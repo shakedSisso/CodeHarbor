@@ -2,7 +2,7 @@
   "name": "code-harbor",
   "version": "1.0.0",
   "description": "Collaborative code editor",
-  "main": "editFile.js",
+  "main": "main.js",
   "scripts": {
     "start": "electron main.js"
   },
