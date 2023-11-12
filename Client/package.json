@@ -1,0 +1,22 @@
+{
+  "name": "code-harbor",
+  "version": "1.0.0",
+  "description": "Collaborative code editor",
+  "main": "editFile.js",
+  "scripts": {
+    "start": "electron editFile.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitlab.com/IlanSap/haifa-1502-code_harbor.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://gitlab.com/IlanSap/haifa-1502-code_harbor/issues"
+  },
+  "homepage": "https://gitlab.com/IlanSap/haifa-1502-code_harbor#readme",
+  "devDependencies": {
+    "electron": "^27.0.4"
+  }
+}
