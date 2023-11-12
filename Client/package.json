@@ -4,7 +4,7 @@
   "description": "Collaborative code editor",
   "main": "editFile.js",
   "scripts": {
-    "start": "electron editFile.js"
+    "start": "electron main.js"
   },
   "repository": {
     "type": "git",
