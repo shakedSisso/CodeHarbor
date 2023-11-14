@@ -1,4 +1,5 @@
-const { app, BrowserWindow } = require('electron')
+const net = require('net');
+const { app, BrowserWindow } = require('electron');
 
 function createWindow() {
     const win = new BrowserWindow({
@@ -25,3 +26,26 @@ app.on('activate', () => {
         createWindow()
     }
 })
+
+const client = new net.Socket();
+
+client.on('data', (data) => {
+    console.log('Received data from server:', data.toString());
+});
+
+client.on('close', () => {
+    console.log('Connection closed');
+});
+
+client.on('error', (err) => {
+    console.error('Error:', err.message);
+});
+
+client.connect(1888, '127.0.0.1', () => {
+    console.log('Connected to server');
+    client.write('Hello from Electron!');
+});
+
+app.on('before-quit', () => {
+    client.destroy();
+});
