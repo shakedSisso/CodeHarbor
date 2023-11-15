@@ -1,19 +1,25 @@
 const net = require('net');
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow , ipcMain} = require('electron');
+const path = require('path');
+
+let mainWindow;
 
 function createWindow() {
-    const win = new BrowserWindow({
+    mainWindow = new BrowserWindow({
         width: 800,
         height: 600,
         webPreferences: {
-            nodeIntegration: true
+            nodeIntegration: true,
+            preload: path.join(__dirname, 'preload.js'),
         },
         autoHideMenuBar: true,
     })
-    win.loadFile('editFile.html')
+    mainWindow.loadFile('editFile.html')
 }
 
-app.whenReady().then(createWindow)
+app.whenReady().then(()=>{
+    createWindow();
+})
 
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
@@ -27,25 +33,18 @@ app.on('activate', () => {
     }
 })
 
-const client = new net.Socket();
+ipcMain.on('server-connection-failed', (event, serverUrl) => {
+    console.error('Failed to connect to the server at', serverUrl);
+    app.quit();
+  });
 
-client.on('data', (data) => {
-    console.log('Received data from server:', data.toString());
-});
-
-client.on('close', () => {
-    console.log('Connection closed');
-});
-
-client.on('error', (err) => {
-    console.error('Error:', err.message);
-});
-
-client.connect(1888, '127.0.0.1', () => {
-    console.log('Connected to server');
-    client.write('Hello from Electron!');
+ipcMain.on('print-message',(event, message)=>{
+    console.log(message);
 });
 
 app.on('before-quit', () => {
     client.destroy();
 });
+
+ipcMain.on('socket-ready', (event) => {
+  });
