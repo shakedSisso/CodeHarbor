@@ -47,4 +47,6 @@ app.on('before-quit', () => {
 });
 
 ipcMain.on('socket-ready', (event) => {
+    message = '{"data": {"file_name": "fileName"}}';
+    mainWindow.webContents.send('send-message', message);
   });
