@@ -1,4 +1,5 @@
 from socket import socket
+from room import Room
 
 class User():
     def __init__(self, user_socket, user_name="ghost"):
@@ -16,3 +17,9 @@ class User():
 
     def get_user_name(self):
         return self._user_name
+    
+    def connect_to_room(self, room):
+        self._room = room
+
+    def get_room(self):
+        return self._room
