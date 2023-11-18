@@ -14,3 +14,5 @@ class Room():
     def get_file_name(self):
         return self._file_name
     
+    def update_changes(self, changes, updating_user):
+        pass

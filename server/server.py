@@ -13,6 +13,8 @@ SERVER_PORT_NUMBER = 1888
 MESSAGE_CODE_FIELD_SIZE = 2
 MESSAGE_LEN_FIELD_SIZE = 3
 
+exit_event = threading.Event()  # Event to signal threads to exit
+
 class server():
     def __init__(self):
         if not FSWrapper.check_if_folder_exists(os.getcwd(), "files"):
@@ -21,7 +23,10 @@ class server():
         self.sock.bind(("0.0.0.0", SERVER_PORT_NUMBER))
         self.clients = {}
         self.rooms = []
-        self.handlers = {RequestCodes.CONNECT_TO_FILE.value: self.get_file_content_and_connect_to_room}
+        self.handlers = {
+            RequestCodes.CONNECT_TO_FILE.value: self.get_file_content_and_connect_to_room,
+            RequestCodes.UPDATE_CHANGES.value: self.update_file_changes
+            }
         
     
     def accept_connections(self, connections_amount=MAX_DEFAULT_CONNECTION_AMOUNT):
@@ -81,9 +86,15 @@ class server():
         room = [room for room in self.rooms if room.get_file_name() == data["data"]["file_name"]]
         if room is []:
             self.rooms.append(Room("files", data["data"]["file_name"]))
+            user.connect_to_room(self.rooms[-1])  # becuase when we created the new room we appended it to the end of the array, accessing index -1 will give us the room we now created
         else:
             room[0].add_user(user)
+            user.connect_to_room(room[0])
         return {"data": file_content}
+    
+    def update_file_changes(self, data, user):
+        room = user.get_room()
+        room.update_changes(data["data"]["changes"], user)
         
         
 
