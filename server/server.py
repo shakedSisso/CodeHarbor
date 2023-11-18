@@ -1,17 +1,28 @@
 import socket
 import threading
 import json
+import os
+from file_system_wrapper import FSWrapper
+from user import User
+from room import Room
+from codes import RequestCodes
 
 MAX_DEFAULT_CONNECTION_AMOUNT = 20
 HEADER_LENGTH = 5
-TEMP_MESSAGE_LENGTH = 1024
+SERVER_PORT_NUMBER = 1888
+MESSAGE_CODE_FIELD_SIZE = 2
+MESSAGE_LEN_FIELD_SIZE = 3
 
 class server():
     def __init__(self):
+        if not FSWrapper.check_if_folder_exists(os.getcwd(), "files"):
+            FSWrapper.create_folder(os.getcwd, "files")
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.bind(("0.0.0.0", 1888))
+        self.sock.bind(("0.0.0.0", SERVER_PORT_NUMBER))
         self.clients = {}
-        self.handlers = {1: self.get_file_content}
+        self.rooms = []
+        self.handlers = {RequestCodes.CONNECT_TO_FILE.value: self.get_file_content_and_connect_to_room}
+        
     
     def accept_connections(self, connections_amount=MAX_DEFAULT_CONNECTION_AMOUNT):
         self.sock.listen(connections_amount)
@@ -28,13 +39,14 @@ class server():
             quit(1)
     
     def handle_client(self, client_socket):
+        user = User(client_socket)
         while not exit_event.is_set():
             client_message_code, client_message_len = self.get_message_info(client_socket)
-            client_message_code = 1
-            client_message_len = TEMP_MESSAGE_LENGTH
             client_message_data_json = self.get_message_data(client_socket, client_message_len)
             message_data = client_message_data_json["data"]
-            handle_request(client_message_code, message_data)
+            response = self.handle_request(client_message_code, message_data, user)
+            user.send_message(response)
+
 
 
     def get_message_info(self, client_socket):
@@ -51,12 +63,27 @@ class server():
         return message_json
 
 
-    def handle_request(self, code, data):
-        return self.handlers[code](data)
+    def handle_request(self, code, data, user):
+        response_data = json.dumps(self.handlers[code](data, user))
+        code_bytes = int(code).to_bytes(MESSAGE_CODE_FIELD_SIZE, byteorder="big", signed=False)
+        len_bytes = len(response_data).to_bytes(MESSAGE_LEN_FIELD_SIZE, byteorder="big", signed=False)
+        return code_bytes + len_bytes + response_data.encode()
 
-    def get_file_content(self, data):
-        pass
-
+    def get_file_content_and_connect_to_room(self, data, user):
+        if not FSWrapper.check_if_file_exists("files", data["data"]["file_name"]):
+            FSWrapper.create_file("files", data["data"]["file_name"])
+        file_object = FSWrapper.open_file("files", data["data"]["file_name"], "r")
+        file_content = FSWrapper.read_file_content(file_object)
+        file_object.close()
+        for room in self.rooms:  # checking is there is an open room for the file
+            if room.get_file_name() == data["data"]["file_name"]:
+                room.add_user(user)
+        room = [room for room in self.rooms if room.get_file_name() == data["data"]["file_name"]]
+        if room is []:
+            self.rooms.append(Room("files", data["data"]["file_name"]))
+        else:
+            room[0].add_user(user)
+        return {"data": file_content}
         
         
 
