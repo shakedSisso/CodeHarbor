@@ -48,7 +48,7 @@ class server():
         while not exit_event.is_set():
             client_message_code, client_message_len = self.get_message_info(client_socket)
             client_message_data_json = self.get_message_data(client_socket, client_message_len)
-            message_data = client_message_data_json["data"]
+            message_data = client_message_data_json
             response = self.handle_request(client_message_code, message_data, user)
             user.send_message(response)
 
