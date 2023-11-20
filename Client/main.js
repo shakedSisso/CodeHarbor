@@ -3,6 +3,7 @@ const { app, BrowserWindow , ipcMain} = require('electron');
 const path = require('path');
 
 let mainWindow;
+const FILE_REQUEST = 1;
 
 function createWindow() {
     mainWindow = new BrowserWindow({
@@ -47,6 +48,16 @@ app.on('before-quit', () => {
 });
 
 ipcMain.on('socket-ready', (event) => {
-    message = '{"data": {"file_name": "fileName"}}';
-    mainWindow.webContents.send('send-message', message);
+    const messageData = {
+        data: {
+            file_name: 'example',
+        },
+    };
+    
+    const messageDataJson = JSON.stringify(messageData);
+    mainWindow.webContents.send('send-message', messageDataJson ,FILE_REQUEST);
+  });
+
+  ipcMain.on('handle-message', (event, jsonObject) => {
+    console.log(jsonObject);
   });
