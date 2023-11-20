@@ -59,5 +59,9 @@ ipcMain.on('socket-ready', (event) => {
   });
 
   ipcMain.on('handle-message', (event, jsonObject) => {
-    console.log(jsonObject);
+    mainWindow.webContents.executeJavaScript(`
+      const textarea = document.getElementById('text-box');
+      textarea.value = '${jsonObject.data}';
+    `);
   });
+  
