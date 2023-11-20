@@ -84,12 +84,13 @@ class server():
             if room.get_file_name() == data["data"]["file_name"]:
                 room.add_user(user)
         room = [room for room in self.rooms if room.get_file_name() == data["data"]["file_name"]]
-        if room is []:
-            self.rooms.append(Room("files", data["data"]["file_name"]))
-            user.connect_to_room(self.rooms[-1])  # becuase when we created the new room we appended it to the end of the array, accessing index -1 will give us the room we now created
-        else:
+        try:
             room[0].add_user(user)
             user.connect_to_room(room[0])
+        except IndexError:
+            self.rooms.append(Room("files", data["data"]["file_name"]))
+            self.rooms[0].add_user(user)
+            user.connect_to_room(self.rooms[0])
         return {"data": file_content}
     
     def update_file_changes(self, data, user):
