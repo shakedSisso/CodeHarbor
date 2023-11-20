@@ -1,5 +1,4 @@
 from file_system_wrapper import FSWrapper
-from user import User
 
 class Room():
     def __init__(self, file_path, file_name):
