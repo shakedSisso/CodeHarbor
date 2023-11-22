@@ -5,6 +5,10 @@ const path = require('path');
 let mainWindow;
 const FILE_REQUEST = 1;
 
+function handleChangesInMain(event, changes) {
+    //create message and send it to server
+  }
+
 function createWindow() {
     mainWindow = new BrowserWindow({
         width: 800,
@@ -19,6 +23,7 @@ function createWindow() {
 }
 
 app.whenReady().then(()=>{
+    ipcMain.handle('dialog:sendChanges', handleChangesInMain)
     createWindow();
 })
 
@@ -58,10 +63,13 @@ ipcMain.on('socket-ready', (event) => {
     mainWindow.webContents.send('send-message', messageDataJson ,FILE_REQUEST);
   });
 
-  ipcMain.on('handle-message', (event, jsonObject) => {
-    mainWindow.webContents.executeJavaScript(`
+  ipcMain.on('handle-message', async (event, jsonObject) => {
+  try {
+    await mainWindow.webContents.executeJavaScript(`
       const textarea = document.getElementById('text-box');
-      textarea.value = '${jsonObject.data}';
+      textarea.value = ${JSON.stringify(jsonObject.data)};
     `);
-  });
-  
+  } catch (error) {
+    console.error('Error executing JavaScript in renderer process:', error);
+  }
+});

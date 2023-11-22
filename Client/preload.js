@@ -1,4 +1,4 @@
-const { ipcRenderer, remote } = require('electron');
+const { ipcRenderer, remote, contextBridge } = require('electron');
 const net = require('net');
 
 const socket = new net.Socket();
@@ -56,3 +56,7 @@ socket.on('data', (data) => {
       ipcRenderer.send('print-message', 'No JSON content found in the received data');
   }
 });
+
+contextBridge.exposeInMainWorld('electronAPI', {
+  sendChanges: (changes) => ipcRenderer.invoke('dialog:sendChanges', changes),
+})
