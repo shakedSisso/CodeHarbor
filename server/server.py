@@ -50,7 +50,8 @@ class server():
             client_message_data_json = self.get_message_data(client_socket, client_message_len)
             message_data = client_message_data_json
             response = self.handle_request(client_message_code, message_data, user)
-            user.send_message(response)
+            if response is not None:
+                user.send_message(response)
 
 
 
@@ -70,6 +71,8 @@ class server():
 
     def handle_request(self, code, data, user):
         response_data = self.handlers[code](data, user)
+        if response_data is None:
+            return None
         response_data["code"] = code
         response_data_json = json.dumps(response_data)
         len_bytes = len(response_data_json).to_bytes(MESSAGE_LEN_FIELD_SIZE, byteorder="big", signed=False)
@@ -96,7 +99,8 @@ class server():
     
     def update_file_changes(self, data, user):
         room = user.get_room()
-        room.update_changes(data["data"]["changes"], user)
+        room.update_changes(data["data"]["updates"], user)
+        return None
         
         
 
