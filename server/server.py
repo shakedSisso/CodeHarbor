@@ -69,10 +69,10 @@ class server():
 
 
     def handle_request(self, code, data, user):
+        response_data["code"] = code
         response_data = json.dumps(self.handlers[code](data, user))
-        code_bytes = int(code).to_bytes(MESSAGE_CODE_FIELD_SIZE, byteorder="big", signed=False)
         len_bytes = len(response_data).to_bytes(MESSAGE_LEN_FIELD_SIZE, byteorder="big", signed=False)
-        return code_bytes + len_bytes + response_data.encode()
+        return len_bytes + response_data.encode()
 
     def get_file_content_and_connect_to_room(self, data, user):
         if not FSWrapper.check_if_file_exists("files", data["data"]["file_name"]):
