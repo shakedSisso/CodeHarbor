@@ -4,9 +4,11 @@ const path = require('path');
 
 let mainWindow;
 const FILE_REQUEST = 1;
+var fileContent;
 
 function handleChangesInMain(event, changes) {
     //create message and send it to server
+    console.log(changes);
   }
 
 function createWindow() {
@@ -53,9 +55,10 @@ app.on('before-quit', () => {
 });
 
 ipcMain.on('socket-ready', (event) => {
+    fileName = 'examples.txt';
     const messageData = {
         data: {
-            file_name: 'example',
+            file_name: fileName,
         },
     };
     
@@ -63,13 +66,21 @@ ipcMain.on('socket-ready', (event) => {
     mainWindow.webContents.send('send-message', messageDataJson ,FILE_REQUEST);
   });
 
+
   ipcMain.on('handle-message', async (event, jsonObject) => {
-  try {
-    await mainWindow.webContents.executeJavaScript(`
-      const textarea = document.getElementById('text-box');
-      textarea.value = ${JSON.stringify(jsonObject.data)};
-    `);
-  } catch (error) {
-    console.error('Error executing JavaScript in renderer process:', error);
-  }
-});
+    if (jsonObject.code === FILE_REQUEST) {
+        fileContent = jsonObject.data
+        try {
+        await mainWindow.webContents.executeJavaScript(`
+            var data = "";
+            var arr = ${JSON.stringify(fileContent)};
+            for (var i = 0; i <arr.length; i++){
+                data += arr[i];
+            }
+            textarea.value = data;
+        `);
+        } catch (error) {
+        console.error('Error executing JavaScript in renderer process:', error);
+        }
+    }
+  })
