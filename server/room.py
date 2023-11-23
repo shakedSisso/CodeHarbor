@@ -14,4 +14,5 @@ class Room():
         return self._file_name
     
     def update_changes(self, changes, updating_user):
-        pass
+        for line_number, new_line in changes.items():
+            FSWrapper.write_change_to_file(self._file_object, line_number, new_line)
