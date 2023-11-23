@@ -27,4 +27,15 @@ class FSWrapper():
     def read_file_content(file):
         file_lines = file.readlines()
         return file_lines
-        
+    
+    @staticmethod
+    def write_change_to_file(file, line_number, new_line):
+        file = open("text", "r+")
+        line_count = 0
+        for line in file:
+            line_count += 1
+
+            if line_count == line_number:
+                file.seek(file.tell() - len(line))
+                file.write(new_line)
+                break
