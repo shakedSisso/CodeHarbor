@@ -3,11 +3,11 @@ import os
 class FSWrapper():
 
     @staticmethod
-    def create_folder(folder_name, folder_path):
+    def create_folder(folder_path, folder_name):
         os.mkdir(os.path.join(folder_path, folder_name))
 
     @staticmethod
-    def check_if_folder_exists(folder_name, folder_path):
+    def check_if_folder_exists(folder_path, folder_name):
         return os.path.exists(os.path.join(folder_path, folder_name))   
 
     @staticmethod 

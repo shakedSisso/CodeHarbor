@@ -18,7 +18,7 @@ exit_event = threading.Event()  # Event to signal threads to exit
 class server():
     def __init__(self):
         if not FSWrapper.check_if_folder_exists(os.getcwd(), "files"):
-            FSWrapper.create_folder(os.getcwd, "files")
+            FSWrapper.create_folder(os.getcwd(), "files")
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.bind(("0.0.0.0", SERVER_PORT_NUMBER))
         self.clients = {}
@@ -69,10 +69,11 @@ class server():
 
 
     def handle_request(self, code, data, user):
-        response_data = json.dumps(self.handlers[code](data, user))
+        response_data = self.handlers[code](data, user)
         response_data["code"] = code
-        len_bytes = len(response_data).to_bytes(MESSAGE_LEN_FIELD_SIZE, byteorder="big", signed=False)
-        return len_bytes + response_data.encode()
+        response_data_json = json.dumps(response_data)
+        len_bytes = len(response_data_json).to_bytes(MESSAGE_LEN_FIELD_SIZE, byteorder="big", signed=False)
+        return len_bytes + response_data_json.encode()
 
     def get_file_content_and_connect_to_room(self, data, user):
         if not FSWrapper.check_if_file_exists("files", data["data"]["file_name"]):
