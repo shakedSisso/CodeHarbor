@@ -69,8 +69,8 @@ class server():
 
 
     def handle_request(self, code, data, user):
-        response_data["code"] = code
         response_data = json.dumps(self.handlers[code](data, user))
+        response_data["code"] = code
         len_bytes = len(response_data).to_bytes(MESSAGE_LEN_FIELD_SIZE, byteorder="big", signed=False)
         return len_bytes + response_data.encode()
 
