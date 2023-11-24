@@ -1,5 +1,5 @@
 var textarea = document.getElementById('text-box');
-var text = "";
+var text;
 var changes = {};
 var currentLine = 1;
 var currentIndex = 0;
@@ -21,10 +21,8 @@ var currentIndex = 0;
     if (text != lines) {
       var i = 0;
       for (i = 0; i < lines.length; i++) {
-        if (text[i] != lines[i] && lines[i] != '') {
+        if (text[i] != lines[i]) {
           changes[i+1] = lines[i];
-      } else if (text[i] != lines[i]) {
-        changes[i+1] = 'new line';
       }
       for (var key in changes) {
         var numericKey = parseFloat(key);
