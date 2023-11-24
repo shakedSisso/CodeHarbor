@@ -4,11 +4,18 @@ const path = require('path');
 
 let mainWindow;
 const FILE_REQUEST = 1;
+const UPDATE_REQUEST = 2;
 var fileContent;
 
 function handleChangesInMain(event, changes) {
     //create message and send it to server
-    console.log(changes);
+    const messageData = {
+        data: {
+            updates: changes
+        },
+    };
+    const messageDataJson = JSON.stringify(messageData);
+    mainWindow.webContents.send('send-message', messageDataJson ,UPDATE_REQUEST);
   }
 
 function createWindow() {
