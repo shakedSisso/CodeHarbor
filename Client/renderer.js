@@ -35,12 +35,6 @@ var currentIndex = 0;
     }
     }
     text = lines;
-    document.getElementById('key').innerText = event.key;
-    var resultString = '';
-    for (var key in changes) {
-      resultString += key + ': ' + changes[key] + '\n';
-  }
-    document.getElementById('data').innerText = resultString; 
   });
   updateCursorPosition();
 
@@ -49,3 +43,8 @@ var currentIndex = 0;
       window.electronAPI.sendChanges(changes);
     changes = {};
   }, 1000);
+
+  window.electronAPI.getContentFile((event, value) => {
+    textarea.value = value;
+    text = textarea.value.split('\n');
+  })

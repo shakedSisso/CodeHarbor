@@ -59,4 +59,5 @@ socket.on('data', (data) => {
 
 contextBridge.exposeInMainWorld('electronAPI', {
   sendChanges: (changes) => ipcRenderer.invoke('dialog:sendChanges', changes),
+  getContentFile: (callback) => ipcRenderer.on('file-content', callback)
 })

@@ -69,18 +69,11 @@ ipcMain.on('socket-ready', (event) => {
 
   ipcMain.on('handle-message', async (event, jsonObject) => {
     if (jsonObject.code === FILE_REQUEST) {
-        fileContent = jsonObject.data
-        try {
-        await mainWindow.webContents.executeJavaScript(`
-            var data = "";
-            var arr = ${JSON.stringify(fileContent)};
-            for (var i = 0; i <arr.length; i++){
-                data += arr[i];
-            }
-            textarea.value = data;
-        `);
-        } catch (error) {
-        console.error('Error executing JavaScript in renderer process:', error);
+        var arr = jsonObject.data
+        fileContent = ""
+        for (var i = 0; i <arr.length; i++){
+            fileContent += arr[i];
         }
+        mainWindow.webContents.send('file-content', fileContent);
     }
   })
