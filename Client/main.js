@@ -119,8 +119,6 @@ function updateLocalFile(changes){
             fs.writeFile(filePath, newData, (err) => {
                 if (err) {
                 console.error('Error editing file:', err);
-                } else {
-                console.log('File edited successfully');
                 }
             });
         }
@@ -130,9 +128,11 @@ function updateLocalFile(changes){
 
 function deleteLocalFile(fileName){
     const filePath = path.join('.', fileName); // '.' is used to delete in file that is in the same folder as the app
-    fs.unlink(filePath, (err) => {
-        if (err) {
-        console.error('Error deleting file:', err);
-        }
-    });
+    if (fs.existsSync(filePath)) { //check if the file exists
+        fs.unlink(filePath, (err) => {
+            if (err) {
+            console.error('Error deleting file:', err);
+            }
+        });
+    }
 }
