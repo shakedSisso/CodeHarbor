@@ -5,7 +5,7 @@ const path = require('path');
 let mainWindow;
 const FILE_REQUEST = 1;
 const UPDATE_REQUEST = 2;
-var fileContent;
+var fileName;
 
 function handleChangesInMain(event, changes) {
     //create message and send it to server
@@ -16,6 +16,7 @@ function handleChangesInMain(event, changes) {
     };
     const messageDataJson = JSON.stringify(messageData);
     mainWindow.webContents.send('send-message', messageDataJson ,UPDATE_REQUEST);
+    updateLocalFile(changes);
   }
 
 function createWindow() {
@@ -58,6 +59,7 @@ ipcMain.on('print-message',(event, message)=>{
 });
 
 app.on('before-quit', () => {
+    deleteLocalFile(fileName);
     client.destroy();
 });
 
@@ -68,7 +70,6 @@ ipcMain.on('socket-ready', (event) => {
             file_name: fileName,
         },
     };
-    
     const messageDataJson = JSON.stringify(messageData);
     mainWindow.webContents.send('send-message', messageDataJson ,FILE_REQUEST);
   });
@@ -82,5 +83,56 @@ ipcMain.on('socket-ready', (event) => {
             fileContent += arr[i];
         }
         mainWindow.webContents.send('file-content', fileContent);
+        createLocalFile(fileName, fileContent);
     }
   })
+  
+
+const fs = require('fs');
+
+function createLocalFile(fileName, content) {
+    const filePath = path.join('.', fileName); // '.' is used to create a file in the same folder as the app
+    fs.writeFile(filePath, content, (err) => {
+        if (err) {
+        console.error('Error creating file:', err);
+        }
+    });
+}
+
+function updateLocalFile(changes){
+    const filePath = path.join('.', fileName); // '.' is used to access in file that is in the same folder as the app
+    fs.readFile(filePath, 'utf8', (err, data) => {
+        if (err) {
+        console.error('Error reading file:', err);
+        } else {
+
+            dataArr = data.split('\n');
+
+            for (const key in changes) {
+                if (changes.hasOwnProperty(key)) {
+                dataArr[key - 1] = changes[key];
+                }
+            }
+            
+            const newData = dataArr.join('\n');
+
+            fs.writeFile(filePath, newData, (err) => {
+                if (err) {
+                console.error('Error editing file:', err);
+                } else {
+                console.log('File edited successfully');
+                }
+            });
+        }
+    });
+}
+
+
+function deleteLocalFile(fileName){
+    const filePath = path.join('.', fileName); // '.' is used to delete in file that is in the same folder as the app
+    fs.unlink(filePath, (err) => {
+        if (err) {
+        console.error('Error deleting file:', err);
+        }
+    });
+}
