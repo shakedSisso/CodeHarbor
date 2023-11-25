@@ -39,9 +39,14 @@ ipcRenderer.on('send-message', (event, messageDataJson, code) => {
 
 socket.on('data', (data) => {
   const jsonString = data.toString('utf-8');
+  //get only the first json if server sends a couple of messages in a row
   const firstOpeningBraceIndex = jsonString.indexOf('{');
+  const CodeIndex = jsonString.indexOf('"code":');
+  const trimmedString = jsonString.slice(CodeIndex);
+  const firstClosingingBraceIndex = trimmedString.indexOf('}');
+  const messageLen = CodeIndex + firstClosingingBraceIndex + 1;
   if (firstOpeningBraceIndex !== -1) {
-      const trimmedJsonString = jsonString.slice(firstOpeningBraceIndex);
+      const trimmedJsonString = jsonString.slice(firstOpeningBraceIndex, messageLen);
       try {
           const jsonObject = JSON.parse(trimmedJsonString);
           if (jsonObject && jsonObject.data) {
