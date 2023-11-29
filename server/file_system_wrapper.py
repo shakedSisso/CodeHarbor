@@ -30,12 +30,16 @@ class FSWrapper():
     
     @staticmethod
     def write_change_to_file(file, line_number, new_line):
-        file = open("text", "r+")
-        line_count = 0
-        for line in file:
-            line_count += 1
-
-            if line_count == line_number:
-                file.seek(file.tell() - len(line))
-                file.write(new_line)
-                break
+        file.seek(0)
+        lines = file.readlines()
+        line_number = int(line_number)
+        new_line += "\n"
+        if line_number <= len(lines):
+            lines[line_number - 1] = new_line
+        else:
+            while len(lines) < line_number:
+                lines.append("\n")
+            lines.append(new_line)
+        file.seek(0)
+        file.writelines(lines)
+        file.flush()
