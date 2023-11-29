@@ -20,6 +20,7 @@ class server():
         if not FSWrapper.check_if_folder_exists(os.getcwd(), "files"):
             FSWrapper.create_folder(os.getcwd(), "files")
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.sock.bind(("0.0.0.0", SERVER_PORT_NUMBER))
         self.clients = {}
         self.rooms = []
@@ -47,7 +48,10 @@ class server():
         user = User(client_socket)
         while not exit_event.is_set():
             client_message_code, client_message_len = self.get_message_info(client_socket)
-            client_message_data_json = self.get_message_data(client_socket, client_message_len)
+            try:
+                client_message_data_json = self.get_message_data(client_socket, client_message_len)
+            except json.decoder.JSONDecodeError:
+                continue
             message_data = client_message_data_json
             response = self.handle_request(client_message_code, message_data, user)
             if response is not None:
@@ -79,9 +83,9 @@ class server():
         return len_bytes + response_data_json.encode()
 
     def get_file_content_and_connect_to_room(self, data, user):
-        if not FSWrapper.check_if_file_exists("files", data["data"]["file_name"]):
-            FSWrapper.create_file("files", data["data"]["file_name"])
-        file_object = FSWrapper.open_file("files", data["data"]["file_name"], "r")
+        if not FSWrapper.check_if_file_exists(os.path.join(os.getcwd(), "files"), data["data"]["file_name"]):
+            FSWrapper.create_file("./files", data["data"]["file_name"])
+        file_object = FSWrapper.open_file("./files", data["data"]["file_name"], "r")
         file_content = FSWrapper.read_file_content(file_object)
         file_object.close()
         for room in self.rooms:  # checking is there is an open room for the file
