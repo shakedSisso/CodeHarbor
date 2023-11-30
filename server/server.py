@@ -83,9 +83,9 @@ class server():
         return len_bytes + response_data_json.encode()
 
     def get_file_content_and_connect_to_room(self, data, user):
-        if not FSWrapper.check_if_file_exists(os.path.join(os.getcwd(), "files"), data["data"]["file_name"]):
-            FSWrapper.create_file("./files", data["data"]["file_name"])
-        file_object = FSWrapper.open_file("./files", data["data"]["file_name"], "r")
+        if not FSWrapper.check_if_file_exists("files", data["data"]["file_name"]):
+            FSWrapper.create_file("files", data["data"]["file_name"])
+        file_object = FSWrapper.open_file("files", data["data"]["file_name"], "r")
         file_content = FSWrapper.read_file_content(file_object)
         file_object.close()
         for room in self.rooms:  # checking is there is an open room for the file
