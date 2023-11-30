@@ -37,7 +37,7 @@ class FSWrapper():
         if line_number <= len(lines):
             lines[line_number - 1] = new_line
         else:
-            while len(lines) < line_number:
+            while len(lines) < line_number - 1:
                 lines.append("\n")
             lines.append(new_line)
         file.seek(0)
