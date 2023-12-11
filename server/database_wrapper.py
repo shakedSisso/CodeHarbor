@@ -32,3 +32,9 @@ class MongoDBWrapper:
     def find_documents(query, collection):
         documents = collection.find(query)
         return list(documents)
+
+    @staticmethod
+    def create_new_file_record(file_name, location, owner_name=""):
+        data = {"file_name": file_name, "location": location, "owner": owner_name}
+        collection = MongoDBWrapper.connect_to_mongo("Files")
+        MongoDBWrapper.insert_document(data, collection)
