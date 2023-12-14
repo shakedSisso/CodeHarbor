@@ -27,6 +27,7 @@ class server():
         self.handlers = {
             RequestCodes.CONNECT_TO_FILE.value: self.get_file_content_and_connect_to_room,
             RequestCodes.UPDATE_CHANGES.value: self.update_file_changes
+            RequestCodes.CREATE_FILE.value: self.create_file
             }
         
     
@@ -106,8 +107,8 @@ class server():
         room.update_changes(data["data"]["updates"], user)
         return None
         
-        
-
+    def create_file(self, data, user):
+        MongoDBWrapper.create_new_file_record(data["data"]["file_name"], data["data"]["location"]) #when we'll have users the username will also be sent to the function
 
 def main():
     main_server = server()
