@@ -108,7 +108,10 @@ class server():
         return None
         
     def create_file(self, data, user):
-        MongoDBWrapper.create_new_file_record(data["data"]["file_name"], data["data"]["location"]) #when we'll have users the username will also be sent to the function
+        file_name = data["data"]["file_name"]
+        file_path = "./files/" + data["data"]["location"]
+        MongoDBWrapper.create_new_file_record(file_name, file_path) #when we'll have users the username will also be sent to the function
+        FSWrapper.create_file(file_path, file_name)
 
 def main():
     main_server = server()
