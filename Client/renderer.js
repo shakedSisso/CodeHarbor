@@ -46,3 +46,13 @@ var currentIndex = 0;
     textarea.value = value;
     text = textarea.value.split('\n');
   })
+
+  window.electronAPI.getFileUpdates((event, value) => {
+    let changes = value.changes;
+    let currentText = textarea.value.split("\n");
+    Object.entries(changes).forEach(([key, value]) => {
+      currentText[parseInt(key, 10) - 1] = value;
+    });
+    let newText = currentText.join("");
+    textarea.value = newText;
+  })
