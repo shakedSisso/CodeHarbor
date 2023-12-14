@@ -87,8 +87,8 @@ ipcMain.on('socket-ready', (event) => {
     }
     else if (jsonObject.code === UPDATE_REQUEST)
     {
-        mainWindow.webContents.send('file-updates', jsonObject.changes);
-        updateLocalFile(jsonObject.data);
+        mainWindow.webContents.send('file-updates', jsonObject.data);
+        updateLocalFile(jsonObject.data.updates);
     }
   })
   
