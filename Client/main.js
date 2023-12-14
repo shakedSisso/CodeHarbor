@@ -85,6 +85,11 @@ ipcMain.on('socket-ready', (event) => {
         mainWindow.webContents.send('file-content', fileContent);
         createLocalFile(fileName, fileContent);
     }
+    else if (jsonObject.code === UPDATE_REQUEST)
+    {
+        mainWindow.webContents.send('file-updates', jsonObject.changes);
+        updateLocalFile(jsonObject.data);
+    }
   })
   
 
