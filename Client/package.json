@@ -17,6 +17,6 @@
   },
   "homepage": "https://gitlab.com/IlanSap/haifa-1502-code_harbor#readme",
   "devDependencies": {
-    "electron": "^27.1.2"
+    "electron": "^27.1.3"
   }
 }
