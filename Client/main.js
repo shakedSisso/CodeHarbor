@@ -1,5 +1,5 @@
 const net = require('net');
-const { app, BrowserWindow , ipcMain} = require('electron');
+const { app, BrowserWindow , ipcMain, Menu} = require('electron');
 const path = require('path');
 
 let mainWindow;
@@ -25,9 +25,10 @@ function createWindow() {
         height: 600,
         webPreferences: {
             nodeIntegration: true,
+            contextIsolation: true,
             preload: path.join(__dirname, 'preload.js'),
         },
-        autoHideMenuBar: true,
+        autoHideMenuBar: false,
     })
     mainWindow.loadFile('editFile.html')
 }
@@ -91,6 +92,26 @@ ipcMain.on('socket-ready', (event) => {
         updateLocalFile(jsonObject.data.updates);
     }
   })
+
+  // Handle IPC to set the menu
+ipcMain.on('set-menu', (event, menu) => {
+    const template = [
+        {
+          label: 'File',
+          submenu: [
+            {
+              label: 'Create File',
+              click: () => {
+                openCreateFileDialog();
+                },
+            },
+          ],
+        },
+      ];
+    
+      const menuTemplate = Menu.buildFromTemplate(template);
+      mainWindow.setMenu(menuTemplate);
+  });
   
 
 const fs = require('fs');
@@ -141,3 +162,37 @@ function deleteLocalFile(fileName){
         });
     }
 }
+
+function openCreateFileDialog() {
+    const { BrowserWindow } = require('electron');
+
+    const inputDialog = new BrowserWindow({
+        width: 300,
+        height: 200,
+        show: false,
+        webPreferences: {
+        nodeIntegration: true,
+        },
+        autoHideMenuBar: true,
+    });
+
+    // Load an HTML file for the dialog
+    inputDialog.loadFile('fileDialog.html');
+
+    inputDialog.once('ready-to-show', () => {
+        inputDialog.show();
+    });
+
+    // Handle messages from the dialog
+    ipcMain.once('input-dialog-result', (event, result) => {
+        if (result.action === 'submit') {
+        console.log(`Dialog result: file name = ${result.value}`);
+        } else {
+        console.log(`Dialog canceled`);
+        }
+    });
+
+    inputDialog.on('closed', () => {
+        // Handle the closed event if needed
+    });
+  }
