@@ -5,6 +5,7 @@ const path = require('path');
 let mainWindow;
 const FILE_REQUEST = 1;
 const UPDATE_REQUEST = 2;
+const NEW_FILE_REQUEST = 3;
 var fileName;
 
 function handleChangesInMain(event, changes) {
@@ -17,7 +18,20 @@ function handleChangesInMain(event, changes) {
     const messageDataJson = JSON.stringify(messageData);
     mainWindow.webContents.send('send-message', messageDataJson ,UPDATE_REQUEST);
     updateLocalFile(changes);
-  }
+}
+
+function handleCreateFileRequest(event, fileName)
+{
+    // creating message
+    const messageData = {
+        data: {
+            file_name: fileName,
+            location: "files",
+        },
+    };
+    const messageDataJson = JSON.stringify(messageData);
+    mainWindow.webContents.send('send-message', messageDataJson ,NEW_FILE_REQUEST);
+}
 
 function createWindow() {
     mainWindow = new BrowserWindow({
@@ -35,6 +49,7 @@ function createWindow() {
 
 app.whenReady().then(()=>{
     ipcMain.handle('dialog:sendChanges', handleChangesInMain)
+    ipcMain.handle('dialog:createFile', handleCreateFileRequest);
     createWindow();
 })
 
@@ -172,6 +187,8 @@ function openCreateFileDialog() {
         show: false,
         webPreferences: {
         nodeIntegration: true,
+        contextIsolation: true,
+        preload: path.join(__dirname, 'fileDialogPreload.js'),
         },
         autoHideMenuBar: true,
     });
@@ -181,15 +198,6 @@ function openCreateFileDialog() {
 
     inputDialog.once('ready-to-show', () => {
         inputDialog.show();
-    });
-
-    // Handle messages from the dialog
-    ipcMain.once('input-dialog-result', (event, result) => {
-        if (result.action === 'submit') {
-        console.log(`Dialog result: file name = ${result.value}`);
-        } else {
-        console.log(`Dialog canceled`);
-        }
     });
 
     inputDialog.on('closed', () => {
