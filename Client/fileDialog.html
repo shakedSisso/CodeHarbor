@@ -16,22 +16,28 @@
 <body>
   <label for="textInput">File Name:</label>
   <input type="text" id="textInput" name="textInput">
-  <button onclick="submitForm()" class="button">OK</button>
-  <button onclick="cancel()" class="button">Cancel</button>
-
+  <button class="button" id="okButton">OK</button>
+  <button class="button" id="cancelButton">Cancel</button>
   <script>
-    const { ipcRenderer } = require('electron');
+    document.addEventListener('DOMContentLoaded', () => {
+    console.log("on callback");
+    const okButton = document.getElementById('okButton');
+    const cancelButton = document.getElementById('cancelButton');
+    const inputField = document.getElementById('textInput');
 
-    function submitForm() {
-    const input = document.getElementById('textInput').value;
-    ipcRenderer.send('input-dialog-result', { action: 'submit', value: input });
-    window.close();
-    }
+    okButton.addEventListener('click', () => {
+      console.log("ok button clicked");
+      const input = inputField.value;
+      window.electronAPI.createNewFile(input);
+      window.close();
+    });
 
-    function cancel() {
-    ipcRenderer.send('input-dialog-result', { action: 'cancel' });
-    window.close();
-    }
+    cancelButton.addEventListener('click', () => {
+      console.log("cancel button clicked");
+      window.close();
+    });
+  });
   </script>
+  
 </body>
 </html>
