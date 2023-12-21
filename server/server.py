@@ -2,6 +2,7 @@ import socket
 import threading
 import json
 import os
+from database_wrapper import MongoDBWrapper
 from file_system_wrapper import FSWrapper
 from user import User
 from room import Room
@@ -26,7 +27,8 @@ class server():
         self.rooms = []
         self.handlers = {
             RequestCodes.CONNECT_TO_FILE.value: self.get_file_content_and_connect_to_room,
-            RequestCodes.UPDATE_CHANGES.value: self.update_file_changes
+            RequestCodes.UPDATE_CHANGES.value: self.update_file_changes,
+            RequestCodes.CREATE_FILE.value: self.create_file
             }
         
     
@@ -106,8 +108,12 @@ class server():
         room.update_changes(data["data"]["updates"], user)
         room.send_changes_to_all_room_users(data, user)
         return None
-  
-
+        
+    def create_file(self, data, user):
+        file_name = data["data"]["file_name"]
+        file_path = "./files/" + data["data"]["location"]
+        MongoDBWrapper.create_new_file_record(file_name, file_path) #when we'll have users the username will also be sent to the function
+        FSWrapper.create_file(file_path, file_name)
 
 def main():
     main_server = server()
