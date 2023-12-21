@@ -2,6 +2,7 @@ import socket
 import threading
 import json
 import os
+from database_wrapper import MongoDBWrapper
 from file_system_wrapper import FSWrapper
 from user import User
 from room import Room
@@ -26,7 +27,7 @@ class server():
         self.rooms = []
         self.handlers = {
             RequestCodes.CONNECT_TO_FILE.value: self.get_file_content_and_connect_to_room,
-            RequestCodes.UPDATE_CHANGES.value: self.update_file_changes
+            RequestCodes.UPDATE_CHANGES.value: self.update_file_changes,
             RequestCodes.CREATE_FILE.value: self.create_file
             }
         
