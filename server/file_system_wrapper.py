@@ -12,7 +12,7 @@ class FSWrapper():
 
     @staticmethod 
     def check_if_file_exists(file_path, file_name):
-        return FSWrapper.check_if_folder_exists(file_name, file_path)
+        return FSWrapper.check_if_folder_exists(file_path, file_name)
     
     @staticmethod
     def create_file(file_path, file_name):

@@ -17,6 +17,9 @@ class User():
 
     def get_user_name(self):
         return self._user_name
+
+    def get_user_socket(self):
+        return self._user_socket
     
     def connect_to_room(self, room):
         self._room = room
