@@ -62,7 +62,14 @@ socket.on('data', (data) => {
   }
 });
 
+contextBridge.exposeInMainWorld('api', {
+  setMenu: (menu) => {
+    ipcRenderer.send('set-menu', menu);
+  },
+});
+
 contextBridge.exposeInMainWorld('electronAPI', {
   sendChanges: (changes) => ipcRenderer.invoke('dialog:sendChanges', changes),
-  getContentFile: (callback) => ipcRenderer.on('file-content', callback)
+  getContentFile: (callback) => ipcRenderer.on('file-content', callback),
+  getFileUpdates: (updates) => ipcRenderer.on('file-updates', updates),
 })
