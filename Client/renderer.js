@@ -42,6 +42,10 @@ var currentIndex = 0;
     changes = {};
   }, 1000);
 
+  window.addEventListener('DOMContentLoaded', () => {
+    window.api.setMenu();
+  });
+
   window.electronAPI.getContentFile((event, value) => {
     textarea.value = value;
     text = textarea.value.split('\n');
