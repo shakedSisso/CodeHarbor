@@ -80,7 +80,7 @@ app.on('before-quit', () => {
 });
 
 ipcMain.on('socket-ready', (event) => {
-    fileName = 'examples.txt';
+    fileName = 'examples';
     const messageData = {
         data: {
             file_name: fileName,
@@ -99,6 +99,7 @@ ipcMain.on('socket-ready', (event) => {
             fileContent += arr[i];
         }
         mainWindow.webContents.send('file-content', fileContent);
+        fileName += ".c"
         createLocalFile(fileName, fileContent);
     }
     else if (jsonObject.code === UPDATE_REQUEST)
