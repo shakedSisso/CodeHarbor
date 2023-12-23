@@ -12,6 +12,10 @@ class Room():
     
     def add_user(self, user):
         self._users.append(user)
+
+    def remove_user(self, user):
+        if user in self._users:
+            self._users.remove(user)
     
     def get_file_name(self):
         return self._file_name
