@@ -26,7 +26,7 @@ function handleCreateFileRequest(event, fileName)
     const messageData = {
         data: {
             file_name: fileName,
-            location: "files",
+            location: "",
         },
     };
     const messageDataJson = JSON.stringify(messageData);
