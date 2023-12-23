@@ -49,17 +49,20 @@ class server():
     def handle_client(self, client_socket):
         user = User(client_socket)
         while not exit_event.is_set():
-            client_message_code, client_message_len = self.get_message_info(client_socket)
             try:
+                client_message_code, client_message_len = self.get_message_info(client_socket)
                 client_message_data_json = self.get_message_data(client_socket, client_message_len)
             except json.decoder.JSONDecodeError:
                 continue
+            except ConnectionResetError:
+                room = user.get_room()
+                room.remove_user(user)
+                print(user.get_user_socket().getpeername(), "has disconnected")
+                break;
             message_data = client_message_data_json
             response = self.handle_request(client_message_code, message_data, user)
             if response is not None:
                 user.send_message(response)
-
-
 
     def get_message_info(self, client_socket):
         header = client_socket.recv(HEADER_LENGTH)
@@ -73,7 +76,6 @@ class server():
         message_data =  client_socket.recv(msg_len).decode()
         message_json = json.loads(message_data)
         return message_json
-
 
     def handle_request(self, code, data, user):
         response_data = self.handlers[code](data, user)
@@ -115,6 +117,7 @@ class server():
         file_path = "./files/" + data["data"]["location"]
         MongoDBWrapper.create_new_file_record(file_name, file_path) #when we'll have users the username will also be sent to the function
         FSWrapper.create_file(file_path, file_name)
+        return self.get_file_content_and_connect_to_room(data, user)
 
 def main():
     main_server = server()
