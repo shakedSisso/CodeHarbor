@@ -41,5 +41,6 @@ class FSWrapper():
                 lines.append("\n")
             lines.append(new_line)
         file.seek(0)
+        file.truncate()
         file.writelines(lines)
         file.flush()
