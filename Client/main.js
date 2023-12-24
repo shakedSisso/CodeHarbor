@@ -8,11 +8,12 @@ const UPDATE_REQUEST = 2;
 const NEW_FILE_REQUEST = 3;
 var fileName, newFile;
 
-function handleChangesInMain(event, changes) {
+function handleChangesInMain(event, changes, lineCount) {
     //create message and send it to server
     const messageData = {
         data: {
-            updates: changes
+            updates: changes,
+            line_count: lineCount,
         },
     };
     const messageDataJson = JSON.stringify(messageData);

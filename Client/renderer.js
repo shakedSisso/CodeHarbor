@@ -17,7 +17,7 @@ var currentIndex = 0;
     if (event.key === 'Tab') {
       lines[currentLine - 1] = lines[currentLine - 1].substring(0, currentIndex) + '\t' + lines[currentLine - 1].substring(currentIndex);
       textarea.value = lines.join('\n');
-  }
+    }
     if (text != lines) {
       var i = 0;
       for (i = 0; i < lines.length; i++) {
@@ -37,8 +37,8 @@ var currentIndex = 0;
   updateCursorPosition();
 
   setInterval(() => {
-    if (Object.keys(changes).length != 0)
-      window.electronAPI.sendChanges(changes);
+    if (Object.keys(changes).length != 0) 
+      window.electronAPI.sendChanges(changes, text.length);
     changes = {};
   }, 1000);
 
