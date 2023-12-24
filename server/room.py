@@ -20,7 +20,7 @@ class Room():
     def get_file_name(self):
         return self._file_name
     
-    def update_changes(self, changes, amount_of_lines=0, updating_user=None):
+    def update_changes(self, changes, amount_of_lines, updating_user):
         with self._file_lock:
             for line_number, new_line in changes.items():
                 FSWrapper.write_change_to_file(self._file_object, line_number, new_line)
