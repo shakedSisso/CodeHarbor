@@ -49,17 +49,20 @@ class server():
     def handle_client(self, client_socket):
         user = User(client_socket)
         while not exit_event.is_set():
-            client_message_code, client_message_len = self.get_message_info(client_socket)
             try:
+                client_message_code, client_message_len = self.get_message_info(client_socket)
                 client_message_data_json = self.get_message_data(client_socket, client_message_len)
             except json.decoder.JSONDecodeError:
                 continue
+            except ConnectionResetError:
+                room = user.get_room()
+                room.remove_user(user)
+                print(user.get_user_socket().getpeername(), "has disconnected")
+                break;
             message_data = client_message_data_json
             response = self.handle_request(client_message_code, message_data, user)
             if response is not None:
                 user.send_message(response)
-
-
 
     def get_message_info(self, client_socket):
         header = client_socket.recv(HEADER_LENGTH)
@@ -74,7 +77,6 @@ class server():
         message_json = json.loads(message_data)
         return message_json
 
-
     def handle_request(self, code, data, user):
         response_data = self.handlers[code](data, user)
         if response_data is None:
@@ -85,35 +87,37 @@ class server():
         return len_bytes + response_data_json.encode()
 
     def get_file_content_and_connect_to_room(self, data, user):
-        if not FSWrapper.check_if_file_exists("files", data["data"]["file_name"]):
-            FSWrapper.create_file("files", data["data"]["file_name"])
-        file_object = FSWrapper.open_file("files", data["data"]["file_name"], "r")
+        fileName = data["data"]["file_name"] + ".c"
+        if not FSWrapper.check_if_file_exists("files", fileName):
+            FSWrapper.create_file("files", fileName)
+        file_object = FSWrapper.open_file("files", fileName, "r")
         file_content = FSWrapper.read_file_content(file_object)
         file_object.close()
         for room in self.rooms:  # checking is there is an open room for the file
-            if room.get_file_name() == data["data"]["file_name"]:
+            if room.get_file_name() == fileName:
                 room.add_user(user)
-        room = [room for room in self.rooms if room.get_file_name() == data["data"]["file_name"]]
+        room = [room for room in self.rooms if room.get_file_name() == fileName]
         try:
             room[0].add_user(user)
             user.connect_to_room(room[0])
         except IndexError:
-            self.rooms.append(Room("files", data["data"]["file_name"]))
+            self.rooms.append(Room("files", fileName))
             self.rooms[0].add_user(user)
             user.connect_to_room(self.rooms[0])
         return {"data": file_content}
     
     def update_file_changes(self, data, user):
         room = user.get_room()
-        room.update_changes(data["data"]["updates"], user)
+        room.update_changes(data["data"]["updates"], data["data"]["line_count"], user)
         room.send_changes_to_all_room_users(data, user)
         return None
         
     def create_file(self, data, user):
-        file_name = data["data"]["file_name"]
+        file_name = data["data"]["file_name"] + ".c"
         file_path = "./files/" + data["data"]["location"]
         MongoDBWrapper.create_new_file_record(file_name, file_path) #when we'll have users the username will also be sent to the function
         FSWrapper.create_file(file_path, file_name)
+        return self.get_file_content_and_connect_to_room(data, user)
 
 def main():
     main_server = server()

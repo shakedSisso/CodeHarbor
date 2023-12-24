@@ -41,5 +41,16 @@ class FSWrapper():
                 lines.append("\n")
             lines.append(new_line)
         file.seek(0)
+        file.truncate()
+        file.writelines(lines)
+        file.flush()
+
+    @staticmethod
+    def trim_end_of_file(file, last_line_number):
+        file.seek(0)
+        lines = file.readlines()
+        lines = lines[:last_line_number]
+        file.seek(0)
+        file.truncate()
         file.writelines(lines)
         file.flush()

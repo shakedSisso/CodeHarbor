@@ -6,13 +6,14 @@ let mainWindow;
 const FILE_REQUEST = 1;
 const UPDATE_REQUEST = 2;
 const NEW_FILE_REQUEST = 3;
-var fileName;
+var fileName, newFile;
 
-function handleChangesInMain(event, changes) {
+function handleChangesInMain(event, changes, lineCount) {
     //create message and send it to server
     const messageData = {
         data: {
-            updates: changes
+            updates: changes,
+            line_count: lineCount,
         },
     };
     const messageDataJson = JSON.stringify(messageData);
@@ -20,13 +21,14 @@ function handleChangesInMain(event, changes) {
     updateLocalFile(changes);
 }
 
-function handleCreateFileRequest(event, fileName)
+function handleCreateFileRequest(event, file_name)
 {
+    newFile = file_name
     // creating message
     const messageData = {
         data: {
-            file_name: fileName,
-            location: "files",
+            file_name: file_name,
+            location: "",
         },
     };
     const messageDataJson = JSON.stringify(messageData);
@@ -80,7 +82,7 @@ app.on('before-quit', () => {
 });
 
 ipcMain.on('socket-ready', (event) => {
-    fileName = 'examples.txt';
+    fileName = 'examples';
     const messageData = {
         data: {
             file_name: fileName,
@@ -93,20 +95,31 @@ ipcMain.on('socket-ready', (event) => {
 
   ipcMain.on('handle-message', async (event, jsonObject) => {
     if (jsonObject.code === FILE_REQUEST) {
-        var arr = jsonObject.data
-        fileContent = ""
-        for (var i = 0; i <arr.length; i++){
-            fileContent += arr[i];
-        }
-        mainWindow.webContents.send('file-content', fileContent);
-        createLocalFile(fileName, fileContent);
+        updateScreenAndCreateLocalFile(jsonObject.data)
     }
     else if (jsonObject.code === UPDATE_REQUEST)
     {
         mainWindow.webContents.send('file-updates', jsonObject.data);
         updateLocalFile(jsonObject.data.updates);
     }
+    else if (jsonObject.code === NEW_FILE_REQUEST) {
+        deleteLocalFile(fileName);
+        fileName = newFile
+        updateScreenAndCreateLocalFile(jsonObject.data)
+    }
   })
+
+function updateScreenAndCreateLocalFile(data)
+{
+    var arr = data
+    fileContent = ""
+    for (var i = 0; i <arr.length; i++){
+        fileContent += arr[i];
+    }
+    mainWindow.webContents.send('file-content', fileContent);
+    fileName += ".c"
+    createLocalFile(fileName, fileContent);
+}
 
   // Handle IPC to set the menu
 ipcMain.on('set-menu', (event, menu) => {

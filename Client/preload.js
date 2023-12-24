@@ -69,7 +69,7 @@ contextBridge.exposeInMainWorld('api', {
 });
 
 contextBridge.exposeInMainWorld('electronAPI', {
-  sendChanges: (changes) => ipcRenderer.invoke('dialog:sendChanges', changes),
+  sendChanges: (changes, lineCount) => ipcRenderer.invoke('dialog:sendChanges', changes, lineCount),
   getContentFile: (callback) => ipcRenderer.on('file-content', callback),
   getFileUpdates: (updates) => ipcRenderer.on('file-updates', updates),
 })
