@@ -20,10 +20,11 @@ class Room():
     def get_file_name(self):
         return self._file_name
     
-    def update_changes(self, changes, updating_user):
+    def update_changes(self, changes, amount_of_lines=0, updating_user=None):
         with self._file_lock:
             for line_number, new_line in changes.items():
                 FSWrapper.write_change_to_file(self._file_object, line_number, new_line)
+            FSWrapper.trim_end_of_file(self._file_object, amount_of_lines)
         
     def send_changes_to_all_room_users(self, data, sending_user):
         data["code"] = 2 #add the update code to the data dictionary

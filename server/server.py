@@ -108,7 +108,7 @@ class server():
     
     def update_file_changes(self, data, user):
         room = user.get_room()
-        room.update_changes(data["data"]["updates"], user)
+        room.update_changes(data["data"]["updates"], data["data"]["line_count"], user)
         room.send_changes_to_all_room_users(data, user)
         return None
         
