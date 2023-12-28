@@ -68,7 +68,7 @@ function dataHandler(jsonObject)
 }
 
 function createEditFileWindow() {
-    if(!communicator.isConnected)
+    if(!communicator.getIsConnected())
     {
         communicator.connectToServer();
     }
@@ -85,7 +85,7 @@ function createEditFileWindow() {
     mainWindow.loadFile('editFile.html');
     mainWindow.webContents.openDevTools();
 
-    communicator.dataHandler = dataHandler;
+    communicator.setDataHandler(dataHandler);
     connectToFileRequest();
 
     ipcMain.handle('dialog:sendChanges', handleChangesInMain);

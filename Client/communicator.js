@@ -16,6 +16,15 @@ function connectToServer()
     });
 }
 
+function setDataHandler(newDataHandler)
+{
+    dataHandler = newDataHandler;
+}
+
+function getIsConnected()
+{
+    return isConnected;
+}
 
 socket.on('error', (error) => {
     console.error('Error connecting to the server:', error.message);
@@ -61,8 +70,8 @@ socket.on('data', (data) => {
   });
 
 module.exports = {
-    dataHandler,
-    isConnected,
+    getIsConnected,
+    setDataHandler,
     sendMessage,
     connectToServer
 };
