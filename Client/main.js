@@ -1,8 +1,16 @@
 const { app, BrowserWindow ,} = require('electron');
 const editFileWindow = require("./editFileWindow.js")
+const communicator = require("./communicator.js");
 
 app.whenReady().then(()=>{
-    editFileWindow.createEditFileWindow();
+    communicator.connectToServer(() => {
+        if (communicator.getIsConnected())
+            editFileWindow.createEditFileWindow();
+        else {
+            console.log("couldn't connect to server");
+            app.quit()
+        }
+    });
 })
 
 app.on('window-all-closed', () => {
@@ -11,8 +19,6 @@ app.on('window-all-closed', () => {
     }
 })
 
-app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-        createWindow()
-    }
-})
+app.on('before-quit', () => {
+    communicator.disconnectFromServer();
+});
