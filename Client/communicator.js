@@ -9,11 +9,25 @@ const MESSAGE_LEN_FIELD_SIZE = 3;
 
 let dataHandler = null;
 let isConnected = false;
-function connectToServer()
+
+function connectToServer(callback)
 {
-    socket.connect(serverPort, serverAddress, () => {
-        isConnected = true;
-    });
+    if (!isConnected) {
+        socket.connect(serverPort, serverAddress, () => {
+            isConnected = true;
+            callback();
+        });
+    }
+}
+
+function disconnectFromServer()
+{
+    if (isConnected) {
+        messageDataJson = {};
+        sendMessage(messageDataJson, 0); //0 is the disconnection code
+        socket.end();
+        isConnected = false;
+    }
 }
 
 function setDataHandler(newDataHandler)
@@ -73,5 +87,6 @@ module.exports = {
     getIsConnected,
     setDataHandler,
     sendMessage,
-    connectToServer
+    connectToServer,
+    disconnectFromServer
 };
