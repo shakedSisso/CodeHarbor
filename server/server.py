@@ -51,18 +51,23 @@ class server():
         while not exit_event.is_set():
             try:
                 client_message_code, client_message_len = self.get_message_info(client_socket)
+                if client_message_code == 0:
+                    self.remove_and_disconnect(user)
+                    break
                 client_message_data_json = self.get_message_data(client_socket, client_message_len)
             except json.decoder.JSONDecodeError:
                 continue
             except ConnectionResetError:
-                room = user.get_room()
-                room.remove_user(user)
-                print(user.get_user_socket().getpeername(), "has disconnected")
-                break;
-            message_data = client_message_data_json
-            response = self.handle_request(client_message_code, message_data, user)
+                self.remove_and_disconnect(user)
+                break
+            response = self.handle_request(client_message_code, client_message_data_json, user)
             if response is not None:
                 user.send_message(response)
+
+    def remove_and_disconnect(self, user):
+        room = user.get_room()
+        room.remove_user(user)
+        print(user.get_user_socket().getpeername(), "has disconnected")
 
     def get_message_info(self, client_socket):
         header = client_socket.recv(HEADER_LENGTH)
