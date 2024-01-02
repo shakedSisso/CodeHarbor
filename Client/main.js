@@ -1,5 +1,5 @@
 const { app, BrowserWindow ,} = require('electron');
-const editFileWindow = require("./editFileWindow.js")
+const editFileWindow = require("./editFile/editFileWindow.js")
 const communicator = require("./communicator.js");
 
 app.whenReady().then(()=>{
