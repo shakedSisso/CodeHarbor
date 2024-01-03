@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../styles.css">
+    <title>CodeHarbor</title>
+</head>
+<body>
+  <div class="form-container" id="loginForm">
+    <h2>Login</h2>
+    <form>
+      <div class="input-group">
+        <label for="username">
+            <img src="../images/username.png" alt="User Icon">Username:
+        </label>
+        <input type="text" id="username" name="username" required>
+      </div>
+      <div class="input-group">
+        <label for="password">
+            <img src="../images/password.png" alt="User Icon">Password:
+        </label>
+        <input type="password" id="password" name="password" required>
+      </div>
+      <div id="errorMessage" class="error-message"><em></em></div>
+      <button type="button" class="action-btn" onclick="login()">Login</button>
+    </form>
+    <p class="switch-form" onclick="switchForm()">Don't have an account? Sign Up</p>
+  </div>
+  <script src="loginRenderer.js"></script>
+</body>
+</html>
