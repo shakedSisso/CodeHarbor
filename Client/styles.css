@@ -1,6 +1,6 @@
 body {
   font-family: Arial, sans-serif;
-  background: linear-gradient(rgba(153, 226, 180, 0.75), rgba(153, 226, 180, 0.75)), url('./images/background.jpg') center/cover no-repeat;
+  background: linear-gradient(rgba(153, 226, 180, 0.75), rgba(4, 99, 99, 0.75)), url('./images/background.jpg') center/cover no-repeat;
   margin: 0;
   padding: 0;
   display: flex;
