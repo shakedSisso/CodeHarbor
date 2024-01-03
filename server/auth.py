@@ -24,3 +24,15 @@ class Auth:
             "username": username
         }, Auth.users_collection)
         return result
+    
+    @staticmethod
+    def validate_user(username, password):
+        user = Auth.get_user(username)
+        if user is None:
+            raise Exception("User doesn't exists")
+        hashed_user_password = user.get("password")
+        if bcrypt.checkpw(password.encode('utf-8'), hashed_user_password):
+            return True
+        else:
+            return False
+

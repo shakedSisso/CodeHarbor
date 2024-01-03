@@ -130,7 +130,15 @@ class server():
         return {"data": {"id": new_id}}
 
     def login_user(self, data):
-        pass
+        try:
+            auth_result = Auth.validate_user(data["data"]["username"], data["data"]["password"])
+        except Exception as e:
+            return {"data": {"message": "user doesn't exists"}}
+        if auth_result:
+            return {"data": {"message": "connected"}}
+        else:
+            return {"data": {"message": "password incorrect"}}
+
 
 def main():
     main_server = server()
