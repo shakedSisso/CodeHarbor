@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../styles.css">
+    <title>CodeHarbor</title>
+</head>
+<body>
+  <div class="form-container" id="signupForm">
+    <h2>Sign Up</h2>
+    <form>
+        <div class="input-group">
+            <label for="username">
+                <img src="../images/username.png" alt="User Icon">Username:
+            </label>
+            <input type="text" id="username" name="username" required>
+        </div>
+        <div class="input-group">
+            <label for="email">
+                <img src="../images/email.png" alt="User Icon">Email:
+            </label>
+            <input type="email" id="email" name="email" required>
+        </div>
+        <div class="input-group">
+            <label for="password">
+                <img src="../images/password.png" alt="User Icon">Password:
+            </label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <div id="errorMessage" class="error-message"><em></em></div>
+      <button type="button" class="action-btn" onclick="signup()">Sign Up</button>
+    </form>
+    <p class="switch-form" onclick="switchForm()">Already have an account? Login</p>
+  </div>
+  <script src="signupRenderer.js"></script>
+</body>
+</html>
