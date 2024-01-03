@@ -1,5 +1,5 @@
 var textarea = document.getElementById('text-box');
-var text;
+var text = {};
 var changes = {};
 var currentLine = 1;
 var currentIndex = 0;
