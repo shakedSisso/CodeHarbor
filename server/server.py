@@ -7,6 +7,7 @@ from file_system_wrapper import FSWrapper
 from user import User
 from room import Room
 from codes import RequestCodes
+from auth import Auth
 
 MAX_DEFAULT_CONNECTION_AMOUNT = 20
 HEADER_LENGTH = 5
@@ -28,7 +29,10 @@ class server():
         self.handlers = {
             RequestCodes.CONNECT_TO_FILE.value: self.get_file_content_and_connect_to_room,
             RequestCodes.UPDATE_CHANGES.value: self.update_file_changes,
-            RequestCodes.CREATE_FILE.value: self.create_file
+            RequestCodes.CREATE_FILE.value: self.create_file,
+            RequestCodes.SIGN_UP.value: self.sign_up_user,
+            RequestCodes.LOGIN.value: self.login_user,
+            
             }
         
     
@@ -123,6 +127,26 @@ class server():
         MongoDBWrapper.create_new_file_record(file_name, file_path) #when we'll have users the username will also be sent to the function
         FSWrapper.create_file(file_path, file_name)
         return self.get_file_content_and_connect_to_room(data, user)
+    
+    def sign_up_user(self, data, user):
+        try:
+            Auth.add_new_user(data["data"]["username"], data["data"]["password"], data["data"]["email"])
+        except Exception as e:
+            return {"data": {"status": "error"}}
+        user.login_user(data["data"]["username"])
+        return {"data": {"status": "success"}}
+
+    def login_user(self, data, user):
+        try:
+            auth_result = Auth.validate_user(data["data"]["username"], data["data"]["password"])
+        except Exception as e:
+            return {"data": {"status": "error"}}
+        if auth_result:
+            user.login_user(data["data"]["username"])
+            return {"data": {"status": "success"}}
+        else:
+            return {"data": {"status": "error"}}
+
 
 def main():
     main_server = server()

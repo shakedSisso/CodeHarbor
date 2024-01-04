@@ -5,6 +5,7 @@ class User():
     def __init__(self, user_socket, user_name="ghost"):
         self._user_socket = user_socket
         self._user_name = user_name
+        self._is_logged_in = True
     
     def send_message(self, message):
         try:
@@ -14,6 +15,10 @@ class User():
             return -1
         finally:
             return 0
+
+    def login_user(self, username):
+        self._is_logged_in = True
+        self._user_name = username
 
     def get_user_name(self):
         return self._user_name
