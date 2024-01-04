@@ -15,8 +15,7 @@ class Auth:
             "password": hashed_password,
             "email": email
         }
-        new_user_id = MongoDBWrapper.insert_document(new_user, Auth.users_collection)
-        return new_user_id
+        MongoDBWrapper.insert_document(new_user, Auth.users_collection)
 
     @staticmethod
     def get_user(username):

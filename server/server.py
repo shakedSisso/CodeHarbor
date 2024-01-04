@@ -125,22 +125,22 @@ class server():
     
     def sign_up_user(self, data, user):
         try:
-            new_id = Auth.add_new_user(data["data"]["username"], data["data"]["password"], data["data"]["email"])
+            Auth.add_new_user(data["data"]["username"], data["data"]["password"], data["data"]["email"])
         except Exception as e:
-            return {"data": {"message": "username is taken"}}
+            return {"data": {"status": "error"}}
         user.login_user(data["data"]["username"])
-        return {"data": {"id": new_id}}
+        return {"data": {"status": "success"}}
 
     def login_user(self, data, user):
         try:
             auth_result = Auth.validate_user(data["data"]["username"], data["data"]["password"])
         except Exception as e:
-            return {"data": {"message": "user doesn't exists"}}
+            return {"data": {"status": "error"}}
         if auth_result:
             user.login_user(data["data"]["username"])
-            return {"data": {"message": "connected"}}
+            return {"data": {"status": "success"}}
         else:
-            return {"data": {"message": "password incorrect"}}
+            return {"data": {"status": "error"}}
 
 
 def main():
