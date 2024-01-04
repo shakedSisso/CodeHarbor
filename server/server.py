@@ -31,7 +31,8 @@ class server():
             RequestCodes.UPDATE_CHANGES.value: self.update_file_changes,
             RequestCodes.CREATE_FILE.value: self.create_file,
             RequestCodes.SIGN_UP.value: self.sign_up_user,
-            RequestCodes.LOGIN.value: self.login_user
+            RequestCodes.LOGIN.value: self.login_user,
+            
             }
         
     
@@ -122,19 +123,21 @@ class server():
         FSWrapper.create_file(file_path, file_name)
         return self.get_file_content_and_connect_to_room(data, user)
     
-    def sign_up_user(self, data):
+    def sign_up_user(self, data, user):
         try:
             new_id = Auth.add_new_user(data["data"]["username"], data["data"]["password"], data["data"]["email"])
         except Exception as e:
             return {"data": {"message": "username is taken"}}
+        user.login_user(data["data"]["username"])
         return {"data": {"id": new_id}}
 
-    def login_user(self, data):
+    def login_user(self, data, user):
         try:
             auth_result = Auth.validate_user(data["data"]["username"], data["data"]["password"])
         except Exception as e:
             return {"data": {"message": "user doesn't exists"}}
         if auth_result:
+            user.login_user(data["data"]["username"])
             return {"data": {"message": "connected"}}
         else:
             return {"data": {"message": "password incorrect"}}
