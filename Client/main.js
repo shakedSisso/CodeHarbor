@@ -1,7 +1,23 @@
 const { app , dialog } = require('electron');
-const editFileWindow = require("./editFile/editFileWindow.js")
+const editFileWindow = require("./editFile/editFileWindow.js");
+const loginWindow = require("./login/loginWindow.js");
+const signupWindow = require("./signup/signupWindow.js");
 const communicator = require("./communicator.js");
 
+let isLogin;
+let currentWindow;
+
+function switchLoginAndSignup(){
+    if (isLogin){
+        isLogin = false;
+        loginWindow.deleteWindow();
+        currentWindow = signupWindow.createWindow();
+    } else {
+        isLogin = true;
+        signupWindow.deleteWindow();
+        currentWindow = loginWindow.createWindow();
+    }
+}
 
 function closeWindowWhenDisconnected() {
     dialog.showMessageBox({
@@ -16,11 +32,9 @@ function closeWindowWhenDisconnected() {
 
 app.whenReady().then(()=>{
     communicator.connectToServer(() => {
-        if (communicator.getIsConnected())
-            editFileWindow.createEditFileWindow();
-        else {
-            console.log("couldn't connect to server");
-            app.quit()
+        if (communicator.getIsConnected()){
+            currentWindow = loginWindow.createWindow();
+            isLogin = true;
         }
     });
 })
@@ -36,5 +50,6 @@ app.on('before-quit', () => {
 });
 
 module.exports = {
+    switchLoginAndSignup, 
     closeWindowWhenDisconnected
 }
