@@ -45,3 +45,7 @@ function checkIfInputValid(username, password, email) {
 function switchForm() {
   window.electronAPI.switchToLogin();
 }
+
+window.electronAPI.showError((event, value) => {
+  error.textContent = value;
+})

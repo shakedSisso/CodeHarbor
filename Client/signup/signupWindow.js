@@ -6,7 +6,15 @@ const communicator = require("../communicator.js");
 let mainWindow;
 const SIGNUP_REQUEST = 4;
 
-function dataHandler(jsonObject){}
+function dataHandler(jsonObject)
+{
+    const data = jsonObject.data;
+    if (data.status == "error") {
+        mainWindow.webContents.send('show-error', 'Username is already taken by another user');
+    } else  {
+        //switch to file viewing screen
+    }
+}
 
 function handleSwitchToLogin()
 {
