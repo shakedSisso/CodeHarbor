@@ -6,6 +6,7 @@ class User():
         self._user_socket = user_socket
         self._user_name = user_name
         self._is_logged_in = True
+        self._room = None
     
     def send_message(self, message):
         try:
