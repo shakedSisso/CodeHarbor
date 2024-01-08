@@ -6,7 +6,15 @@ const communicator = require("../communicator.js");
 let mainWindow;
 const LOGIN_REQUEST = 5;
 
-function dataHandler(jsonObject){}
+function dataHandler(jsonObject)
+{
+    const data = jsonObject.data;
+    if (data.status == "error") {
+        mainWindow.webContents.send('show-error', 'Username or password are incorrect');
+    } else  {
+        //switch to file viewing screen
+    }
+}
 
 function handleSwitchToSignUp()
 {

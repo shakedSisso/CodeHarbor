@@ -18,3 +18,7 @@ button.addEventListener('click', () => {
 function switchForm() {
   window.electronAPI.switchToSignup();
 }
+
+window.electronAPI.showError((event, value) => {
+  error.textContent = value;
+})
