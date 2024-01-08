@@ -70,7 +70,8 @@ class server():
 
     def remove_and_disconnect(self, user):
         room = user.get_room()
-        room.remove_user(user)
+        if room is not None:
+            room.remove_user(user)
         print(user.get_user_socket().getpeername(), "has disconnected")
 
     def get_message_info(self, client_socket):
