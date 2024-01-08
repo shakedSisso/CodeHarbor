@@ -66,7 +66,7 @@ function dataHandler(jsonObject)
     }
 }
 
-function createEditFileWindow() {
+function createWindow() {
     mainWindow = new BrowserWindow({
         width: 800,
         height: 600,
@@ -86,8 +86,10 @@ function createEditFileWindow() {
     communicator.setDataHandler(dataHandler);
     connectToFileRequest();
 
-    ipcMain.handle('dialog:sendChanges', handleChangesInMain);
-    ipcMain.handle('dialog:createFile', handleCreateFileRequest);
+    try {
+        ipcMain.handle('dialog:sendChanges', handleChangesInMain);
+        ipcMain.handle('dialog:createFile', handleCreateFileRequest);
+    } catch {} //used in case the handlers already exists
 
     
     ipcMain.on('set-menu', (event, menu) => {
@@ -107,6 +109,8 @@ function createEditFileWindow() {
         
         const menuTemplate = Menu.buildFromTemplate(template);
         mainWindow.setMenu(menuTemplate);
+
+        return mainWindow;
     });
 }  
 
@@ -203,6 +207,6 @@ function openCreateFileDialog() {
   }
 
   module.exports = {
-    createEditFileWindow,
+    createWindow,
     deleteLocalFile
 }
