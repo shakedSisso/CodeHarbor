@@ -1,4 +1,5 @@
 const net = require('net');
+const getMain = () => require('./main.js');
 
 const socket = new net.Socket();
 
@@ -42,7 +43,7 @@ function getIsConnected()
 
 socket.on('error', (error) => {
     console.error('Error connecting to the server:', error.message);
-    //ipcRenderer.send('server-connection-failed', error.message);
+    getMain().closeWindowWhenDisconnected();
   });
 
 function sendMessage(messageDataJson, code)
