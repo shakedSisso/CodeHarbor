@@ -3,7 +3,7 @@ import bcrypt
 
 class Auth:
 
-    users_collection = MongoDBWrapper.connect_to_mongo("users")
+    users_collection = MongoDBWrapper.connect_to_mongo("Users")
 
     @staticmethod
     def add_new_user(username, password, email):
