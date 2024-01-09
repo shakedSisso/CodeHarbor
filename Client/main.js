@@ -3,19 +3,56 @@ const editFileWindow = require("./editFile/editFileWindow.js");
 const loginWindow = require("./login/loginWindow.js");
 const signupWindow = require("./signup/signupWindow.js");
 const communicator = require("./communicator.js");
+const codes = require('./windowCodes.js');
 
-let isLogin;
-let currentWindow;
+let currentWindowCode;
 
-function switchLoginAndSignup(){
-    if (isLogin){
-        isLogin = false;
-        loginWindow.deleteWindow();
-        currentWindow = signupWindow.createWindow();
-    } else {
-        isLogin = true;
-        signupWindow.deleteWindow();
-        currentWindow = loginWindow.createWindow();
+function switchWindow(code) {
+    try {
+        closeLastWindow();
+        openRequestedWindow(code);
+    } catch (error) {
+        dialog.showMessageBox({
+            type: 'error',
+            title: 'Error',
+            message: error.message,
+            buttons: ['OK']
+          }).then((result) => {
+              app.quit();
+          });
+    }
+}
+
+function openRequestedWindow(code){
+    switch(code){
+        case codes.LOGIN:
+            loginWindow().createWindow();
+            break;
+        case codes.SIGNUP:
+            signupWindow().createWindow();
+            break;
+        case codes.EDIT:
+            editFileWindow().createWindow();
+            break;
+        default:
+            throw new Error(`Couldn't find requested window`);
+    }
+    currentWindowCode = code;
+}
+
+function closeLastWindow() {
+    switch(currentWindowCode){
+        case codes.LOGIN:
+            loginWindow().deleteWindow();
+            break;
+        case codes.SIGNUP:
+            signupWindow().deleteWindow();
+            break;
+        case codes.EDIT:
+            editFileWindow().deleteWindow();
+            break;
+        default:
+            throw new Error(`Couldn't delete the current window`);
     }
 }
 
@@ -33,8 +70,8 @@ function closeWindowWhenDisconnected() {
 app.whenReady().then(()=>{
     communicator.connectToServer(() => {
         if (communicator.getIsConnected()){
-            currentWindow = loginWindow.createWindow();
-            isLogin = true;
+            loginWindow().createWindow();
+            currentWindowCode = codes.LOGIN;
         }
     });
 })
@@ -50,6 +87,6 @@ app.on('before-quit', () => {
 });
 
 module.exports = {
-    switchLoginAndSignup, 
+    switchWindow,
     closeWindowWhenDisconnected
 }
