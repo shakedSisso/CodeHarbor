@@ -2,6 +2,7 @@ const { BrowserWindow , ipcMain} = require('electron');
 const path = require('path');
 const getMain = () => require('../main.js');
 const communicator = require("../communicator.js");
+const codes = require('../windowCodes.js');
 
 let mainWindow;
 const SIGNUP_REQUEST = 4;
@@ -18,7 +19,7 @@ function dataHandler(jsonObject)
 
 function handleSwitchToLogin()
 {
-    getMain().switchLoginAndSignup();
+    getMain().switchWindow(codes.LOGIN);
 }
 
 function handleSendSignUpDetails(event, username, password, email)
