@@ -26,13 +26,13 @@ function switchWindow(code) {
 function openRequestedWindow(code){
     switch(code){
         case codes.LOGIN:
-            loginWindow().createWindow();
+            loginWindow.createWindow();
             break;
         case codes.SIGNUP:
-            signupWindow().createWindow();
+            signupWindow.createWindow();
             break;
         case codes.EDIT:
-            editFileWindow().createWindow();
+            editFileWindow.createWindow();
             break;
         default:
             throw new Error(`Couldn't find requested window`);
@@ -43,13 +43,13 @@ function openRequestedWindow(code){
 function closeLastWindow() {
     switch(currentWindowCode){
         case codes.LOGIN:
-            loginWindow().deleteWindow();
+            loginWindow.deleteWindow();
             break;
         case codes.SIGNUP:
-            signupWindow().deleteWindow();
+            signupWindow.deleteWindow();
             break;
         case codes.EDIT:
-            editFileWindow().deleteWindow();
+            editFileWindow.deleteWindow();
             break;
         default:
             throw new Error(`Couldn't delete the current window`);
