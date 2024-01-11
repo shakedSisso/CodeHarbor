@@ -7,3 +7,4 @@ class RequestCodes(Enum):
     SIGN_UP = 4
     LOGIN = 5
     CREATE_FOLDER = 6
+    GET_FILES_AND_FOLDERS = 7
