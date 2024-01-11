@@ -29,6 +29,10 @@ class FSWrapper():
         return file_lines
     
     @staticmethod
+    def create_folder(folder_path, folder_name):
+        os.makedirs(os.path.join(folder_path, folder_name))
+
+    @staticmethod
     def write_change_to_file(file, line_number, new_line):
         file.seek(0)
         lines = file.readlines()
