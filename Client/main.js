@@ -26,13 +26,13 @@ function switchWindow(code) {
 function openRequestedWindow(code){
     switch(code){
         case codes.LOGIN:
-            loginWindow().createWindow();
+            loginWindow.createWindow();
             break;
         case codes.SIGNUP:
-            signupWindow().createWindow();
+            signupWindow.createWindow();
             break;
         case codes.EDIT:
-            editFileWindow().createWindow();
+            editFileWindow.createWindow();
             break;
         default:
             throw new Error(`Couldn't find requested window`);
