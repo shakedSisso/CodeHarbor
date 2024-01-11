@@ -32,7 +32,8 @@ class server():
             RequestCodes.CREATE_FILE.value: self.create_file,
             RequestCodes.SIGN_UP.value: self.sign_up_user,
             RequestCodes.LOGIN.value: self.login_user,
-            RequestCodes.CREATE_FOLDER: self.create_folder
+            RequestCodes.CREATE_FOLDER: self.create_folder,
+            RequestCodes.GET_FILES_AND_FOLDERS: self.get_files_and_folders_in_location
             }
         
     
@@ -133,6 +134,7 @@ class server():
         folder_path = "./files/" + data["data"]["location"]
         try:
             MongoDBWrapper.create_new_folder_record(folder_name, folder_path, user.get_user_name())
+            FSWrapper.create_folder(folder_path, folder_name)
         except Exception:
             return {"data": {"status": "error"}}
         return {"data": {"status": "success"}}
@@ -143,6 +145,11 @@ class server():
         except Exception as e:
             return {"data": {"status": "error"}}
         user.login_user(data["data"]["username"])
+        try:
+            FSWrapper.create_folder("./files/", data["data"]["username"])
+            MongoDBWrapper.create_new_folder_record(data["data"]["username"], "", data["data"]["username"])
+        except OSError:
+            return {"data": {"status": "error"}}
         return {"data": {"status": "success"}}
 
     def login_user(self, data, user):
@@ -155,6 +162,24 @@ class server():
             return {"data": {"status": "success"}}
         else:
             return {"data": {"status": "error"}}
+        
+    def get_files_and_folders_in_location(self, data, user):
+        location = data["data"]["location"]
+        try:
+            files_collection = MongoDBWrapper.connect_to_mongo("Files")
+            files_list = MongoDBWrapper.find_documents({"location": location}, files_collection)
+            folders_collection = MongoDBWrapper.connect_to_mongo("Folders")
+            folders_list = MongoDBWrapper.find_documents({"location": location}, folders_collection)
+        except Exception:
+            return {"data": {"status": "error"}}
+        return {
+            "data": {
+                "status": "success",
+                "files": files_list,
+                "folders": folders_list
+            }
+        }
+
 
 
 def main():
