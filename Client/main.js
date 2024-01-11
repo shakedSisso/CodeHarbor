@@ -70,7 +70,7 @@ function closeWindowWhenDisconnected() {
 app.whenReady().then(()=>{
     communicator.connectToServer(() => {
         if (communicator.getIsConnected()){
-            loginWindow().createWindow();
+            loginWindow.createWindow();
             currentWindowCode = codes.LOGIN;
         }
     });
