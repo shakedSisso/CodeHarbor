@@ -5,6 +5,7 @@ const communicator = require("../communicator.js");
 const codes = require('../windowCodes.js');
 
 let mainWindow;
+let name;
 const LOGIN_REQUEST = 5;
 
 function dataHandler(jsonObject)
@@ -13,7 +14,8 @@ function dataHandler(jsonObject)
     if (data.status == "error") {
         mainWindow.webContents.send('show-error', 'Username or password are incorrect');
     } else  {
-        //switch to file viewing screen
+        getMain().setUsername(name);
+        getMain().switchWindow(codes.FILE_VIEW);
     }
 }
 
@@ -24,6 +26,7 @@ function handleSwitchToSignUp()
 
 function handleSendLoginDetails(event, username, password)
 {
+    name = username;
     const messageData = {
         data: {
             username: username,

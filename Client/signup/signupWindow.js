@@ -5,6 +5,7 @@ const communicator = require("../communicator.js");
 const codes = require('../windowCodes.js');
 
 let mainWindow;
+let name;
 const SIGNUP_REQUEST = 4;
 
 function dataHandler(jsonObject)
@@ -13,7 +14,8 @@ function dataHandler(jsonObject)
     if (data.status == "error") {
         mainWindow.webContents.send('show-error', 'Username is already taken by another user');
     } else  {
-        //switch to file viewing screen
+        getMain().setUsername(name);
+        getMain().switchWindow(codes.FILE_VIEW);
     }
 }
 
@@ -24,6 +26,7 @@ function handleSwitchToLogin()
 
 function handleSendSignUpDetails(event, username, password, email)
 {
+    name = username;
     const messageData = {
         data: {
             username: username,
