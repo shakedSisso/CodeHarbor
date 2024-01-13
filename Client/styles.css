@@ -1,5 +1,5 @@
 body {
-  font-family: Arial, sans-serif;
+  font-family: 'Ubuntu', sans-serif;
   background: linear-gradient(rgba(153, 226, 180, 0.75), rgba(4, 99, 99, 0.75)), url('./images/background.jpg') center/cover no-repeat;
   margin: 0;
   padding: 0;
@@ -20,7 +20,7 @@ textarea {
   color: #036666;
   resize: none;
   font-size: 16px;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Consolas', sans-serif;
 }
 textarea:focus {
   border: 2px solid #b4ffd6;
@@ -37,6 +37,44 @@ textarea::-webkit-scrollbar-thumb {
 }
 textarea::-webkit-scrollbar-thumb:hover {
   background: #358F80;
+}
+
+.files-container  {
+  background-color: #78C6A3;
+  padding: 15px;
+  border-radius: 20px;
+  box-shadow: 0 0 10px #046363;
+  width: calc(95% - 50px);
+  height: calc(95% - 50px);
+  text-align: center;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+.file-container {
+  margin: 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.file-container img {
+    margin-bottom: 5px;
+    cursor: pointer;
+}
+
+.file-container label {
+  font-weight: bold;
+  color: #023939;
+  font-family: 'Ubuntu', sans-serif;
+}
+.item {
+  margin: -50px; /* Adjust the margin to reduce vertical spacing */
+  padding: 15px;
+  border: 1px solid #ccc;
 }
 
 .form-container {
@@ -83,7 +121,7 @@ textarea::-webkit-scrollbar-thumb:hover {
   outline: none;
   font-size: 16px;
   color: #046363;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Consolas', Helvetica, sans-serif;
 }
 
 .input-group input:focus {
