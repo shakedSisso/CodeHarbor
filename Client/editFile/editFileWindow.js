@@ -1,14 +1,13 @@
-const net = require('net');
-const { app, BrowserWindow , ipcMain, Menu} = require('electron');
+const { BrowserWindow , ipcMain, Menu} = require('electron');
 const path = require('path');
 const communicator = require("../communicator.js");
 const fs = require('fs');
+const codes = require('../windowCodes.js');
 
 let mainWindow;
 const FILE_REQUEST = 1;
 const UPDATE_REQUEST = 2;
-const NEW_FILE_REQUEST = 3;
-var fileName = "", newFile;
+var fileName = "", newFile, location = "";
 
 function handleChangesInMain(event, changes, lineCount) {
     //create message and send it to server
@@ -23,28 +22,15 @@ function handleChangesInMain(event, changes, lineCount) {
     updateLocalFile(changes);
 }
 
-function handleCreateFileRequest(event, file_name)
-{
-    newFile = file_name
-    // creating message
-    const messageData = {
-        data: {
-            file_name: file_name,
-            location: "",
-        },
-    };
-    const messageDataJson = JSON.stringify(messageData);
-    communicator.sendMessage(messageDataJson, NEW_FILE_REQUEST);
-}
-
 function connectToFileRequest()
 {
-    fileName = 'examples';
-        const messageData = {
-            data: {
-                file_name: fileName,
-            },
-        };
+
+    const name = location + "/" + fileName;
+    const messageData = {
+        data: {
+            file_name: name,
+        },
+    };
     const messageDataJson = JSON.stringify(messageData);
     communicator.sendMessage(messageDataJson, FILE_REQUEST);
 }
@@ -66,7 +52,9 @@ function dataHandler(jsonObject)
     }
 }
 
-function createWindow() {
+function createWindow(locationPath, name) {
+    location = locationPath;
+    fileName = name;
     mainWindow = new BrowserWindow({
         width: 800,
         height: 600,
@@ -78,7 +66,6 @@ function createWindow() {
         autoHideMenuBar: false,
     })
     mainWindow.loadFile('editFile/editFile.html');
-    mainWindow.webContents.openDevTools();
     mainWindow.on('closed', () => {
         deleteLocalFile();
       });
@@ -88,31 +75,34 @@ function createWindow() {
 
     try {
         ipcMain.handle('dialog:sendChanges', handleChangesInMain);
-        ipcMain.handle('dialog:createFile', handleCreateFileRequest);
     } catch {} //used in case the handlers already exists
 
     
-    ipcMain.on('set-menu', (event, menu) => {
+    ipcMain.on('set-menu', (event) => {
+        alert('menu');
         const template = [
             {
-            label: 'File',
-            submenu: [
-                {
-                label: 'Create File',
-                click: () => {
-                    openCreateFileDialog();
-                    },
+            label: 'Exit',
+            click: () => {
+                    getMain().switchWindow(codes.FILE_VIEW)
                 },
-            ],
             },
         ];
         
         const menuTemplate = Menu.buildFromTemplate(template);
         mainWindow.setMenu(menuTemplate);
-
-        return mainWindow;
     });
+
+    return mainWindow;
 }  
+
+function deleteWindow()
+{
+    if (mainWindow) {
+        mainWindow.close();
+        mainWindow = null;
+    }
+}
 
 function updateScreenAndCreateLocalFile(data)
 {
@@ -179,34 +169,8 @@ function deleteLocalFile() {
         });
 }
 
-function openCreateFileDialog() {
-    const { BrowserWindow } = require('electron');
-
-    const inputDialog = new BrowserWindow({
-        width: 300,
-        height: 200,
-        show: false,
-        webPreferences: {
-        nodeIntegration: true,
-        contextIsolation: true,
-        preload: path.join(__dirname, '../fileDialog/fileDialogPreload.js'),
-        },
-        autoHideMenuBar: true,
-    });
-
-    // Load an HTML file for the dialog
-    inputDialog.loadFile('fileDialog/fileDialog.html');
-
-    inputDialog.once('ready-to-show', () => {
-        inputDialog.show();
-    });
-
-    inputDialog.on('closed', () => {
-        // Handle the closed event if needed
-    });
-  }
-
   module.exports = {
     createWindow,
+    deleteWindow,
     deleteLocalFile
 }
