@@ -2,10 +2,12 @@ const { app , dialog } = require('electron');
 const editFileWindow = require("./editFile/editFileWindow.js");
 const loginWindow = require("./login/loginWindow.js");
 const signupWindow = require("./signup/signupWindow.js");
+const fileViewingWindow = require("./fileViewing/fileViewingWindow.js");
 const communicator = require("./communicator.js");
 const codes = require('./windowCodes.js');
 
 let currentWindowCode;
+let username;
 
 function switchWindow(code) {
     try {
@@ -32,7 +34,10 @@ function openRequestedWindow(code){
             signupWindow.createWindow();
             break;
         case codes.EDIT:
-            editFileWindow.createWindow();
+            editFileWindow.createWindow(fileViewingWindow.getLocationPath(), fileViewingWindow.getFileName());
+            break;
+        case codes.FILE_VIEW:
+            fileViewingWindow.createWindow();
             break;
         default:
             throw new Error(`Couldn't find requested window`);
@@ -51,6 +56,9 @@ function closeLastWindow() {
         case codes.EDIT:
             editFileWindow.deleteWindow();
             break;
+        case codes.FILE_VIEW:
+            fileViewingWindow.deleteWindow();
+            break;
         default:
             throw new Error(`Couldn't delete the current window`);
     }
@@ -60,7 +68,7 @@ function closeWindowWhenDisconnected() {
     dialog.showMessageBox({
       type: 'error',
       title: 'Error',
-      message: "Couldn't connect to the server.\n\nPlease try again later",
+      message: "Couldn't connect to the server.\nPlease try again later",
       buttons: ['OK']
     }).then((result) => {
         app.quit();
@@ -86,7 +94,17 @@ app.on('before-quit', () => {
     communicator.disconnectFromServer();
 });
 
+function getUsername() {
+    return username;
+}
+
+function setUsername(name) {
+    username = name;
+}
+
 module.exports = {
     switchWindow,
-    closeWindowWhenDisconnected
+    closeWindowWhenDisconnected,
+    getUsername,
+    setUsername
 }
