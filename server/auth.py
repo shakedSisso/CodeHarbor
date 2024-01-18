@@ -3,11 +3,11 @@ import bcrypt
 
 class Auth:
 
-    users_collection = MongoDBWrapper.connect_to_mongo("users")
+    users_collection = MongoDBWrapper.connect_to_mongo("Users")
 
     @staticmethod
     def add_new_user(username, password, email):
-        if Auth.get_user(username) is None:
+        if Auth.get_user(username) is not None:
             raise Exception("User already exists")
         hashed_password = bcrypt.hashpw(password.encode(), bcrypt.gensalt())
         new_user = {
