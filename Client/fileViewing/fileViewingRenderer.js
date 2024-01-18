@@ -41,14 +41,21 @@ function handleImageClick(event) {
         {
             if (name === "../")
             {
-                fileViewingForm.alt = goBackAFolder(fileViewingForm.alt);
+                if (fileViewingForm.alt != usernameFolder)
+                    fileViewingForm.alt = goBackAFolder(fileViewingForm.alt);
+                else {
+                    fileViewingForm.alt = "";
+                    window.electronAPI.resetLocation();
+                }
             }
             else 
             {
                 if (name != "Owned/") 
                     fileViewingForm.alt = fileViewingForm.alt + name;
                 else 
+                {
                     fileViewingForm.alt = usernameFolder;
+                }
             }
             window.electronAPI.getFilesAndFolders(fileViewingForm.alt);
         }

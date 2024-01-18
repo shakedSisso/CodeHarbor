@@ -5,7 +5,7 @@ const getMain = () => require('../main.js');
 const codes = require('../windowCodes.js');
 
 let mainWindow;
-let locationPath;
+let locationPath = "";
 let fileName;
 const NEW_FILE_REQUEST = 3;
 const GET_FILES_AND_FOLDERS_REQUEST = 7;
@@ -30,7 +30,7 @@ function dataHandler(jsonObject)
 
 function handleCreateFileRequest(event, file_name)
 {
-    newFile = file_name
+    newFile = locationPath + "/" + file_name
     // creating message
     const messageData = {
         data: {
@@ -77,9 +77,12 @@ function createWindow() {
 
     communicator.setDataHandler(dataHandler);
 
+    try {
+        ipcMain.handle('dialog:resetLocation', ()=>{locationPath = "";});
     ipcMain.handle('dialog:createFile', handleCreateFileRequest);
     ipcMain.handle('dialog:getFilesAndFolders', handleGetFilesAndFolders);
     ipcMain.handle('dialog:switchToEditFile', handleSwitchToEditFile);
+    } catch {} //used in case the handlers already exists
 
     
     ipcMain.on('set-menu-fileViewing', (event, menu) => {
