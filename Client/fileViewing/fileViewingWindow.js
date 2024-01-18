@@ -12,6 +12,8 @@ const GET_FILES_AND_FOLDERS_REQUEST = 7;
 
 function dataHandler(jsonObject)
 {
+    if (jsonObject.code === GET_FILES_AND_FOLDERS_REQUEST)
+    {
     data = jsonObject.data;
     if (data.status === "success"){
         mainWindow.webContents.send('show-files-and-folders', data);
@@ -23,6 +25,7 @@ function dataHandler(jsonObject)
             buttons: ['OK']
           });
     }
+}
 }
 
 function handleCreateFileRequest(event, file_name)
