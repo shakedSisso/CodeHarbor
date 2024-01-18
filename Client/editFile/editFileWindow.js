@@ -1,5 +1,6 @@
 const { BrowserWindow , ipcMain, Menu} = require('electron');
 const path = require('path');
+const getMain = () => require('../main.js');
 const communicator = require("../communicator.js");
 const fs = require('fs');
 const codes = require('../windowCodes.js');
