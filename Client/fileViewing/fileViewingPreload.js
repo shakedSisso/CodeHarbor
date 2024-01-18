@@ -6,6 +6,7 @@ contextBridge.exposeInMainWorld('api', {
 
 contextBridge.exposeInMainWorld('electronAPI', {
   resetLocation: () => ipcRenderer.invoke('dialog:resetLocation'),
+  showMenu: () => ipcRenderer.invoke('dialog:showMenu'),
   getFilesAndFolders: (location) => ipcRenderer.invoke('dialog:getFilesAndFolders', location),
   showFilesAndFolders: (foldersAndFolders) => ipcRenderer.on('show-files-and-folders', foldersAndFolders),
   getUsername: (callback) => ipcRenderer.on('send-username', callback),

@@ -55,6 +55,7 @@ function handleImageClick(event) {
                     fileViewingForm.alt = fileViewingForm.alt + name;
                 else 
                 {
+                    window.electronAPI.showMenu();
                     fileViewingForm.alt = usernameFolder;
                 }
             }

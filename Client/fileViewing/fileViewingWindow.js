@@ -60,6 +60,11 @@ function handleSwitchToEditFile(event, name)
     getMain().switchWindow(codes.EDIT);
 }
 
+function handleResetLocation() {
+    locationPath = "";
+    mainWindow.setMenuBarVisibility(!mainWindow.isMenuBarVisible());
+}
+
 function createWindow() {
     mainWindow = new BrowserWindow({
         width: 800,
@@ -78,7 +83,8 @@ function createWindow() {
     communicator.setDataHandler(dataHandler);
 
     try {
-        ipcMain.handle('dialog:resetLocation', ()=>{locationPath = "";});
+        ipcMain.handle('dialog:resetLocation', handleResetLocation);
+        ipcMain.handle('dialog:showMenu', ()=>{mainWindow.setMenuBarVisibility(!mainWindow.isMenuBarVisible());})
         ipcMain.handle('dialog:createFile', handleCreateFileRequest);
         ipcMain.handle('dialog:getFilesAndFolders', handleGetFilesAndFolders);
         ipcMain.handle('dialog:switchToEditFile', handleSwitchToEditFile);
@@ -116,14 +122,6 @@ function deleteWindow()
 }
 
 function openCreateFileOrFolderDialog() {
-    if (locationPath == ""){
-        dialog.showMessageBox({
-            type: 'error',
-            title: 'Error',
-            message: "You must enter a folder (`Owned` or one of the folders inside of `Owned`) to create a file",
-            buttons: ['OK']
-        });
-    } else {
         const inputDialog = new BrowserWindow({
             width: 300,
             height: 200,
@@ -145,7 +143,6 @@ function openCreateFileOrFolderDialog() {
         inputDialog.on('closed', () => {
             // Handle the closed event if needed
         });
-    }
   }
 
 function getLocationPath(){
