@@ -1,4 +1,4 @@
-const { BrowserWindow , ipcMain, Menu} = require('electron');
+const { BrowserWindow , ipcMain, Menu, dialog } = require('electron');
 const path = require('path');
 const communicator = require("../communicator.js");
 const getMain = () => require('../main.js');
@@ -123,9 +123,7 @@ function openCreateFileOrFolderDialog() {
             message: "You must enter a folder (`Owned` or one of the folders inside of `Owned`) to create a file",
             buttons: ['OK']
         });
-    }else{
-        const { BrowserWindow } = require('electron');
-
+    } else {
         const inputDialog = new BrowserWindow({
             width: 300,
             height: 200,
@@ -137,18 +135,17 @@ function openCreateFileOrFolderDialog() {
             },
             autoHideMenuBar: true,
         });
+        // Load an HTML file for the dialog
+        inputDialog.loadFile('fileDialog/fileDialog.html');
+
+        inputDialog.once('ready-to-show', () => {
+            inputDialog.show();
+        });
+
+        inputDialog.on('closed', () => {
+            // Handle the closed event if needed
+        });
     }
-
-    // Load an HTML file for the dialog
-    inputDialog.loadFile('fileDialog/fileDialog.html');
-
-    inputDialog.once('ready-to-show', () => {
-        inputDialog.show();
-    });
-
-    inputDialog.on('closed', () => {
-        // Handle the closed event if needed
-    });
   }
 
 function getLocationPath(){

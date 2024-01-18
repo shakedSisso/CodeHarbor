@@ -5,6 +5,7 @@ var usernameFolder;
 
 window.addEventListener('DOMContentLoaded', () => {
     window.api.setMenu();
+    window.electronAPI.resetLocation();
     fileViewingForm.addEventListener('click', handleImageClick);
     fileViewingForm.alt = ""; //used to keep track on the location the user is in
   });
