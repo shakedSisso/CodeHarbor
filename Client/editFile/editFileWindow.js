@@ -46,11 +46,6 @@ function dataHandler(jsonObject)
         mainWindow.webContents.send('file-updates', jsonObject.data);
         updateLocalFile(jsonObject.data.updates);
     }
-    else if (jsonObject.code === NEW_FILE_REQUEST) {
-        deleteLocalFile();
-        fileName = newFile
-        updateScreenAndCreateLocalFile(jsonObject.data)
-    }
 }
 
 function createWindow(locationPath, name) {
@@ -111,7 +106,6 @@ function updateScreenAndCreateLocalFile(data)
         fileContent += arr[i];
     }
     mainWindow.webContents.send('file-content', fileContent);
-    fileName += ".c"
     createLocalFile(fileContent);
 }
 
