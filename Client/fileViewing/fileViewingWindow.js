@@ -14,18 +14,18 @@ function dataHandler(jsonObject)
 {
     if (jsonObject.code === GET_FILES_AND_FOLDERS_REQUEST)
     {
-    data = jsonObject.data;
-    if (data.status === "success"){
-        mainWindow.webContents.send('show-files-and-folders', data);
-    } else {
-        dialog.showMessageBox({
-            type: 'error',
-            title: 'Error',
-            message: "Couldn't find the requested folder",
-            buttons: ['OK']
-          });
+        data = jsonObject.data;
+        if (data.status === "success"){
+            mainWindow.webContents.send('show-files-and-folders', data);
+        } else {
+            dialog.showMessageBox({
+                type: 'error',
+                title: 'Error',
+                message: "Couldn't find the requested folder",
+                buttons: ['OK']
+            });
+        }
     }
-}
 }
 
 function handleCreateFileRequest(event, file_name)
@@ -79,9 +79,9 @@ function createWindow() {
 
     try {
         ipcMain.handle('dialog:resetLocation', ()=>{locationPath = "";});
-    ipcMain.handle('dialog:createFile', handleCreateFileRequest);
-    ipcMain.handle('dialog:getFilesAndFolders', handleGetFilesAndFolders);
-    ipcMain.handle('dialog:switchToEditFile', handleSwitchToEditFile);
+        ipcMain.handle('dialog:createFile', handleCreateFileRequest);
+        ipcMain.handle('dialog:getFilesAndFolders', handleGetFilesAndFolders);
+        ipcMain.handle('dialog:switchToEditFile', handleSwitchToEditFile);
     } catch {} //used in case the handlers already exists
 
     
@@ -116,19 +116,28 @@ function deleteWindow()
 }
 
 function openCreateFileOrFolderDialog() {
-    const { BrowserWindow } = require('electron');
+    if (locationPath == ""){
+        dialog.showMessageBox({
+            type: 'error',
+            title: 'Error',
+            message: "You must enter a folder (`Owned` or one of the folders inside of `Owned`) to create a file",
+            buttons: ['OK']
+        });
+    }else{
+        const { BrowserWindow } = require('electron');
 
-    const inputDialog = new BrowserWindow({
-        width: 300,
-        height: 200,
-        show: false,
-        webPreferences: {
-        nodeIntegration: true,
-        contextIsolation: true,
-        preload: path.join(__dirname, '../fileDialog/fileDialogPreload.js'),
-        },
-        autoHideMenuBar: true,
-    });
+        const inputDialog = new BrowserWindow({
+            width: 300,
+            height: 200,
+            show: false,
+            webPreferences: {
+            nodeIntegration: true,
+            contextIsolation: true,
+            preload: path.join(__dirname, '../fileDialog/fileDialogPreload.js'),
+            },
+            autoHideMenuBar: true,
+        });
+    }
 
     // Load an HTML file for the dialog
     inputDialog.loadFile('fileDialog/fileDialog.html');
