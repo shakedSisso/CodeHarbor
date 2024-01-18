@@ -77,12 +77,13 @@ function createWindow(locationPath, name) {
         ipcMain.handle('dialog:sendChanges', handleChangesInMain);
     } catch {} //used in case the handlers already exists
 
+    return mainWindow;
+}  
     
-    ipcMain.on('set-menu', (event) => {
-        alert('menu');
+    ipcMain.on('set-menu-editFile', (event) => {
         const template = [
             {
-            label: 'Exit',
+            label: 'Exit File',
             click: () => {
                     getMain().switchWindow(codes.FILE_VIEW)
                 },
@@ -92,9 +93,6 @@ function createWindow(locationPath, name) {
         const menuTemplate = Menu.buildFromTemplate(template);
         mainWindow.setMenu(menuTemplate);
     });
-
-    return mainWindow;
-}  
 
 function deleteWindow()
 {

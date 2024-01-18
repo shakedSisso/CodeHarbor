@@ -79,7 +79,7 @@ function createWindow() {
     ipcMain.handle('dialog:switchToEditFile', handleSwitchToEditFile);
 
     
-    ipcMain.on('set-menu', (event, menu) => {
+    ipcMain.on('set-menu-fileViewing', (event, menu) => {
         const template = [
             {
             label: 'File',

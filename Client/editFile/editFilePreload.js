@@ -1,9 +1,7 @@
 const { ipcRenderer, remote, contextBridge } = require('electron');
 
 contextBridge.exposeInMainWorld('api', {
-  setMenu: (menu) => {
-    ipcRenderer.send('set-menu', menu);
-  },
+  setMenu: (menu) => { ipcRenderer.send('set-menu-editFile', menu); },
 });
 
 contextBridge.exposeInMainWorld('electronAPI', {
