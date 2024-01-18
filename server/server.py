@@ -32,8 +32,8 @@ class server():
             RequestCodes.CREATE_FILE.value: self.create_file,
             RequestCodes.SIGN_UP.value: self.sign_up_user,
             RequestCodes.LOGIN.value: self.login_user,
-            RequestCodes.CREATE_FOLDER: self.create_folder,
-            RequestCodes.GET_FILES_AND_FOLDERS: self.get_files_and_folders_in_location
+            RequestCodes.CREATE_FOLDER.value: self.create_folder,
+            RequestCodes.GET_FILES_AND_FOLDERS.value: self.get_files_and_folders_in_location
             }
         
     
@@ -125,7 +125,7 @@ class server():
     def create_file(self, data, user):
         file_name = data["data"]["file_name"] + ".c"
         file_path = "./files/" + data["data"]["location"]
-        MongoDBWrapper.create_new_file_record(file_name, file_path, user.get_user_name()) #when we'll have users the username will also be sent to the function
+        MongoDBWrapper.create_new_file_record(file_name, file_path, user.get_user_name())
         FSWrapper.create_file(file_path, file_name)
         return self.get_file_content_and_connect_to_room(data, user)
     
@@ -147,7 +147,6 @@ class server():
         user.login_user(data["data"]["username"])
         try:
             FSWrapper.create_folder("./files/", data["data"]["username"])
-            MongoDBWrapper.create_new_folder_record(data["data"]["username"], "", data["data"]["username"])
         except OSError:
             return {"data": {"status": "error"}}
         return {"data": {"status": "success"}}
@@ -167,11 +166,17 @@ class server():
         location = data["data"]["location"]
         try:
             files_collection = MongoDBWrapper.connect_to_mongo("Files")
-            files_list = MongoDBWrapper.find_documents({"location": location}, files_collection)
+            files_documents = MongoDBWrapper.find_documents({"location": location}, files_collection)
             folders_collection = MongoDBWrapper.connect_to_mongo("Folders")
-            folders_list = MongoDBWrapper.find_documents({"location": location}, folders_collection)
+            folders_documents = MongoDBWrapper.find_documents({"location": location}, folders_collection)
         except Exception:
             return {"data": {"status": "error"}}
+        files_list = []
+        for document in files_documents:
+            files_list.append({"file_name": document["file_name"], "location": document["location"]})
+        folders_list = []
+        for document in folders_documents:
+            folders_list.append({"folder_name": document["folder_name"], "location": document["location"]})
         return {
             "data": {
                 "status": "success",
