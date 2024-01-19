@@ -30,8 +30,7 @@ function dataHandler(jsonObject)
 
 function handleCreateFileRequest(event, file_name)
 {
-    newFile = locationPath + "/" + file_name
-    // creating message
+    fileName = file_name;
     const messageData = {
         data: {
             file_name: file_name,
