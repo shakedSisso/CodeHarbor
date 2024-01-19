@@ -25,7 +25,6 @@ function handleChangesInMain(event, changes, lineCount) {
 
 function connectToFileRequest()
 {
-
     const name = location + "/" + fileName;
     const messageData = {
         data: {
@@ -79,11 +78,16 @@ function createWindow(locationPath, name) {
     ipcMain.on('set-menu-editFile', (event) => {
         const template = [
             {
-            label: 'Exit File',
-            click: () => {
-                    getMain().switchWindow(codes.FILE_VIEW)
+                label: 'Exit',
+                submenu: [
+                    {
+                    label: 'Exit File',
+                    click: () => {
+                        getMain().switchWindow(codes.FILE_VIEW);
+                        },
+                    },
+                ],
                 },
-            },
         ];
         
         const menuTemplate = Menu.buildFromTemplate(template);
