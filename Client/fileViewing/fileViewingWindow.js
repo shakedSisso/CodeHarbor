@@ -123,8 +123,8 @@ function deleteWindow()
 
 function openCreateFileOrFolderDialog() {
         const inputDialog = new BrowserWindow({
-            width: 300,
-            height: 200,
+            width: 525,
+            height: 400,
             show: false,
             webPreferences: {
             nodeIntegration: true,
