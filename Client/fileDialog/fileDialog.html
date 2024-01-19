@@ -2,23 +2,40 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="../styles.css">
+  <link href='http://fonts.googleapis.com/css?family=Ubuntu&subset=cyrillic,latin' rel='stylesheet' type='text/css' />
   <title>Create File Dialog</title>
-  <style>
-    .button
-    {
-        margin-top: 12px;
-    }
-  </style>
 </head>
 <body>
-  <label for="textInput">File Name:</label>
-  <input type="text" id="textInput" name="textInput">
-  <button class="button" id="okButton">OK</button>
-  <button class="button" id="cancelButton">Cancel</button>
+  <div class="form-container">
+    <h2>Create File Dialog</h2>
+    <form>
+      <div class="input-group">
+        <label for="textInput">File Name:</label>
+        <input type="text" id="textInput" name="textInput" required>
+      </div>
+
+      <div class="input-group">
+        <label><input type="radio" name="radioGroup" id="hFile"><span>`.h` file</span></label>
+      </div>
+
+      <div class="input-group">
+        <label><input type="radio" name="radioGroup" id="cFile"><span>`.c` file</span></label>
+      </div>
+
+      <div class="input-group">
+        <label>
+          <input type="radio" name="radioGroup" id="folder"><span>folder</span>
+        </label>
+      </div>
+
+      <div class="buttons-group">
+        <button class="action-btn" id="okButton">OK</button>
+        <button class="action-btn" id="cancelButton">Cancel</button>
+      </div>
+    </form>
+  </div>
+
   <script src="./fileDialogRenderer.js"></script>
-  
 </body>
 </html>
