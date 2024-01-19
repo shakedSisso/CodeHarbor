@@ -104,10 +104,12 @@ textarea::-webkit-scrollbar-thumb:hover {
 }
 
 .input-group label {
-  display: block;
+  display: flex;
   margin-bottom: 5px;
   margin-left: 2px;
+  margin-top: -15px;
   color: #036666;
+  align-items: center;
 }
 
 .input-group input {
@@ -128,6 +130,36 @@ textarea::-webkit-scrollbar-thumb:hover {
   border: 2px solid #b4ffd6;
 }
 
+.input-group input[type="radio"] {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid #14746F;
+  background-color: #88D4AB;
+  margin-right: 10px;
+  position: relative;
+  outline: none;
+}
+
+.input-group input[type="radio"]:checked {
+  background-color: #14746F;
+  border-color: #14746F;
+}
+
+.input-group span {
+  margin-top: -10px;
+  color: #036666;
+}
+
+.buttons-group {
+  margin: -10px;
+  display: flex;
+  justify-content: flex-end;
+}
+
 .action-btn {
   background-color: #14746F;
   color: #c8f9da;
@@ -136,6 +168,8 @@ textarea::-webkit-scrollbar-thumb:hover {
   border-radius: 4px;
   cursor: pointer;
   font-size: 16px;
+  margin-top: -5px;
+  margin-right: 10px;
 }
 
 .action-btn:hover {
