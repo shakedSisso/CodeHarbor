@@ -98,10 +98,11 @@ class server():
         return len_bytes + response_data_json.encode()
 
     def get_file_content_and_connect_to_room(self, data, user):
-        fileName = data["data"]["file_name"] + ".c"
-        if not FSWrapper.check_if_file_exists("files", fileName):
-            FSWrapper.create_file("files", fileName)
-        file_object = FSWrapper.open_file("files", fileName, "r")
+        fileName = data["data"]["file_name"]
+        fileLocation = "files/"+ data["data"]["location"]
+        if not FSWrapper.check_if_file_exists(fileLocation, fileName):
+            FSWrapper.create_file(fileLocation, fileName)
+        file_object = FSWrapper.open_file(fileLocation, fileName, "r")
         file_content = FSWrapper.read_file_content(file_object)
         file_object.close()
         for room in self.rooms:  # checking is there is an open room for the file
@@ -112,7 +113,7 @@ class server():
             room[0].add_user(user)
             user.connect_to_room(room[0])
         except IndexError:
-            self.rooms.append(Room("files", fileName))
+            self.rooms.append(Room(fileLocation, fileName))
             self.rooms[0].add_user(user)
             user.connect_to_room(self.rooms[0])
         return {"data": file_content}
@@ -124,7 +125,7 @@ class server():
         return None
         
     def create_file(self, data, user):
-        file_name = data["data"]["file_name"] + ".c"
+        file_name = data["data"]["file_name"]
         file_path = "./files/" + data["data"]["location"]
         MongoDBWrapper.create_new_file_record(file_name, file_path, user.get_user_name())
         FSWrapper.create_file(file_path, file_name)

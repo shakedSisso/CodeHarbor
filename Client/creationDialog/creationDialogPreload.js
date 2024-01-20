@@ -1,6 +1,6 @@
 const { ipcRenderer, remote, contextBridge } = require('electron');
 
 contextBridge.exposeInMainWorld('electronAPI', {
-    createNewFile: (fileName) => ipcRenderer.invoke('dialog:createFile', fileName),
+    create: (fileName, isFolder) => ipcRenderer.invoke('dialog:create', fileName, isFolder),
   })
   
