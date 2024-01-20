@@ -158,12 +158,12 @@ function openCreateFileOrFolderDialog() {
             webPreferences: {
             nodeIntegration: true,
             contextIsolation: true,
-            preload: path.join(__dirname, '../fileDialog/fileDialogPreload.js'),
+            preload: path.join(__dirname, '../creationDialog/creationDialogPreload.js'),
             },
             autoHideMenuBar: true,
         });
         // Load an HTML file for the dialog
-        inputDialog.loadFile('fileDialog/fileDialog.html');
+        inputDialog.loadFile('creationDialog/creationDialog.html');
 
         inputDialog.once('ready-to-show', () => {
             inputDialog.show();
