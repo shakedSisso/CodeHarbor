@@ -38,3 +38,9 @@ class MongoDBWrapper:
         data = {"file_name": file_name, "location": location, "owner": owner_name}
         collection = MongoDBWrapper.connect_to_mongo("Files")
         MongoDBWrapper.insert_document(data, collection)
+
+    @staticmethod
+    def create_new_folder_record(folder_name, location, owner_name=""):
+        data = {"folder_name": folder_name, "location": location, "owner": owner_name}
+        collection = MongoDBWrapper.connect_to_mongo("Folders")
+        MongoDBWrapper.insert_document(data, collection)
