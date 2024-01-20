@@ -165,7 +165,7 @@ class server():
             return {"data": {"status": "error"}}
         
     def get_files_and_folders_in_location(self, data, user):
-        location = data["data"]["location"]
+        location = "./files/" + data["data"]["location"]
         try:
             files_collection = MongoDBWrapper.connect_to_mongo("Files")
             files_documents = MongoDBWrapper.find_documents({"location": location}, files_collection)
@@ -175,10 +175,10 @@ class server():
             return {"data": {"status": "error"}}
         files_list = []
         for document in files_documents:
-            files_list.append({"file_name": document["file_name"], "location": document["location"]})
+            files_list.append({"file_name": document.get("file_name", ""), "location": document.get("location", "")})
         folders_list = []
         for document in folders_documents:
-            folders_list.append({"folder_name": document["folder_name"], "location": document["location"]})
+            folders_list.append({"folder_name": document.get("folder_name", ""), "location": document.get("location", "")})
         return {
             "data": {
                 "status": "success",
