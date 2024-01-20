@@ -8,6 +8,7 @@ let mainWindow;
 let locationPath = "";
 let fileName;
 const NEW_FILE_REQUEST = 3;
+const NEW_FOLDER_REQUEST = 6;
 const GET_FILES_AND_FOLDERS_REQUEST = 7;
 
 function dataHandler(jsonObject)
@@ -27,20 +28,35 @@ function dataHandler(jsonObject)
         }
     } else if (jsonObject.code === NEW_FILE_REQUEST) {
         getMain().switchWindow(codes.EDIT);
+    } else if (jsonObject.code === NEW_FOLDER_REQUEST) { 
+        handleGetFilesAndFolders(null, locationPath); //when a user creates a folder, we don't enter that folder
     }
 }
 
-function handleCreateFileRequest(event, file_name)
+function handleCreateRequest(event, name, isFolder)
 {
-    fileName = file_name;
-    const messageData = {
-        data: {
-            file_name: file_name,
-            location: locationPath,
-        },
-    };
+    fileName = name;
+    var code, messageData;
+    if (isFolder) {
+        code = NEW_FOLDER_REQUEST;
+        messageData = {
+            data: {
+                folder_name: name,
+                location: locationPath,
+            },
+        }; 
+    }
+    else {
+        code = NEW_FILE_REQUEST;
+        messageData = {
+            data: {
+                file_name: name,
+                location: locationPath,
+            },
+        }; 
+    }
     const messageDataJson = JSON.stringify(messageData);
-    communicator.sendMessage(messageDataJson, NEW_FILE_REQUEST);
+    communicator.sendMessage(messageDataJson, code);
 }
 
 function handleGetFilesAndFolders(event, location)
@@ -98,7 +114,7 @@ function createWindow() {
         ipcMain.handle('dialog:resetLocation', handleResetLocation);
         ipcMain.handle('dialog:checkLocation', handleCheckLocation);
         ipcMain.handle('dialog:showMenu', ()=>{mainWindow.setMenuBarVisibility(!mainWindow.isMenuBarVisible());})
-        ipcMain.handle('dialog:createFile', handleCreateFileRequest);
+        ipcMain.handle('dialog:create', handleCreateRequest);
         ipcMain.handle('dialog:getFilesAndFolders', handleGetFilesAndFolders);
         ipcMain.handle('dialog:switchToEditFile', handleSwitchToEditFile);
     } catch {} //used in case the handlers already exists

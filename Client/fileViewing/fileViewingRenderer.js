@@ -22,6 +22,11 @@ window.electronAPI.getLocation((event, location) => {
 });
 
 window.electronAPI.showFilesAndFolders((event, filesAndFolders) => {
+    if (fileViewingForm.alt.includes(usernameFolder)){ //used when user creates a new folder to show the folder was created
+        deleteAllItems();
+        dynamicallyCreateItem("../images/folder.png", "..");
+    }
+
     for (const file of filesAndFolders.folders){
         dynamicallyCreateItem("../images/folder.png", file);
     }
