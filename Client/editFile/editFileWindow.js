@@ -25,10 +25,10 @@ function handleChangesInMain(event, changes, lineCount) {
 
 function connectToFileRequest()
 {
-    const name = location + "/" + fileName;
     const messageData = {
         data: {
-            file_name: name,
+            file_name: fileName,
+            location: location,
         },
     };
     const messageDataJson = JSON.stringify(messageData);
