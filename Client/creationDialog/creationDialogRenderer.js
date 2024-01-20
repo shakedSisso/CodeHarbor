@@ -21,9 +21,9 @@ okButton.addEventListener('click', () => {
         input += '.c';
       }
     }
+    window.electronAPI.create(input, isFolder);
+    window.close();
   }
-  window.electronAPI.create(input, isFolder);
-  window.close();
 });
 
 cancelButton.addEventListener('click', () => {
