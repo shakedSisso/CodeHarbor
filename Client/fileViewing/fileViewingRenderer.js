@@ -5,13 +5,20 @@ var usernameFolder;
 
 window.addEventListener('DOMContentLoaded', () => {
     window.api.setMenu();
-    window.electronAPI.resetLocation();
+    window.electronAPI.checkLocation();
     fileViewingForm.addEventListener('click', handleImageClick);
     fileViewingForm.alt = ""; //used to keep track on the location the user is in
   });
 
 window.electronAPI.getUsername((event, username) => {
     usernameFolder = username + "/";
+});
+
+window.electronAPI.getLocation((event, location) => {
+    fileViewingForm.alt = location + "/";
+    //function is called if location isn't empty so there should be a `..` folder instead of the original folder/s
+    deleteAllItems();
+    dynamicallyCreateItem("../images/folder.png", "..");
 });
 
 window.electronAPI.showFilesAndFolders((event, filesAndFolders) => {

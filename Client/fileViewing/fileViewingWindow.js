@@ -25,6 +25,8 @@ function dataHandler(jsonObject)
                 buttons: ['OK']
             });
         }
+    } else if (jsonObject.code === NEW_FILE_REQUEST) {
+        getMain().switchWindow(codes.EDIT);
     }
 }
 
@@ -43,7 +45,9 @@ function handleCreateFileRequest(event, file_name)
 
 function handleGetFilesAndFolders(event, location)
 {
-    locationPath = location.substring(0, location.lastIndexOf("/"));
+    if (location != locationPath) {
+        locationPath = location.substring(0, location.lastIndexOf("/"));
+    }
     const messageData = {
         data: {
             location: locationPath
@@ -59,9 +63,18 @@ function handleSwitchToEditFile(event, name)
     getMain().switchWindow(codes.EDIT);
 }
 
-function handleResetLocation() {
+function handleResetLocation(event) {
     locationPath = "";
     mainWindow.setMenuBarVisibility(!mainWindow.isMenuBarVisible());
+}
+
+function handleCheckLocation(event){
+    if (locationPath != "") {
+        mainWindow.webContents.send('send-location', locationPath);
+        handleGetFilesAndFolders(event, locationPath);
+    } else {
+        handleResetLocation();
+    }
 }
 
 function createWindow() {
@@ -83,6 +96,7 @@ function createWindow() {
 
     try {
         ipcMain.handle('dialog:resetLocation', handleResetLocation);
+        ipcMain.handle('dialog:checkLocation', handleCheckLocation);
         ipcMain.handle('dialog:showMenu', ()=>{mainWindow.setMenuBarVisibility(!mainWindow.isMenuBarVisible());})
         ipcMain.handle('dialog:createFile', handleCreateFileRequest);
         ipcMain.handle('dialog:getFilesAndFolders', handleGetFilesAndFolders);
