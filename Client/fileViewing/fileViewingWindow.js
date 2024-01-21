@@ -13,9 +13,9 @@ const GET_FILES_AND_FOLDERS_REQUEST = 7;
 
 function dataHandler(jsonObject)
 {
+    data = jsonObject.data;
     if (jsonObject.code === GET_FILES_AND_FOLDERS_REQUEST)
     {
-        data = jsonObject.data;
         if (data.status === "success"){
             mainWindow.webContents.send('show-files-and-folders', data);
         } else {
@@ -27,9 +27,27 @@ function dataHandler(jsonObject)
             });
         }
     } else if (jsonObject.code === NEW_FILE_REQUEST) {
-        getMain().switchWindow(codes.EDIT);
+        if (data.status === "success")
+            getMain().switchWindow(codes.EDIT);
+        else {
+            dialog.showMessageBox({
+                type: 'error',
+                title: 'Error',
+                message: "This file name is already taken by another file in this location",
+                buttons: ['OK']
+            });
+        }
     } else if (jsonObject.code === NEW_FOLDER_REQUEST) { 
-        handleGetFilesAndFolders(null, locationPath); //when a user creates a folder, we don't enter that folder
+        if (data.status === "success")
+            handleGetFilesAndFolders(null, locationPath); //when a user creates a folder, we don't enter that folder
+        else {
+            dialog.showMessageBox({
+                type: 'error',
+                title: 'Error',
+                message: "This folder name is already taken by another folder in this location",
+                buttons: ['OK']
+            });
+        }
     }
 }
 
