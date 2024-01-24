@@ -8,6 +8,7 @@ const codes = require('../windowCodes.js');
 let mainWindow;
 const FILE_REQUEST = 1;
 const UPDATE_REQUEST = 2;
+const DISCONNECT_FROM_FILE_REQUEST = 8;
 var fileName = "", newFile, location = "";
 
 function handleChangesInMain(event, changes, lineCount) {
@@ -33,6 +34,15 @@ function connectToFileRequest()
     };
     const messageDataJson = JSON.stringify(messageData);
     communicator.sendMessage(messageDataJson, FILE_REQUEST);
+}
+
+function disconnectFromFile()
+{
+    const messageData = {
+        data: {}
+    };
+    const messageDataJson = JSON.stringify(messageData);
+    communicator.sendMessage(messageDataJson, DISCONNECT_FROM_FILE_REQUEST)
 }
 
 function dataHandler(jsonObject)
@@ -83,6 +93,7 @@ function createWindow(locationPath, name) {
                     {
                     label: 'Exit File',
                     click: () => {
+                        disconnectFromFile();
                         getMain().switchWindow(codes.FILE_VIEW);
                         },
                     },
