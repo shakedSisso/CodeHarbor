@@ -33,7 +33,8 @@ class server():
             RequestCodes.SIGN_UP.value: self.sign_up_user,
             RequestCodes.LOGIN.value: self.login_user,
             RequestCodes.CREATE_FOLDER.value: self.create_folder,
-            RequestCodes.GET_FILES_AND_FOLDERS.value: self.get_files_and_folders_in_location
+            RequestCodes.GET_FILES_AND_FOLDERS.value: self.get_files_and_folders_in_location,
+            RequestCodes.DISCONNECT_FROM_FILE.value: self.disconnect_user_from_file
             }
         
     
@@ -114,8 +115,8 @@ class server():
             user.connect_to_room(room[0])
         except IndexError:
             self.rooms.append(Room(fileLocation, fileName))
-            self.rooms[0].add_user(user)
-            user.connect_to_room(self.rooms[0])
+            self.rooms[-1].add_user(user)
+            user.connect_to_room(self.rooms[-1])
         return {"data": file_content}
     
     def update_file_changes(self, data, user):
@@ -134,7 +135,8 @@ class server():
             FSWrapper.create_file(file_path, file_name)
         except Exception:
             return {"data": {"status": "error"}}
-        return self.get_file_content_and_connect_to_room(data, user)
+        self.get_file_content_and_connect_to_room(data, user)
+        return {"data": {"status": "success"}}
     
     def create_folder(self, data, user):
         folder_name = data["data"]["folder_name"]
@@ -193,6 +195,12 @@ class server():
                 "folders": folders_list
             }
         }
+    
+    def disconnect_user_from_file(self, data, user):
+        user_room = user.get_room()
+        user_room.remove_user(user)
+        user.connect_to_room(None)
+        return None
 
 
 
