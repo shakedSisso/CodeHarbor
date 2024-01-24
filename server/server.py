@@ -33,7 +33,8 @@ class server():
             RequestCodes.SIGN_UP.value: self.sign_up_user,
             RequestCodes.LOGIN.value: self.login_user,
             RequestCodes.CREATE_FOLDER.value: self.create_folder,
-            RequestCodes.GET_FILES_AND_FOLDERS.value: self.get_files_and_folders_in_location
+            RequestCodes.GET_FILES_AND_FOLDERS.value: self.get_files_and_folders_in_location,
+            RequestCodes.DISCONNECT_FROM_FILE.value: self.disconnect_user_from_file
             }
         
     
@@ -114,8 +115,8 @@ class server():
             user.connect_to_room(room[0])
         except IndexError:
             self.rooms.append(Room(fileLocation, fileName))
-            self.rooms[0].add_user(user)
-            user.connect_to_room(self.rooms[0])
+            self.rooms[-1].add_user(user)
+            user.connect_to_room(self.rooms[-1])
         return {"data": file_content}
     
     def update_file_changes(self, data, user):
@@ -127,13 +128,21 @@ class server():
     def create_file(self, data, user):
         file_name = data["data"]["file_name"]
         file_path = "./files/" + data["data"]["location"]
-        MongoDBWrapper.create_new_file_record(file_name, file_path, user.get_user_name())
-        FSWrapper.create_file(file_path, file_name)
-        return self.get_file_content_and_connect_to_room(data, user)
+        if FSWrapper.check_if_file_exists(file_path, file_name):
+            return {"data": {"status": "error"}}
+        try:
+            MongoDBWrapper.create_new_file_record(file_name, file_path, user.get_user_name())
+            FSWrapper.create_file(file_path, file_name)
+        except Exception:
+            return {"data": {"status": "error"}}
+        self.get_file_content_and_connect_to_room(data, user)
+        return {"data": {"status": "success"}}
     
     def create_folder(self, data, user):
         folder_name = data["data"]["folder_name"]
         folder_path = "./files/" + data["data"]["location"]
+        if FSWrapper.check_if_folder_exists(folder_path, folder_name):
+            return {"data": {"status": "error"}}
         try:
             MongoDBWrapper.create_new_folder_record(folder_name, folder_path, user.get_user_name())
             FSWrapper.create_folder(folder_path, folder_name)
@@ -165,20 +174,20 @@ class server():
             return {"data": {"status": "error"}}
         
     def get_files_and_folders_in_location(self, data, user):
-        location = data["data"]["location"]
+        location = "./files/" + data["data"]["location"]
         try:
             files_collection = MongoDBWrapper.connect_to_mongo("Files")
             files_documents = MongoDBWrapper.find_documents({"location": location}, files_collection)
             folders_collection = MongoDBWrapper.connect_to_mongo("Folders")
             folders_documents = MongoDBWrapper.find_documents({"location": location}, folders_collection)
         except Exception:
-            return {"data": {"status": "error"}}
+            return {"data": {"status": "error"}} 
         files_list = []
         for document in files_documents:
-            files_list.append({"file_name": document["file_name"], "location": document["location"]})
+            files_list.append({"file_name": document.get("file_name", ""), "location": document.get("location", "")})
         folders_list = []
         for document in folders_documents:
-            folders_list.append({"folder_name": document["folder_name"], "location": document["location"]})
+            folders_list.append({"folder_name": document.get("folder_name", ""), "location": document.get("location", "")})
         return {
             "data": {
                 "status": "success",
@@ -186,6 +195,12 @@ class server():
                 "folders": folders_list
             }
         }
+    
+    def disconnect_user_from_file(self, data, user):
+        user_room = user.get_room()
+        user_room.remove_user(user)
+        user.connect_to_room(None)
+        return None
 
 
 

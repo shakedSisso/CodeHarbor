@@ -27,11 +27,11 @@ window.electronAPI.showFilesAndFolders((event, filesAndFolders) => {
         dynamicallyCreateItem("../images/folder.png", "..");
     }
 
-    for (const file of filesAndFolders.folders){
-        dynamicallyCreateItem("../images/folder.png", file);
+    for (const folder of filesAndFolders.folders){
+        dynamicallyCreateItem("../images/folder.png", folder.folder_name);
     }
     for (const file of filesAndFolders.files){
-        dynamicallyCreateItem("../images/file.png", file);
+        dynamicallyCreateItem("../images/file.png", file.file_name);
     }
 });
 

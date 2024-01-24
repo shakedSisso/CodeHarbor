@@ -8,3 +8,4 @@ class RequestCodes(Enum):
     LOGIN = 5
     CREATE_FOLDER = 6
     GET_FILES_AND_FOLDERS = 7
+    DISCONNECT_FROM_FILE = 8
