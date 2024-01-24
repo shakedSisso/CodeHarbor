@@ -44,3 +44,15 @@ class MongoDBWrapper:
         data = {"folder_name": folder_name, "location": location, "owner": owner_name}
         collection = MongoDBWrapper.connect_to_mongo("Folders")
         MongoDBWrapper.insert_document(data, collection)
+
+    @staticmethod
+    def create_share_code(code, shareId, is_folder):
+        data = {"code": code, "shareId": shareId, "is_folder": is_folder}
+        collection = MongoDBWrapper.connect_to_mongo("Share Codes")
+        MongoDBWrapper.insert_document(data, collection)
+
+    @staticmethod
+    def create_a_share(userId, shareCode, is_folder):
+        data = {"userId": userId, "shareCode": shareCode, "is_folder": is_folder}
+        collection = MongoDBWrapper.connect_to_mongo("Shares")
+        MongoDBWrapper.insert_document(data, collection)
