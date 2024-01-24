@@ -8,6 +8,7 @@ from user import User
 from room import Room
 from codes import RequestCodes
 from auth import Auth
+import secrets
 
 MAX_DEFAULT_CONNECTION_AMOUNT = 20
 HEADER_LENGTH = 5
@@ -202,6 +203,10 @@ class server():
         user.connect_to_room(None)
         return None
 
+
+
+    def generate_share_code():
+	    return secrets.token_urlsafe(8)
 
 
 def main():
