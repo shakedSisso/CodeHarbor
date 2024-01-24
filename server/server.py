@@ -35,7 +35,8 @@ class server():
             RequestCodes.LOGIN.value: self.login_user,
             RequestCodes.CREATE_FOLDER.value: self.create_folder,
             RequestCodes.GET_FILES_AND_FOLDERS.value: self.get_files_and_folders_in_location,
-            RequestCodes.DISCONNECT_FROM_FILE.value: self.disconnect_user_from_file
+            RequestCodes.DISCONNECT_FROM_FILE.value: self.disconnect_user_from_file,
+            RequestCodes.CREATE_SHARE_CODE.value: self.create_share_code_for_file,
             }
         
     
@@ -203,6 +204,33 @@ class server():
         user.connect_to_room(None)
         return None
 
+    def create_share_code_for_file(self, data, user):
+        try:
+            if data["is_folder"]:
+                collection = MongoDBWrapper.connect_to_mongo("Folders")
+                document = MongoDBWrapper.find_document({"folder_name": data["name"]}, collection)
+            else:
+                collection = MongoDBWrapper.connect_to_mongo("Files")
+                document = MongoDBWrapper.find_document({"file_name": data["name"]}, collection)
+
+            if document is None:  # If file doesn't have a record in the database
+                return {"data": {"status": "error"}}
+
+            if document.get("owner") != user.get_user_name():  # If the owner of the file is not the same as the requesting user
+                return {"data": {"status": "error"}}
+
+            objectId = document.get("_id")
+
+            share_codes_collection = MongoDBWrapper.connect_to_mongo("Share Codes")
+            code_document = MongoDBWrapper.find_document({"shareId": objectId}, share_codes_collection)
+
+            if code_document is None:
+                code = generate_share_code()
+                MongoDBWrapper.create_share_code(code, objectId, data["is_folder"])
+                return {"data": {"status": "success", "shareCode": code}}
+            return {"data": {"status": "error"}}
+        except Exception:
+            return {"data": {"status": "error"}}
 
 
     def generate_share_code():
