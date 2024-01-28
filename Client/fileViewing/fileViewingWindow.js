@@ -10,6 +10,7 @@ let fileName;
 const NEW_FILE_REQUEST = 3;
 const NEW_FOLDER_REQUEST = 6;
 const GET_FILES_AND_FOLDERS_REQUEST = 7;
+const GET_SHARE_CODE = 9;
 
 function dataHandler(jsonObject)
 {
@@ -45,6 +46,29 @@ function dataHandler(jsonObject)
                 type: 'error',
                 title: 'Error',
                 message: "This folder name is already taken by another folder in this location",
+                buttons: ['OK']
+            });
+        }
+    }
+    else if (jsonObject.code === GET_SHARE_CODE)
+    {
+        if(data.status === "success")
+        {
+            dialog.showMessageBox(
+                {
+                    type: 'info',
+                    title: 'Shared successfully',
+                    message: `Your share code: ${data.shareCode}`,
+                    buttons: ['OK']
+                }
+            )
+        }
+        else
+        {
+            dialog.showMessageBox({
+                type: 'error',
+                title: 'Error',
+                message: "There was an error while trying to create a share code for this object.\nPlease try again later.",
                 buttons: ['OK']
             });
         }
@@ -111,6 +135,19 @@ function handleCheckLocation(event){
     }
 }
 
+function handleGetShareCode(event, objectName, location, isFolder)
+{
+    const messageData = {
+        data: {
+            name: objectName,
+            is_folder: isFolder,
+            location: location
+        },
+    };
+    const messageDataJson = JSON.stringify(messageData);
+    communicator.sendMessage(messageDataJson, GET_SHARE_CODE);
+}
+
 function createWindow() {
     mainWindow = new BrowserWindow({
         width: 800,
@@ -135,6 +172,7 @@ function createWindow() {
         ipcMain.handle('dialog:create', handleCreateRequest);
         ipcMain.handle('dialog:getFilesAndFolders', handleGetFilesAndFolders);
         ipcMain.handle('dialog:switchToEditFile', handleSwitchToEditFile);
+        ipcMain.handle('dialog:getShareCode', handleGetShareCode);
     } catch {} //used in case the handlers already exists
 
     
