@@ -207,12 +207,13 @@ class server():
 
     def create_share_code_for_file(self, data, user):
         try:
+            location = "./files/" + data["location"]
             if data["is_folder"]:
                 collection = MongoDBWrapper.connect_to_mongo("Folders")
-                document = MongoDBWrapper.find_document({"folder_name": data["name"]}, collection)
+                document = MongoDBWrapper.find_document({"folder_name": data["name"], "location": location}, collection)
             else:
                 collection = MongoDBWrapper.connect_to_mongo("Files")
-                document = MongoDBWrapper.find_document({"file_name": data["name"]}, collection)
+                document = MongoDBWrapper.find_document({"file_name": data["name"], "location": location}, collection)
 
             if document is None:  # If file doesn't have a record in the database
                 return {"data": {"status": "error"}}
@@ -245,12 +246,13 @@ class server():
         user_share = MongoDBWrapper.find_document({"userId": user_id}, shares_collection)
         if user_share is not None:
             return {"data": {"status": "error", "message": "This share already exists"}}
+        location = "./files/" + data["location"]
         if data["is_folder"]:
             collection = MongoDBWrapper.connect_to_mongo("Folders")
-            document = MongoDBWrapper.find_document({"folder_name": data["name"]}, collection)
+            document = MongoDBWrapper.find_document({"folder_name": data["name"], "location": location}, collection)
         else:
             collection = MongoDBWrapper.connect_to_mongo("Files")
-            document = MongoDBWrapper.find_document({"file_name": data["name"]}, collection)
+            document = MongoDBWrapper.find_document({"file_name": data["name"], "location": location}, collection)
         objectId = document.get("_id")
         share_codes_collection = MongoDBWrapper.connect_to_mongo("Share Codes")
         code_document = MongoDBWrapper.find_document({"code": data["share_code"]}, share_codes_collection)
