@@ -1,4 +1,5 @@
 dynamicallyCreateItem("../images/folder.png", "Owned");
+dynamicallyCreateItem("../images/folder.png", "Shared");
 const fileViewingForm = document.getElementById('fileViewingForm');
 
 var usernameFolder;
@@ -87,6 +88,18 @@ function handleImageClick(event) {
             {
                 if (name != "Owned/") 
                     fileViewingForm.alt = fileViewingForm.alt + name;
+                else if (name.startsWith("Shared/"))
+                {
+                    if(name === "Shared/")
+                    {
+                        fileViewingForm.alt = name;
+                    }
+                    else
+                    {
+                        fileViewingForm.alt = fileViewingForm.alt + name;
+                    }
+                    window.electronAPI.getSharedFilesAndFolders(fileViewingForm.alt);
+                }
                 else 
                 {
                     window.electronAPI.showMenu();
@@ -97,7 +110,15 @@ function handleImageClick(event) {
         }
         else 
         {
-            window.electronAPI.switchToEditFile(name);
+            if(name.startsWith("Shared/"))
+            {
+                window.electronAPI.switchToSharedEditFile(name);
+            }
+            else
+            {
+                window.electronAPI.switchToEditFile(name);
+            }
+            
         }
     }
 }
