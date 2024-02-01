@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="../styles.css">
+  <link href='http://fonts.googleapis.com/css?family=Ubuntu&subset=cyrillic,latin' rel='stylesheet' type='text/css' />
+  <title>Add Shared File Dialog</title>
+</head>
+<body>
+  <div class="form-container">
+    <h2>Add Shared File Dialog</h2>
+    <form>
+      <div class="input-group">
+        <label for="textInput">Object Name:</label>
+        <input type="text" id="objectInput" name="textInput" required>
+      </div>
+
+      <div class="input-group">
+        <label for="textInput">Share Code:</label>
+        <input type="text" id="shareCodeInput" name="textInput" required>
+      </div>
+
+      <div class="input-group">
+        <label><input type="radio" name="radioGroup" id="hFile"><span>file</span></label>
+      </div>
+
+      <div class="input-group">
+        <label>
+          <input type="radio" name="radioGroup" id="folder"><span>folder</span>
+        </label>
+      </div>
+
+      <div class="buttons-group">
+        <button class="action-btn" id="okButton">OK</button>
+        <button class="action-btn" id="cancelButton">Cancel</button>
+      </div>
+    </form>
+  </div>
+
+  <script src="./sharingDialogRenderer.js"></script>
+</body>
+</html>
