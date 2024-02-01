@@ -11,6 +11,8 @@ const NEW_FILE_REQUEST = 3;
 const NEW_FOLDER_REQUEST = 6;
 const GET_FILES_AND_FOLDERS_REQUEST = 7;
 const GET_SHARE_CODE = 9;
+const CONNECT_TO_SHARED_FILE_REQUEST = 10;
+const GET_SHARED_FILES_AND_FOLDERS_REQUEST = 11;
 
 function dataHandler(jsonObject)
 {
@@ -73,6 +75,43 @@ function dataHandler(jsonObject)
             });
         }
     }
+    else if (jsonObject.code === GET_SHARED_FILES_AND_FOLDERS_REQUEST)
+    {
+        if (data.status === "success"){
+            mainWindow.webContents.send('show-files-and-folders', data);
+        } else {
+            dialog.showMessageBox({
+                type: 'error',
+                title: 'Error',
+                message: "Couldn't find the requested folder",
+                buttons: ['OK']
+            });
+        }
+    }
+    else if (jsonObject.code === CONNECT_TO_SHARED_FILE_REQUEST)
+    {
+        if(data.status === "success")
+        {
+            dialog.showMessageBox(
+                {
+                    type: 'info',
+                    title: 'File Shared successfully',
+                    message: 'File shared successfully',
+                    buttons: ['OK']
+                }
+            );
+            handleGetFilesAndFolders(null, locationPath);
+        }
+        else if(data.status === "error")
+        {
+            dialog.showMessageBox({
+                type: 'error',
+                title: 'Error',
+                message: data.message,
+                buttons: ['OK']
+            });
+        }
+    }
 }
 
 function handleCreateRequest(event, name, isFolder)
@@ -101,6 +140,19 @@ function handleCreateRequest(event, name, isFolder)
     communicator.sendMessage(messageDataJson, code);
 }
 
+function handleShareRequest(event, objectName, shareCode, isFolder)
+{
+    const messageData = {
+        data: {
+            name: objectName,
+            share_code: shareCode,
+            is_folder: isFolder
+        },
+    };
+    const messageDataJson = JSON.stringify(messageData);
+    communicator.sendMessage(messageDataJson, CONNECT_TO_SHARED_FILE_REQUEST);
+}
+
 function handleGetFilesAndFolders(event, location)
 {
     if (location != locationPath) {
@@ -118,6 +170,13 @@ function handleGetFilesAndFolders(event, location)
 function handleSwitchToEditFile(event, name)
 {
     fileName = name;
+    getMain().switchWindow(codes.EDIT);
+}
+
+function handleSwitchToSharedEditFile(event, name)
+{
+    fileName = name;
+    locationPath = locationPath.substring(locationPath.indexOf("/") + 1);
     getMain().switchWindow(codes.EDIT);
 }
 
@@ -148,6 +207,20 @@ function handleGetShareCode(event, objectName, location, isFolder)
     communicator.sendMessage(messageDataJson, GET_SHARE_CODE);
 }
 
+function handleGetSharedFilesAndFolders(event, location)
+{
+    if (location != locationPath) {
+        locationPath = location.substring(0, location.lastIndexOf("/"));
+    }
+    const messageData = {
+        data: {
+            location: locationPath
+        },
+    };
+    const messageDataJson = JSON.stringify(messageData);
+    communicator.sendMessage(messageDataJson, GET_SHARED_FILES_AND_FOLDERS_REQUEST);
+}
+
 function createWindow() {
     mainWindow = new BrowserWindow({
         width: 800,
@@ -173,6 +246,9 @@ function createWindow() {
         ipcMain.handle('dialog:getFilesAndFolders', handleGetFilesAndFolders);
         ipcMain.handle('dialog:switchToEditFile', handleSwitchToEditFile);
         ipcMain.handle('dialog:getShareCode', handleGetShareCode);
+        ipcMain.handle('dialog:getSharedFilesAndFolders', handleGetSharedFilesAndFolders);
+        ipcMain.handle('dialog:switchToSharedEditFile', handleSwitchToSharedEditFile);
+        ipcMain.handle('dialog:share', handleShareRequest);
     } catch {} //used in case the handlers already exists
 
     
@@ -187,6 +263,12 @@ function createWindow() {
                     openCreateFileOrFolderDialog();
                     },
                 },
+                {
+                    label: 'Add Shared File',
+                    click: () => {
+                        openAddSharedFileDialog();
+                    },
+                }
             ],
             },
         ];
@@ -204,6 +286,31 @@ function deleteWindow()
         mainWindow.close();
         mainWindow = null;
     }
+}
+
+function openAddSharedFileDialog()
+{
+    const inputDialog = new BrowserWindow({
+        width: 525,
+        height: 400,
+        show: false,
+        webPreferences: {
+        nodeIntegration: true,
+        contextIsolation: true,
+        preload: path.join(__dirname, '../sharingDialog/sharingDialogPreload.js'),
+        },
+        autoHideMenuBar: true,
+    });
+    // Load an HTML file for the dialog
+    inputDialog.loadFile('sharingDialog/sharingDialog.html');
+
+    inputDialog.once('ready-to-show', () => {
+        inputDialog.show();
+    });
+
+    inputDialog.on('closed', () => {
+        // Handle the closed event if needed
+    });
 }
 
 function openCreateFileOrFolderDialog() {
