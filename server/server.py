@@ -37,7 +37,8 @@ class server():
             RequestCodes.GET_FILES_AND_FOLDERS.value: self.get_files_and_folders_in_location,
             RequestCodes.DISCONNECT_FROM_FILE.value: self.disconnect_user_from_file,
             RequestCodes.CREATE_SHARE_CODE.value: self.create_share_code_for_file,
-            RequestCodes.CONNECT_TO_SHARED_FILE.value: self.connect_to_shared_file
+            RequestCodes.CONNECT_TO_SHARED_FILE.value: self.connect_to_shared_file,
+            RequestCodes.GET_SHARED_FILES_AND_FOLDERS.value: self.get_shared_files_and_folders
             }
         
     
@@ -208,12 +209,12 @@ class server():
     def create_share_code_for_file(self, data, user):
         try:
             location = "./files/" + data["location"]
-            if data["is_folder"]:
+            if data["data"]["is_folder"]:
                 collection = MongoDBWrapper.connect_to_mongo("Folders")
-                document = MongoDBWrapper.find_document({"folder_name": data["name"], "location": location}, collection)
+                document = MongoDBWrapper.find_document({"folder_name": data["data"]["name"], "location": location}, collection)
             else:
                 collection = MongoDBWrapper.connect_to_mongo("Files")
-                document = MongoDBWrapper.find_document({"file_name": data["name"], "location": location}, collection)
+                document = MongoDBWrapper.find_document({"file_name": data["data"]["name"], "location": location}, collection)
 
             if document is None:  # If file doesn't have a record in the database
                 return {"data": {"status": "error"}}
@@ -236,8 +237,8 @@ class server():
 
 
     def generate_share_code():
-	    return secrets.token_urlsafe(8)
-
+        return secrets.token_urlsafe(8)
+    
     def connect_to_shared_file(self, data, user):
         user_collection = MongoDBWrapper.connect_to_mongo("Users")
         user_document =  MongoDBWrapper.find_document({"username": user.get_user_name()}, user_collection)
@@ -246,22 +247,45 @@ class server():
         user_share = MongoDBWrapper.find_document({"userId": user_id}, shares_collection)
         if user_share is not None:
             return {"data": {"status": "error", "message": "This share already exists"}}
-        location = "./files/" + data["location"]
-        if data["is_folder"]:
+        location = "./files/" + data["data"]["location"]
+        if data["data"]["is_folder"]:
             collection = MongoDBWrapper.connect_to_mongo("Folders")
-            document = MongoDBWrapper.find_document({"folder_name": data["name"], "location": location}, collection)
+            document = MongoDBWrapper.find_document({"folder_name": data["data"]["name"], "location": location}, collection)
         else:
             collection = MongoDBWrapper.connect_to_mongo("Files")
-            document = MongoDBWrapper.find_document({"file_name": data["name"], "location": location}, collection)
+            document = MongoDBWrapper.find_document({"file_name": data["data"]["name"], "location": location}, collection)
         objectId = document.get("_id")
         share_codes_collection = MongoDBWrapper.connect_to_mongo("Share Codes")
-        code_document = MongoDBWrapper.find_document({"code": data["share_code"]}, share_codes_collection)
+        code_document = MongoDBWrapper.find_document({"code": data["data"]["share_code"]}, share_codes_collection)
         if code_document is None:
             return {"data": {"status": "error", "message": "This share code doesn't exist"}}
         if code_document.get("shareId") != objectId:
             return {"data": {"status": "error", "message": "This share code doesn't match the file"}}
-        MongoDBWrapper.create_a_share(user_id, data["share_code"], data["is_folder"])
+        MongoDBWrapper.create_a_share(user_id, data["data"]["share_code"], data["data"]["is_folder"])
         return {"data": {"status": "success"}}
+    
+    def get_shared_files_and_folders(self, data, user):
+        shares_collection = MongoDBWrapper.connect_to_mongo("Shares")
+        share_codes_collection = MongoDBWrapper.connect_to_mongo("Share Codes")
+        user_collection = MongoDBWrapper.connect_to_mongo("Users")
+        files_collection = MongoDBWrapper.connect_to_mongo("Files")
+        folders_collection = MongoDBWrapper.connect_to_mongo("Folders")
+        user_document =  MongoDBWrapper.find_document({"username": user.get_user_name()}, user_collection)
+        user_id = user_document.get("_id")
+        files_documents = []
+        folders_documents = []
+        if data["data"]["location"] is "Shared/":
+            user_shares = MongoDBWrapper.find_documents({"userId": user_id}, shares_collection)
+            for share in user_shares:
+                share_document = MongoDBWrapper.find_document({"code": share.get("shareCode")}, share_codes_collection)
+                if share_document.get("is_folder"):
+                    folder_document = MongoDBWrapper.find_document({"_id": share_document.get("shareId")}, folders_collection)
+                    folders_documents.append(folder_document)
+                else:
+                    file_document = MongoDBWrapper.find_document({"_id": share_document.get("shareId")}, files_collection)
+                    files_documents.append(file_document)
+            
+            
 
 def main():
     main_server = server()
