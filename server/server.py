@@ -113,7 +113,7 @@ class server():
         for room in self.rooms:  # checking is there is an open room for the file
             if room.get_file_name() == fileName:
                 room.add_user(user)
-        room = [room for room in self.rooms if room.get_file_name() == fileName]
+        room = [room for room in self.rooms if room.get_file_name() == fileName and room.get_file_path() == fileLocation]
         try:
             room[0].add_user(user)
             user.connect_to_room(room[0])
@@ -208,7 +208,9 @@ class server():
 
     def create_share_code_for_file(self, data, user):
         try:
-            location = "./files/" + data["location"]
+            location = "./files/" + data["data"]["location"]
+            if location[-1] == '/':
+                location = location[:-1]
             if data["data"]["is_folder"]:
                 collection = MongoDBWrapper.connect_to_mongo("Folders")
                 document = MongoDBWrapper.find_document({"folder_name": data["data"]["name"], "location": location}, collection)
@@ -228,15 +230,15 @@ class server():
             code_document = MongoDBWrapper.find_document({"shareId": objectId}, share_codes_collection)
 
             if code_document is None:
-                code = generate_share_code()
-                MongoDBWrapper.create_share_code(code, objectId, data["is_folder"])
+                code = self.generate_share_code()
+                MongoDBWrapper.create_share_code(code, objectId, data["data"]["is_folder"])
                 return {"data": {"status": "success", "shareCode": code}}
             return {"data": {"status": "error"}}
-        except Exception:
+        except Exception as e:
             return {"data": {"status": "error"}}
 
 
-    def generate_share_code():
+    def generate_share_code(self):
         return secrets.token_urlsafe(8)
     
     def connect_to_shared_file(self, data, user):
@@ -247,22 +249,23 @@ class server():
         user_share = MongoDBWrapper.find_document({"userId": user_id}, shares_collection)
         if user_share is not None:
             return {"data": {"status": "error", "message": "This share already exists"}}
-        location = "./files/" + data["data"]["location"]
         if data["data"]["is_folder"]:
             collection = MongoDBWrapper.connect_to_mongo("Folders")
-            document = MongoDBWrapper.find_document({"folder_name": data["data"]["name"], "location": location}, collection)
+            documents = MongoDBWrapper.find_documents({"folder_name": data["data"]["name"]}, collection)
         else:
             collection = MongoDBWrapper.connect_to_mongo("Files")
-            document = MongoDBWrapper.find_document({"file_name": data["data"]["name"], "location": location}, collection)
-        objectId = document.get("_id")
+            documents = MongoDBWrapper.find_documents({"file_name": data["data"]["name"]}, collection)
+        
+        objectIds = [document.get("_id") for document in documents]
         share_codes_collection = MongoDBWrapper.connect_to_mongo("Share Codes")
         code_document = MongoDBWrapper.find_document({"code": data["data"]["share_code"]}, share_codes_collection)
         if code_document is None:
             return {"data": {"status": "error", "message": "This share code doesn't exist"}}
-        if code_document.get("shareId") != objectId:
-            return {"data": {"status": "error", "message": "This share code doesn't match the file"}}
-        MongoDBWrapper.create_a_share(user_id, data["data"]["share_code"], data["data"]["is_folder"])
-        return {"data": {"status": "success"}}
+        for objectId in objectIds:
+            if code_document.get("shareId") == objectId:
+                MongoDBWrapper.create_a_share(user_id, data["data"]["share_code"], data["data"]["is_folder"])
+                return {"data": {"status": "success"}}
+        return {"data": {"status": "error", "message": "This share code doesn't match the file"}}
     
     def get_shared_files_and_folders(self, data, user):
         shares_collection = MongoDBWrapper.connect_to_mongo("Shares")
@@ -276,7 +279,7 @@ class server():
         folders_documents = []
         top_level_files = []
         top_level_folders = []
-        if data["data"]["location"] is "Shared/":
+        if data["data"]["location"] == "Shared":
             user_shares = MongoDBWrapper.find_documents({"userId": user_id}, shares_collection)
             for share in user_shares:
                 share_document = MongoDBWrapper.find_document({"code": share.get("shareCode")}, share_codes_collection)
@@ -288,10 +291,14 @@ class server():
                     files_documents.append(file_document)
             top_level_files = [file for file in files_documents if not self.is_object_in_folder(file, folders_documents)]
             top_level_folders = [folder for folder in folders_documents if not self.is_object_in_folder(folder, folders_documents)]
+            top_level_files_list = [{"file_name": document.get("file_name", ""), "location": document.get("location", ""), "owner": document.get("owner", "")} for document in top_level_files]
+            top_level_folders_list = [{"folder_name": document.get("folder_name", ""), "location": document.get("location", ""), "owner": document.get("owner", "")} for document in top_level_folders]
             return {
-                "status": "success",
-                "files": top_level_files,
-                "folders": top_level_folders
+                "data": {
+                    "status": "success",
+                    "files": top_level_files_list,
+                    "folders": top_level_folders_list
+                }
             }
         else:
             user_shares = MongoDBWrapper.find_documents({"userId": user_id}, shares_collection)
@@ -306,9 +313,11 @@ class server():
                     if file_document.get("location") == data["data"]["location"]:
                         files_documents.append(file_document)
             return {
-                "status": "success",
-                "files": files_documents,
-                "folders": folders_documents
+                "data": {
+                    "status": "success",
+                    "files": files_documents,
+                    "folders": folders_documents
+                }
             }
             
             
