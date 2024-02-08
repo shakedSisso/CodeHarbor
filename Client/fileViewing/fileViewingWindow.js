@@ -17,7 +17,7 @@ const GET_SHARED_FILES_AND_FOLDERS_REQUEST = 11;
 function dataHandler(jsonObject)
 {
     data = jsonObject.data;
-    if (jsonObject.code === GET_FILES_AND_FOLDERS_REQUEST)
+    if (jsonObject.code === GET_FILES_AND_FOLDERS_REQUEST || jsonObject.code === GET_SHARED_FILES_AND_FOLDERS_REQUEST)
     {
         if (data.status === "success"){
             mainWindow.webContents.send('show-files-and-folders', data);
@@ -71,19 +71,6 @@ function dataHandler(jsonObject)
                 type: 'error',
                 title: 'Error',
                 message: "There was an error while trying to create a share code for this object.\nPlease try again later.",
-                buttons: ['OK']
-            });
-        }
-    }
-    else if (jsonObject.code === GET_SHARED_FILES_AND_FOLDERS_REQUEST)
-    {
-        if (data.status === "success"){
-            mainWindow.webContents.send('show-files-and-folders', data);
-        } else {
-            dialog.showMessageBox({
-                type: 'error',
-                title: 'Error',
-                message: "Couldn't find the requested folder",
                 buttons: ['OK']
             });
         }
@@ -146,7 +133,7 @@ function handleShareRequest(event, objectName, shareCode, isFolder)
         data: {
             name: objectName,
             share_code: shareCode,
-            is_folder: isFolder
+            is_folder: isFolder,
         },
     };
     const messageDataJson = JSON.stringify(messageData);
@@ -173,9 +160,11 @@ function handleSwitchToEditFile(event, name)
     getMain().switchWindow(codes.EDIT);
 }
 
-function handleSwitchToSharedEditFile(event, name)
+function handleSwitchToSharedEditFile(event, name, location)
 {
     fileName = name;
+    locationPath = location;
+    locationPath = locationPath.substring(locationPath.indexOf("/") + 1);
     locationPath = locationPath.substring(locationPath.indexOf("/") + 1);
     getMain().switchWindow(codes.EDIT);
 }
@@ -248,7 +237,7 @@ function createWindow() {
         ipcMain.handle('dialog:getShareCode', handleGetShareCode);
         ipcMain.handle('dialog:getSharedFilesAndFolders', handleGetSharedFilesAndFolders);
         ipcMain.handle('dialog:switchToSharedEditFile', handleSwitchToSharedEditFile);
-        ipcMain.handle('dialog:share', handleShareRequest);
+        ipcMain.handle('dialog:createShare', handleShareRequest);
     } catch {} //used in case the handlers already exists
 
     

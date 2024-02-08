@@ -8,7 +8,7 @@ const folderRadioButton = document.getElementById('folder');
 
 okButton.addEventListener('click', () => {
   var objectName, isFolder, shareCode;
-  const shareCodeRegex = /^[a-zA-Z0-9]{8}$/;
+  const shareCodeRegex = /^[a-zA-Z0-9]{11}$/;
   const fileNameRegex = /\.(c|h)$/;
   if (validateRadioButtons()) {
     objectName = objectField.value;

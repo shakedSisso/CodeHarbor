@@ -29,7 +29,7 @@ window.addEventListener('DOMContentLoaded', () => {
         }
       }
     document.getElementById("shareButtonDiv").addEventListener("click", (event) => {
-        createShareRequest(pressedFile, fileViewingForm.alt), isFolder;
+        createShareRequest(pressedFile, fileViewingForm.alt, isFolder);
     })
   });
 
@@ -51,10 +51,10 @@ window.electronAPI.showFilesAndFolders((event, filesAndFolders) => {
     }
 
     for (const folder of filesAndFolders.folders){
-        dynamicallyCreateItem("../images/folder.png", folder.folder_name);
+        dynamicallyCreateItem("../images/folder.png", folder.folder_name, folder.location);
     }
     for (const file of filesAndFolders.files){
-        dynamicallyCreateItem("../images/file.png", file.file_name);
+        dynamicallyCreateItem("../images/file.png", file.file_name, file.location);
     }
 });
 
@@ -62,11 +62,12 @@ function handleImageClick(event) {
     // Check if the clicked element is an image
     if (event.target.tagName === 'IMG') {
         deleteAllItems();
-        const name = event.target.alt;
+        const name = event.target.title;
 
-        if (fileViewingForm.alt === usernameFolder && name != "Owned/")
+        if ((fileViewingForm.alt === usernameFolder && name != "Owned/") || fileViewingForm.alt === "Shared/")
         {
             dynamicallyCreateItem("../images/folder.png", "Owned");
+            dynamicallyCreateItem("../images/folder.png", "Shared");
         }
         else 
         {
@@ -86,9 +87,8 @@ function handleImageClick(event) {
             }
             else 
             {
-                if (name != "Owned/") 
-                    fileViewingForm.alt = fileViewingForm.alt + name;
-                else if (name.startsWith("Shared/"))
+                
+                if (name.startsWith("Shared/"))
                 {
                     if(name === "Shared/")
                     {
@@ -99,6 +99,11 @@ function handleImageClick(event) {
                         fileViewingForm.alt = fileViewingForm.alt + name;
                     }
                     window.electronAPI.getSharedFilesAndFolders(fileViewingForm.alt);
+                    return;
+                }
+                else if (name != "Owned/") 
+                {
+                    fileViewingForm.alt = fileViewingForm.alt + name;
                 }
                 else 
                 {
@@ -110,9 +115,9 @@ function handleImageClick(event) {
         }
         else 
         {
-            if(name.startsWith("Shared/"))
+            if(fileViewingForm.alt.startsWith("Shared/"))
             {
-                window.electronAPI.switchToSharedEditFile(name);
+                window.electronAPI.switchToSharedEditFile(name, event.target.alt);
             }
             else
             {
@@ -137,7 +142,7 @@ function goBackAFolder(inputString) {
     }
   }
 
-function dynamicallyCreateItem(imageSrc, labelText) {
+function dynamicallyCreateItem(imageSrc, labelText, location) {
     let container = document.createElement('div');
     container.classList.add('file-container');
 
@@ -147,7 +152,8 @@ function dynamicallyCreateItem(imageSrc, labelText) {
     let img = document.createElement('img');
     if (imageSrc === "../images/folder.png")
         labelText += "/";
-    img.alt = labelText;
+    img.title = labelText;
+    img.alt = location;
     img.src = imageSrc;
     img.width = 45;
     img.height = 65;
