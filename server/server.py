@@ -274,6 +274,8 @@ class server():
         user_id = user_document.get("_id")
         files_documents = []
         folders_documents = []
+        top_level_files = []
+        top_level_folders = []
         if data["data"]["location"] is "Shared/":
             user_shares = MongoDBWrapper.find_documents({"userId": user_id}, shares_collection)
             for share in user_shares:
@@ -284,7 +286,44 @@ class server():
                 else:
                     file_document = MongoDBWrapper.find_document({"_id": share_document.get("shareId")}, files_collection)
                     files_documents.append(file_document)
+            top_level_files = [file for file in files_documents if not self.is_object_in_folder(file, folders_documents)]
+            top_level_folders = [folder for folder in folders_documents if not self.is_object_in_folder(folder, folders_documents)]
+            return {
+                "status": "success",
+                "files": top_level_files,
+                "folders": top_level_folders
+            }
+        else:
+            user_shares = MongoDBWrapper.find_documents({"userId": user_id}, shares_collection)
+            for share in user_shares:
+                share_document = MongoDBWrapper.find_document({"code": share.get("shareCode")}, share_codes_collection)
+                if share_document.get("is_folder"):
+                    folder_document = MongoDBWrapper.find_document({"_id": share_document.get("shareId")}, folders_collection)
+                    if folder_document.get("location") == data["data"]["location"]:
+                        folders_documents.append(folder_document)
+                else:
+                    file_document = MongoDBWrapper.find_document({"_id": share_document.get("shareId")}, files_collection)
+                    if file_document.get("location") == data["data"]["location"]:
+                        files_documents.append(file_document)
+            return {
+                "status": "success",
+                "files": files_documents,
+                "folders": folders_documents
+            }
             
+            
+    def is_object_in_folder(self, object, folders):
+        owner = object.get("owner")
+        location = object.get("location")
+        owner_folders = [folder for folder in folders if folder.get("owner") == owner]
+        if owner_folders is None:
+            return False
+        for folder in owner_folders:
+            if folder is object:
+                continue
+            if location == folder.get("location") + "/" + folder.get("folder_name"):
+                return True
+        return False
             
 
 def main():
