@@ -34,7 +34,8 @@ class server():
             RequestCodes.LOGIN.value: self.login_user,
             RequestCodes.CREATE_FOLDER.value: self.create_folder,
             RequestCodes.GET_FILES_AND_FOLDERS.value: self.get_files_and_folders_in_location,
-            RequestCodes.DISCONNECT_FROM_FILE.value: self.disconnect_user_from_file
+            RequestCodes.DISCONNECT_FROM_FILE.value: self.disconnect_user_from_file,
+            RequestCodes.GET_FILES.value: self.get_files
             }
         
     
@@ -98,14 +99,18 @@ class server():
         len_bytes = len(response_data_json).to_bytes(MESSAGE_LEN_FIELD_SIZE, byteorder="big", signed=False)
         return len_bytes + response_data_json.encode()
 
-    def get_file_content_and_connect_to_room(self, data, user):
-        fileName = data["data"]["file_name"]
-        fileLocation = "files/"+ data["data"]["location"]
+    def get_file_content(self, fileName, fileLocation):
         if not FSWrapper.check_if_file_exists(fileLocation, fileName):
             FSWrapper.create_file(fileLocation, fileName)
         file_object = FSWrapper.open_file(fileLocation, fileName, "r")
         file_content = FSWrapper.read_file_content(file_object)
         file_object.close()
+        return file_content
+
+    def get_file_content_and_connect_to_room(self, data, user):
+        fileName = data["data"]["file_name"]
+        fileLocation = "files/"+ data["data"]["location"]
+        file_content = get_file_content(fileName, fileLocation)
         for room in self.rooms:  # checking is there is an open room for the file
             if room.get_file_name() == fileName:
                 room.add_user(user)
@@ -202,7 +207,14 @@ class server():
         user.connect_to_room(None)
         return None
 
-
+    def get_files(self, data, user):
+        data = data["data"]
+        files = {"files":{}}
+        for fileData in data["file_names"]:
+            fileLocation, fileName = os.path.split(fileData)
+            files["files"][fileName] = self.get_file_content(fileName, fileLocation)
+        print(files)
+        return {"data": files}
 
 def main():
     main_server = server()
