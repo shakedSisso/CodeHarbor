@@ -1,6 +1,7 @@
 const { ipcRenderer, remote, contextBridge } = require('electron');
 
 contextBridge.exposeInMainWorld('electronAPI', {
+  requestUsername: () =>ipcRenderer.invoke('dialog:requestUsername'),
   resetLocation: () => ipcRenderer.invoke('dialog:resetLocation'),
   checkLocation: () => ipcRenderer.invoke('dialog:checkLocation'),
   setMenu: (mainFolderName) => ipcRenderer.invoke('dialog:setMenu', mainFolderName),

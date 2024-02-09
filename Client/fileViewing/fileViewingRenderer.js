@@ -10,6 +10,7 @@ var pressedFile;
 var isFolder;
 
 window.addEventListener('DOMContentLoaded', () => {
+    window.electronAPI.requestUsername();
     window.electronAPI.checkLocation();
     fileViewingForm.addEventListener('click', handleImageClick);
     fileViewingForm.alt = ""; //used to keep track on the location the user is in
@@ -72,21 +73,21 @@ function handleImageClick(event) {
         {
             dynamicallyCreateItem("../images/folder.png", "..");
         }
-
+        
         if (name.endsWith('/'))
         {
             if (name === "../")
             {
-                if (fileViewingForm.alt != usernameFolder)
-                    fileViewingForm.alt = goBackAFolder(fileViewingForm.alt);
-                else {
+                if (fileViewingForm.alt == usernameFolder || fileViewingForm.alt == "Shared/"){
                     fileViewingForm.alt = "";
                     window.electronAPI.resetLocation();
+                }
+                else {
+                    fileViewingForm.alt = goBackAFolder(fileViewingForm.alt);
                 }
             }
             else 
             {
-                
                 if (name.startsWith("Shared/"))
                 {
                     if(name === "Shared/")
@@ -102,15 +103,15 @@ function handleImageClick(event) {
                     window.electronAPI.getSharedFilesAndFolders(fileViewingForm.alt);
                     return;
                 }
-                else if (name != "Owned/") 
+                else if (name === "Owned/") 
                 {
-                    fileViewingForm.alt = fileViewingForm.alt + name;
+                    fileViewingForm.alt = usernameFolder;
+                    window.electronAPI.setMenu(name);
+                    window.electronAPI.showMenu();
                 }
                 else 
                 {
-                    window.electronAPI.setMenu(name);
-                    window.electronAPI.showMenu();
-                    fileViewingForm.alt = usernameFolder;
+                    fileViewingForm.alt = fileViewingForm.alt + name;
                 }
             }
             window.electronAPI.getFilesAndFolders(fileViewingForm.alt);

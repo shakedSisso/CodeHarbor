@@ -228,6 +228,7 @@ function createWindow() {
     communicator.setDataHandler(dataHandler);
 
     try {
+        ipcMain.handle('dialog:requestUsername', handleRequestUsername);
         ipcMain.handle('dialog:resetLocation', handleResetLocation);
         ipcMain.handle('dialog:checkLocation', handleCheckLocation);
         ipcMain.handle('dialog:setMenu', handleSetMenu);
@@ -242,6 +243,10 @@ function createWindow() {
     } catch {} //used in case the handlers already exists
 
     return mainWindow;
+}
+
+function handleRequestUsername(event) {
+    mainWindow.webContents.send('send-username', getMain().getUsername());
 }
 
 function handleSetMenu (event, mainFolderName) {
@@ -274,7 +279,6 @@ function handleSetMenu (event, mainFolderName) {
 function setMenu(template) {
     const menuTemplate = Menu.buildFromTemplate(template);
     mainWindow.setMenu(menuTemplate);
-    mainWindow.webContents.send('send-username', getMain().getUsername());
 }
 
 function deleteWindow()
