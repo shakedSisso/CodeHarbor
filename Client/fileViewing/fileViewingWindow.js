@@ -11,7 +11,7 @@ const NEW_FILE_REQUEST = 3;
 const NEW_FOLDER_REQUEST = 6;
 const GET_FILES_AND_FOLDERS_REQUEST = 7;
 const GET_SHARE_CODE = 9;
-const CONNECT_TO_SHARED_FILE_REQUEST = 10;
+const CONNECT_TO_SHARED_OBJECT_REQUEST = 10;
 const GET_SHARED_FILES_AND_FOLDERS_REQUEST = 11;
 
 function dataHandler(jsonObject)
@@ -75,15 +75,15 @@ function dataHandler(jsonObject)
             });
         }
     }
-    else if (jsonObject.code === CONNECT_TO_SHARED_FILE_REQUEST)
+    else if (jsonObject.code === CONNECT_TO_SHARED_OBJECT_REQUEST)
     {
         if(data.status === "success")
         {
             dialog.showMessageBox(
                 {
                     type: 'info',
-                    title: 'File Shared successfully',
-                    message: 'File shared successfully',
+                    title: 'Object Shared successfully',
+                    message: 'Object shared successfully',
                     buttons: ['OK']
                 }
             );
@@ -137,7 +137,7 @@ function handleShareRequest(event, objectName, shareCode, isFolder)
         },
     };
     const messageDataJson = JSON.stringify(messageData);
-    communicator.sendMessage(messageDataJson, CONNECT_TO_SHARED_FILE_REQUEST);
+    communicator.sendMessage(messageDataJson, CONNECT_TO_SHARED_OBJECT_REQUEST);
 }
 
 function handleGetFilesAndFolders(event, location)
@@ -253,7 +253,7 @@ function createWindow() {
                     },
                 },
                 {
-                    label: 'Add Shared File',
+                    label: 'Add Shared File/Folder',
                     click: () => {
                         openAddSharedFileDialog();
                     },
