@@ -198,3 +198,44 @@ textarea::-webkit-scrollbar-thumb:hover {
   font-weight: bold;
   font-style: italic;
 }
+
+.compile-container {
+  margin-bottom: 10px;
+  text-align: left;
+}
+
+.compile-container label {
+  display: flex;
+  line-height: 25px;
+  color: #023939;
+}
+
+.compile-container h4 {
+  margin-top: -10px;
+}
+
+input[type="checkbox"] {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #023939;
+  color: #358F80;
+  cursor: pointer;
+}
+
+input[type="checkbox"]::before {  
+  content: '';
+  display: block;
+  width: 15px;
+  height: 15px;
+  background-color: transparent;
+  border: transparent;
+}
+
+input[type="checkbox"]:checked::before {
+  content: '\2714';
+  color: #023939;
+  font-size: 20px;
+  line-height: 20px;
+  text-align: center;
+}
