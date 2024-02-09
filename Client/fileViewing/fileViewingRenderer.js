@@ -10,7 +10,6 @@ var pressedFile;
 var isFolder;
 
 window.addEventListener('DOMContentLoaded', () => {
-    window.api.setMenu();
     window.electronAPI.checkLocation();
     fileViewingForm.addEventListener('click', handleImageClick);
     fileViewingForm.alt = ""; //used to keep track on the location the user is in
@@ -92,6 +91,8 @@ function handleImageClick(event) {
                 {
                     if(name === "Shared/")
                     {
+                        window.electronAPI.setMenu(name);
+                        window.electronAPI.showMenu();
                         fileViewingForm.alt = name;
                     }
                     else
@@ -107,6 +108,7 @@ function handleImageClick(event) {
                 }
                 else 
                 {
+                    window.electronAPI.setMenu(name);
                     window.electronAPI.showMenu();
                     fileViewingForm.alt = usernameFolder;
                 }

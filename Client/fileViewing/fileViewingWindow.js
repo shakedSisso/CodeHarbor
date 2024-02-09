@@ -230,6 +230,7 @@ function createWindow() {
     try {
         ipcMain.handle('dialog:resetLocation', handleResetLocation);
         ipcMain.handle('dialog:checkLocation', handleCheckLocation);
+        ipcMain.handle('dialog:setMenu', handleSetMenu);
         ipcMain.handle('dialog:showMenu', ()=>{mainWindow.setMenuBarVisibility(!mainWindow.isMenuBarVisible());})
         ipcMain.handle('dialog:create', handleCreateRequest);
         ipcMain.handle('dialog:getFilesAndFolders', handleGetFilesAndFolders);
@@ -240,33 +241,40 @@ function createWindow() {
         ipcMain.handle('dialog:createShare', handleShareRequest);
     } catch {} //used in case the handlers already exists
 
-    
-    ipcMain.on('set-menu-fileViewing', (event, menu) => {
-        const template = [
-            {
-            label: 'File',
-            submenu: [
-                {
-                label: 'Create File/Folder',
-                click: () => {
-                    openCreateFileOrFolderDialog();
-                    },
-                },
-                {
-                    label: 'Add Shared File/Folder',
-                    click: () => {
-                        openAddSharedFileDialog();
-                    },
-                }
-            ],
-            },
-        ];
-        
-        const menuTemplate = Menu.buildFromTemplate(template);
-        mainWindow.setMenu(menuTemplate);
-        mainWindow.webContents.send('send-username', getMain().getUsername());
-    });
     return mainWindow;
+}
+
+function handleSetMenu (event, mainFolderName) {
+    let template = [
+        {
+        label: 'File',
+        submenu: [
+            {
+                label: 'Add Shared File/Folder',
+                click: () => {
+                    openAddSharedFileDialog();
+                },
+            }
+        ],
+        },
+    ];
+    
+    if (mainFolderName === "Owned/")
+    {
+        template[0].submenu.push({
+            label: 'Create File/Folder',
+            click: () => {
+                openCreateFileOrFolderDialog();
+                },
+        });
+    }
+    setMenu(template);
+}
+
+function setMenu(template) {
+    const menuTemplate = Menu.buildFromTemplate(template);
+    mainWindow.setMenu(menuTemplate);
+    mainWindow.webContents.send('send-username', getMain().getUsername());
 }
 
 function deleteWindow()
