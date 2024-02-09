@@ -9,3 +9,4 @@ class RequestCodes(Enum):
     CREATE_FOLDER = 6
     GET_FILES_AND_FOLDERS = 7
     DISCONNECT_FROM_FILE = 8
+    GET_FILES = 12
