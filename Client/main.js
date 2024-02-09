@@ -10,6 +10,7 @@ const codes = require('./windowCodes.js');
 
 let currentWindowCode;
 let username;
+let doesCompilerExists;
 
 function checkGCCInstallation() {
   exec('gcc --version', (error, stdout, stderr) => {
@@ -23,12 +24,12 @@ function checkGCCInstallation() {
       });
 
       win.on('closed', () => {
-        app.quit();
+        doesCompilerExists = false;
       });
     } else {
-      console.log('GCC is installed');
       communicator.connectToServer(() => {
         if (communicator.getIsConnected()){
+            doesCompilerExists = true;
             loginWindow.createWindow();
             currentWindowCode = codes.LOGIN;
         }
@@ -125,9 +126,14 @@ function setUsername(name) {
     username = name;
 }
 
+function getDoesCompilerExists(){
+    return doesCompilerExists;
+}
+
 module.exports = {
     switchWindow,
     closeWindowWhenDisconnected,
     getUsername,
-    setUsername
+    setUsername, 
+    getDoesCompilerExists
 }
