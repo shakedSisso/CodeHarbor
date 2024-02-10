@@ -79,6 +79,8 @@ socket.on('data', (data) => {
             } else {
             }
         } catch (error) {
+            console.log("reached error");
+            console.log(error);
         }
     } else {
     }

@@ -198,3 +198,9 @@ textarea::-webkit-scrollbar-thumb:hover {
   font-weight: bold;
   font-style: italic;
 }
+
+.context-menu {
+  display: none;
+  position: absolute;
+  z-index: 10;
+}
