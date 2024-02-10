@@ -20,6 +20,9 @@ class Room():
     def get_file_name(self):
         return self._file_name
     
+    def get_file_path(self):
+        return self._file_path
+    
     def update_changes(self, changes, amount_of_lines, updating_user):
         with self._file_lock:
             for line_number, new_line in changes.items():
