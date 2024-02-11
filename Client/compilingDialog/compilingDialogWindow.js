@@ -122,7 +122,7 @@ function compileAndRun(fileNames)
 
         const executablePath = `./${executableName}.exe`;
 
-        const argumentsArray = ['arguments_if_any'];
+        const argumentsArray = [];
 
         const child = spawn('cmd', ['/c', `start ${executablePath} ${argumentsArray.join(' ')}`]);
             child.on('close', (code) => {

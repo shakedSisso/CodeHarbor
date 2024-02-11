@@ -64,7 +64,7 @@ function compileAndRun()
 
         const executablePath = `./${exeName}.exe`;
 
-        const argumentsArray = ['arguments_if_any'];
+        const argumentsArray = [];
 
         const child = spawn('cmd', ['/c', `start ${executablePath} ${argumentsArray.join(' ')}`]);
         child.on('close', (code) => {
@@ -113,7 +113,6 @@ function createWindow(locationPath, name) {
         autoHideMenuBar: false,
     })
     mainWindow.loadFile('editFile/editFile.html');
-    mainWindow.openDevTools();
     mainWindow.on('closed', () => {
         deleteLocalFile();
       });
