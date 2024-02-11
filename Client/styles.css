@@ -239,3 +239,9 @@ input[type="checkbox"]:checked::before {
   line-height: 20px;
   text-align: center;
 }
+
+.context-menu {
+  display: none;
+  position: absolute;
+  z-index: 10;
+}
