@@ -44,6 +44,7 @@ var currentIndex = 0;
 
   window.addEventListener('DOMContentLoaded', () => {
     window.api.setMenu();
+    window.electronAPI.getFile();
   });
 
   window.electronAPI.getContentFile((event, value) => {

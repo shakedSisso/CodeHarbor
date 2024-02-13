@@ -76,9 +76,9 @@ function createWindow(locationPath, name) {
       });
 
     communicator.setDataHandler(dataHandler);
-    connectToFileRequest();
 
     try {
+        ipcMain.handle('dialog:getFile', connectToFileRequest);
         ipcMain.handle('dialog:sendChanges', handleChangesInMain);
     } catch {} //used in case the handlers already exists
 

@@ -8,10 +8,12 @@ var contextMenuActive = "block";
 var menu;
 var pressedFile;
 var isFolder;
+var menuIsSet;
 
 window.addEventListener('DOMContentLoaded', () => {
     window.electronAPI.requestUsername();
     window.electronAPI.checkLocation();
+    menuIsSet = false;
     fileViewingForm.addEventListener('click', handleImageClick);
     fileViewingForm.alt = ""; //used to keep track on the location the user is in
     menu = document.querySelector(".context-menu");
@@ -56,6 +58,15 @@ window.electronAPI.showFilesAndFolders((event, filesAndFolders) => {
     for (const file of filesAndFolders.files){
         dynamicallyCreateItem("../images/file.png", file.file_name, file.location);
     }
+    
+    //this check is used to set the menu when a user exits a file
+    if (fileViewingForm.alt != "" && !menuIsSet)
+    {
+      if (fileViewingForm.alt.includes(usernameFolder))
+        window.electronAPI.setMenu("Owned/");
+      else
+        window.electronAPI.setMenu("Shared/");
+    }
 });
 
 function handleImageClick(event) {
@@ -93,6 +104,7 @@ function handleImageClick(event) {
                     if(name === "Shared/")
                     {
                         window.electronAPI.setMenu(name);
+                        menuIsSet = true;
                         window.electronAPI.showMenu();
                         fileViewingForm.alt = name;
                     }
@@ -107,6 +119,7 @@ function handleImageClick(event) {
                 {
                     fileViewingForm.alt = usernameFolder;
                     window.electronAPI.setMenu(name);
+                    menuIsSet = true;
                     window.electronAPI.showMenu();
                 }
                 else 
