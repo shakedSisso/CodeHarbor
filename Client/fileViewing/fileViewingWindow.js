@@ -3,10 +3,12 @@ const path = require('path');
 const communicator = require("../communicator.js");
 const getMain = () => require('../main.js');
 const codes = require('../windowCodes.js');
+const compilingDialog = require('../compilingDialog/compilingDialogWindow.js');
 
 let mainWindow;
 let locationPath = "";
 let fileName;
+let files = [];
 const NEW_FILE_REQUEST = 3;
 const NEW_FOLDER_REQUEST = 6;
 const GET_FILES_AND_FOLDERS_REQUEST = 7;
@@ -20,6 +22,9 @@ function dataHandler(jsonObject)
     if (jsonObject.code === GET_FILES_AND_FOLDERS_REQUEST || jsonObject.code === GET_SHARED_FILES_AND_FOLDERS_REQUEST)
     {
         if (data.status === "success"){
+            for (const fileData of data.files) {
+                files.push(fileData.location + "/" + fileData.file_name);
+            }
             mainWindow.webContents.send('show-files-and-folders', data);
         } else {
             dialog.showMessageBox({

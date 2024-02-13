@@ -1,8 +1,10 @@
-const { BrowserWindow , ipcMain, Menu} = require('electron');
+const { BrowserWindow , ipcMain, Menu, dialog} = require('electron');
+const { exec, spawn } = require('child_process');
+const fs = require('fs');
 const path = require('path');
+
 const getMain = () => require('../main.js');
 const communicator = require("../communicator.js");
-const fs = require('fs');
 const codes = require('../windowCodes.js');
 
 let mainWindow;
@@ -34,6 +36,46 @@ function connectToFileRequest()
     };
     const messageDataJson = JSON.stringify(messageData);
     communicator.sendMessage(messageDataJson, FILE_REQUEST);
+}
+
+function compileAndRun() 
+{
+    const exeName = fileName.substring(fileName, fileName.lastIndexOf('.'));
+    const compileCommand = `gcc -o ${exeName}.exe ${fileName}`;
+    exec(compileCommand, (error, stdout, stderr) => {
+        if (error) {
+            dialog.showMessageBox({
+                type: 'error',
+                title: 'Error',
+                message: `Compilation error:\n${error.message}`,
+                buttons: ['OK']
+            });
+            return;
+        }
+
+        if (stderr) {
+            if (!stderr.includes("warning: no newline at end of file"))
+            {
+                console.error(`Compilation stderr: ${stderr}`);
+                return;
+            }
+            console.error(`Compilation stderr: ${stderr}`);
+        }
+
+        const executablePath = `./${exeName}.exe`;
+
+        const argumentsArray = [];
+
+        const child = spawn('cmd', ['/c', `start ${executablePath} ${argumentsArray.join(' ')}`]);
+        child.on('close', (code) => {
+        console.log(`Child process exited with code ${code}`);
+        });
+
+        child.on('error', (err) => {
+            alert(`Error: ${err}`);
+        });
+    });
+    
 }
 
 function disconnectFromFile()
@@ -88,6 +130,18 @@ function createWindow(locationPath, name) {
     ipcMain.on('set-menu-editFile', (event) => {
         const template = [
             {
+                label: 'Run',
+                submenu: [
+                    {
+                        label: 'Compile file',
+                        click: () => {
+                            compileAndRun();
+                        },
+                        enabled: getMain().getDoesCompilerExists(),
+                    },
+                ],
+            },
+            {
                 label: 'Exit',
                 submenu: [
                     {
@@ -98,7 +152,7 @@ function createWindow(locationPath, name) {
                         },
                     },
                 ],
-                },
+            },
         ];
         
         const menuTemplate = Menu.buildFromTemplate(template);

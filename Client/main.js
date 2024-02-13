@@ -1,4 +1,6 @@
-const { app , dialog } = require('electron');
+const { app , dialog, BrowserWindow } = require('electron');
+const { exec } = require('child_process');
+
 const editFileWindow = require("./editFile/editFileWindow.js");
 const loginWindow = require("./login/loginWindow.js");
 const signupWindow = require("./signup/signupWindow.js");
@@ -8,6 +10,33 @@ const codes = require('./windowCodes.js');
 
 let currentWindowCode;
 let username;
+let doesCompilerExists;
+
+function checkGCCInstallation() {
+  exec('gcc --version', (error, stdout, stderr) => {
+    if (error) {
+      console.error('GCC is not installed', stderr);
+      // Open a website with information on how to download GCC
+      const win = new BrowserWindow({ show: false, autoHideMenuBar: true }, );
+      win.loadURL('https://www.scaler.com/topics/c/c-compiler-for-windows/');
+      win.on('ready-to-show', () => {
+        win.show();
+      });
+
+      win.on('closed', () => {
+        doesCompilerExists = false;
+      });
+    } else {
+      communicator.connectToServer(() => {
+        if (communicator.getIsConnected()){
+            doesCompilerExists = true;
+            loginWindow.createWindow();
+            currentWindowCode = codes.LOGIN;
+        }
+    });
+    }
+  });
+}
 
 function switchWindow(code) {
     try {
@@ -76,12 +105,7 @@ function closeWindowWhenDisconnected() {
   }
 
 app.whenReady().then(()=>{
-    communicator.connectToServer(() => {
-        if (communicator.getIsConnected()){
-            loginWindow.createWindow();
-            currentWindowCode = codes.LOGIN;
-        }
-    });
+    checkGCCInstallation();
 })
 
 app.on('window-all-closed', () => {
@@ -102,9 +126,14 @@ function setUsername(name) {
     username = name;
 }
 
+function getDoesCompilerExists(){
+    return doesCompilerExists;
+}
+
 module.exports = {
     switchWindow,
     closeWindowWhenDisconnected,
     getUsername,
-    setUsername
+    setUsername, 
+    getDoesCompilerExists
 }
