@@ -114,7 +114,7 @@ class server():
     def get_file_content_and_connect_to_room(self, data, user):
         fileName = data["data"]["file_name"]
         fileLocation = "files/"+ data["data"]["location"]
-        file_content = get_file_content(fileName, fileLocation)
+        file_content = self.get_file_content(fileName, fileLocation)
         for room in self.rooms:  # checking is there is an open room for the file
             if room.get_file_name() == fileName:
                 room.add_user(user)
