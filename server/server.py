@@ -211,16 +211,14 @@ class server():
         user.connect_to_room(None)
         return None
 
-<<<<<<< server/server.py
     def get_files(self, data, user):
         data = data["data"]
         files = {"files":{}}
         for fileData in data["file_names"]:
             fileLocation, fileName = os.path.split(fileData)
             files["files"][fileName] = self.get_file_content(fileName, fileLocation)
-        print(files)
         return {"data": files}
-=======
+        
     def create_share_code_for_file(self, data, user):
         try:
             location = "./files/" + data["data"]["location"]
@@ -348,8 +346,6 @@ class server():
             if location == folder.get("location") + "/" + folder.get("folder_name"):
                 return True
         return False
-            
->>>>>>> server/server.py
 
 def main():
     main_server = server()
