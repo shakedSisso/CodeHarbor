@@ -269,7 +269,7 @@ class server():
             collection = MongoDBWrapper.connect_to_mongo("Files")
             documents = MongoDBWrapper.find_documents({"file_name": data["data"]["name"]}, collection)
         
-        objectIds = [document.get("_id") for document in documents]
+        objectIds = [document.get("_id") for document in documents if document.get("owner") != user.get_user_name()]
         share_codes_collection = MongoDBWrapper.connect_to_mongo("Share Codes")
         code_document = MongoDBWrapper.find_document({"code": data["data"]["share_code"]}, share_codes_collection)
         if code_document is None:
