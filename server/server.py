@@ -246,7 +246,7 @@ class server():
                 code = self.generate_share_code()
                 MongoDBWrapper.create_share_code(code, objectId, data["data"]["is_folder"])
                 return {"data": {"status": "success", "shareCode": code}}
-            return {"data": {"status": "error"}}
+            return {"data": {"status": "success", "shareCode": code_document["code"]}}
         except Exception as e:
             return {"data": {"status": "error"}}
 
