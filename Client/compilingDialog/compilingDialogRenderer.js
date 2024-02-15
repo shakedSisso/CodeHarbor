@@ -1,8 +1,14 @@
 const okButton = document.getElementById('okButton');
 const cancelButton = document.getElementById('cancelButton');
+const error = document.getElementById('errorMessage');
 const inputField = document.getElementById('textInput');
 
+window.addEventListener('DOMContentLoaded', () => {
+    window.electronAPI.getFiles();
+});
+
 okButton.addEventListener('click', () => {
+    const fileNameRegex = /\./;
     var input = inputField.value;
     var isOneChecked = false;
     let files = [];
@@ -17,7 +23,13 @@ okButton.addEventListener('click', () => {
     {
         alert('You must choose at least one file to compile and run');
     }
-    else {
+    
+    else if (fileNameRegex.test(input)) 
+    {
+        alert('The name executable must cannot include `.`');
+    }
+    else 
+    {
         window.electronAPI.getFilesAndRun(input, files);
     }
 });

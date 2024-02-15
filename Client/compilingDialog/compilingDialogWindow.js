@@ -5,6 +5,7 @@ const { exec, spawn } = require('child_process');
 const communicator = require('../communicator.js');
 
 let inputDialog;
+var filesNames = [];
 var executableName = "";
 const GET_FILES_REQUEST = 12;
 
@@ -52,6 +53,7 @@ function deleteLocalFile(file_name) {
 }
 
 function openCompilingDialog(files) {
+    filesNames = files;
     inputDialog = new BrowserWindow({
         width: 550,
         height: 425,
@@ -63,24 +65,25 @@ function openCompilingDialog(files) {
         },
         autoHideMenuBar: true,
     });
-    
     communicator.setDataHandler(dataHandler);
 
     try {
+        ipcMain.handle('dialog:getFiles', handleGetFiles);
         ipcMain.handle('dialog:getFilesAndRun', handleGetFilesAndRun);
     } catch {} //used in case the handlers already exists
 
     inputDialog.loadFile('compilingDialog/compilingDialog.html');
-
-    inputDialog.once('ready-to-show', () => {
-        inputDialog.webContents.send('get-files', files);
-        inputDialog.show();
-    });
+    inputDialog.show();
 
     inputDialog.on('closed', () => {
         // Handle the closed event if needed
     });
     
+}
+
+function handleGetFiles()
+{
+    inputDialog.webContents.send('get-files', filesNames);
 }
 
 function getFilesAndCreateLocalVersions(fileNames)
