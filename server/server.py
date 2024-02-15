@@ -268,8 +268,11 @@ class server():
         else:
             collection = MongoDBWrapper.connect_to_mongo("Files")
             documents = MongoDBWrapper.find_documents({"file_name": data["data"]["name"]}, collection)
-        
+        if documents is None:
+            return {"data": {"status": "error", "message": "No object with the given name was found"}}
         objectIds = [document.get("_id") for document in documents if document.get("owner") != user.get_user_name()]
+        if objectIds is None:
+            return {"data": {"status": "error", "message": "You can't add objects you own as shared files"}}
         share_codes_collection = MongoDBWrapper.connect_to_mongo("Share Codes")
         code_document = MongoDBWrapper.find_document({"code": data["data"]["share_code"]}, share_codes_collection)
         if code_document is None:
@@ -278,7 +281,7 @@ class server():
             if code_document.get("shareId") == objectId:
                 MongoDBWrapper.create_a_share(user_id, data["data"]["share_code"], data["data"]["is_folder"])
                 return {"data": {"status": "success"}}
-        return {"data": {"status": "error", "message": "This share code doesn't match the file"}}
+        return {"data": {"status": "error", "message": "This share code doesn't match the file "}}
     
     def get_shared_files_and_folders(self, data, user):
         shares_collection = MongoDBWrapper.connect_to_mongo("Shares")
