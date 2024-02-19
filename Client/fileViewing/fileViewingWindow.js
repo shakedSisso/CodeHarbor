@@ -267,6 +267,18 @@ function handleSetMenu (event, mainFolderName) {
             }
         ],
         },
+        {
+            label: 'Run',
+            submenu: [
+                {
+                    label: 'Compile files',
+                    click: () => {
+                        compilingDialog.openCompilingDialog(files);
+                    },
+                    enabled: getMain().getDoesCompilerExists(),
+                },
+            ],
+        }
     ];
     
     if (mainFolderName === "Owned/")

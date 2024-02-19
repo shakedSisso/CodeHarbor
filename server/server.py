@@ -114,7 +114,7 @@ class server():
     def get_file_content_and_connect_to_room(self, data, user):
         fileName = data["data"]["file_name"]
         fileLocation = "files/"+ data["data"]["location"]
-        file_content = get_file_content(fileName, fileLocation)
+        file_content = self.get_file_content(fileName, fileLocation)
         for room in self.rooms:  # checking is there is an open room for the file
             if room.get_file_name() == fileName:
                 room.add_user(user)
@@ -246,7 +246,7 @@ class server():
                 code = self.generate_share_code()
                 MongoDBWrapper.create_share_code(code, objectId, data["data"]["is_folder"])
                 return {"data": {"status": "success", "shareCode": code}}
-            return {"data": {"status": "error"}}
+            return {"data": {"status": "success", "shareCode": code_document["code"]}}
         except Exception as e:
             return {"data": {"status": "error"}}
 
@@ -268,8 +268,11 @@ class server():
         else:
             collection = MongoDBWrapper.connect_to_mongo("Files")
             documents = MongoDBWrapper.find_documents({"file_name": data["data"]["name"]}, collection)
-        
-        objectIds = [document.get("_id") for document in documents]
+        if documents is None:
+            return {"data": {"status": "error", "message": "No object with the given name was found"}}
+        objectIds = [document.get("_id") for document in documents if document.get("owner") != user.get_user_name()]
+        if objectIds is None:
+            return {"data": {"status": "error", "message": "You can't add objects you own as shared files"}}
         share_codes_collection = MongoDBWrapper.connect_to_mongo("Share Codes")
         code_document = MongoDBWrapper.find_document({"code": data["data"]["share_code"]}, share_codes_collection)
         if code_document is None:
@@ -278,7 +281,7 @@ class server():
             if code_document.get("shareId") == objectId:
                 MongoDBWrapper.create_a_share(user_id, data["data"]["share_code"], data["data"]["is_folder"])
                 return {"data": {"status": "success"}}
-        return {"data": {"status": "error", "message": "This share code doesn't match the file"}}
+        return {"data": {"status": "error", "message": "This share code doesn't match the file "}}
     
     def get_shared_files_and_folders(self, data, user):
         shares_collection = MongoDBWrapper.connect_to_mongo("Shares")
