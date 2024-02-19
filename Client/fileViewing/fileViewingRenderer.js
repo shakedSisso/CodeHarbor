@@ -180,6 +180,9 @@ function showContextMenu(x, y) {
   const shareOption = document.getElementById('shareOption');
   shareOption.addEventListener('click', share);
 
+  const manageOption = document.getElementById('manageOption');
+  manageOption.addEventListener('click', manage);
+
   // Hide the context menu when clicking outside of it
   document.addEventListener('click', function hideContextMenu() {
       contextMenu.style.display = 'none';
@@ -189,6 +192,11 @@ function showContextMenu(x, y) {
 
 function share() {
     window.electronAPI.getShareCode(pressedFile, fileViewingForm.alt, isFolder);
+}
+
+function manage() {
+    //getFileShares
+    alert("open share management dialog");
 }
 
 function deleteAllItems() {
