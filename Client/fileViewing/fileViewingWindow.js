@@ -68,9 +68,16 @@ function dataHandler(jsonObject)
                     type: 'info',
                     title: 'Shared successfully',
                     message: `Your share code: ${data.shareCode}`,
-                    buttons: ['OK']
+                    buttons: ['Copy'],
                 }
-            )
+            ).then((response) => {
+                if (response.response === 0) // 'Copy to Clipboard' button clicked
+                {
+                  clipboard.writeText(data.shareCode);
+                }
+              }).catch((err) => {
+                console.log(err);
+              });
         }
         else
         {
