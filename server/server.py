@@ -226,7 +226,7 @@ class server():
                 location = location[:-1]
             if data["data"]["is_folder"]:
                 collection = MongoDBWrapper.connect_to_mongo("Folders")
-                document = MongoDBWrapper.find_document({"folder_name": data["data"]["name"], "location": location}, collection)
+                document = MongoDBWrapper.find_document({"folder_name": data["data"]["name"][:-1], "location": location}, collection)
             else:
                 collection = MongoDBWrapper.connect_to_mongo("Files")
                 document = MongoDBWrapper.find_document({"file_name": data["data"]["name"], "location": location}, collection)
