@@ -195,8 +195,7 @@ function share() {
 }
 
 function manage() {
-    //getFileShares
-    alert("open share management dialog");
+    window.electronAPI.getFileShares(pressedFile, fileViewingForm.alt, isFolder);
 }
 
 function deleteAllItems() {
