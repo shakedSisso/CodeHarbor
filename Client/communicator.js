@@ -24,8 +24,7 @@ function connectToServer(callback)
 function disconnectFromServer()
 {
     if (isConnected) {
-        messageDataJson = {};
-        sendMessage(messageDataJson, 0); //0 is the disconnection code
+        sendMessage("", 0); //0 is the disconnection code
         socket.end();
         isConnected = false;
     }
@@ -48,15 +47,15 @@ socket.on('error', (error) => {
 
 function sendMessage(messageDataJson, code)
 {
-  const messageCode = Buffer.alloc(MESSAGE_CODE_FIELD_SIZE);
-  messageCode.writeUInt16BE(code);
+    const messageCode = Buffer.alloc(MESSAGE_CODE_FIELD_SIZE);
+    messageCode.writeUInt16BE(code);
 
-  const messageLength = Buffer.alloc(MESSAGE_LEN_FIELD_SIZE);
-  messageLength.writeUIntBE(Buffer.from(messageDataJson).length, 0, MESSAGE_LEN_FIELD_SIZE);
+    const messageLength = Buffer.alloc(MESSAGE_LEN_FIELD_SIZE);
+    messageLength.writeUIntBE(Buffer.from(messageDataJson).length, 0, MESSAGE_LEN_FIELD_SIZE);
 
-  const message = Buffer.concat([messageCode, messageLength, Buffer.from(messageDataJson)]);
+    const message = Buffer.concat([messageCode, messageLength, Buffer.from(messageDataJson)]);
 
-  socket.write(message);
+    socket.write(message);
 }
 
 socket.on('data', (data) => {
