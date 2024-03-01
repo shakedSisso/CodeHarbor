@@ -198,9 +198,39 @@ function dynamicallyCreateItem(imageSrc, labelText, location) {
     document.getElementById('fileViewingForm').appendChild(container);
 }
 
-function createShareRequest(objectName, location, isFolder)
-{
-    window.electronAPI.getShareCode(objectName, location, isFolder);
+function showContextMenu(x, y) {
+  const contextMenu = document.getElementById('contextMenu');
+  contextMenu.style.display = 'block';
+  contextMenu.style.left = `${x}px`;
+  contextMenu.style.top = `${y}px`;
+
+  // Handle click on Share option
+  const shareOption = document.getElementById('shareOption');
+  shareOption.addEventListener('click', share);
+
+  const manageOption = document.getElementById('manageOption');
+  manageOption.addEventListener('click', manage);
+
+  const deleteOption = document.getElementById('deleteOption');
+  deleteOption.addEventListener('click', remove);
+
+  // Hide the context menu when clicking outside of it
+  document.addEventListener('click', function hideContextMenu() {
+      contextMenu.style.display = 'none';
+      document.removeEventListener('click', hideContextMenu);
+  });
+}
+
+function share() {
+    window.electronAPI.getShareCode(pressedFile, fileViewingForm.alt, isFolder);
+}
+
+function manage() {
+    window.electronAPI.getFileShares(pressedFile, fileViewingForm.alt, isFolder);
+}
+
+function remove() {
+    window.electronAPI.sendRequestToDelete(pressedFile, fileViewingForm.alt, isFolder);
 }
 
 function deleteAllItems() {
