@@ -15,6 +15,7 @@ const GET_FILES_AND_FOLDERS_REQUEST = 7;
 const GET_SHARE_CODE = 9;
 const CONNECT_TO_SHARED_OBJECT_REQUEST = 10;
 const GET_SHARED_FILES_AND_FOLDERS_REQUEST = 11;
+const DELETE_SELECTION = 15;
 
 function dataHandler(jsonObject)
 {
@@ -89,6 +90,30 @@ function dataHandler(jsonObject)
                     type: 'info',
                     title: 'Object Shared successfully',
                     message: 'Object shared successfully',
+                    buttons: ['OK']
+                }
+            );
+            handleGetFilesAndFolders(null, locationPath);
+        }
+        else if(data.status === "error")
+        {
+            dialog.showMessageBox({
+                type: 'error',
+                title: 'Error',
+                message: data.message,
+                buttons: ['OK']
+            });
+        }
+    }
+    else if (jsonObject.code === DELETE_SELECTION)
+    {
+        if(data.status === "success")
+        {
+            dialog.showMessageBox(
+                {
+                    type: 'info',
+                    title: 'Object Deleted successfully',
+                    message: 'Object deleted successfully',
                     buttons: ['OK']
                 }
             );
@@ -201,6 +226,19 @@ function handleGetShareCode(event, objectName, location, isFolder)
     communicator.sendMessage(messageDataJson, GET_SHARE_CODE);
 }
 
+function handleSendRequestToDelete(event, objectName, location, isFolder)
+{
+    const messageData = {
+        data: {
+            name: objectName,
+            is_folder: isFolder,
+            location: location
+        },
+    };
+    const messageDataJson = JSON.stringify(messageData);
+    communicator.sendMessage(messageDataJson, DELETE_SELECTION);
+}
+
 function handleGetSharedFilesAndFolders(event, location)
 {
     if (location != locationPath) {
@@ -242,6 +280,7 @@ function createWindow() {
         ipcMain.handle('dialog:getFilesAndFolders', handleGetFilesAndFolders);
         ipcMain.handle('dialog:switchToEditFile', handleSwitchToEditFile);
         ipcMain.handle('dialog:getShareCode', handleGetShareCode);
+        ipcMain.handle('dialog:sendRequestToDelete', handleSendRequestToDelete);
         ipcMain.handle('dialog:getSharedFilesAndFolders', handleGetSharedFilesAndFolders);
         ipcMain.handle('dialog:switchToSharedEditFile', handleSwitchToSharedEditFile);
         ipcMain.handle('dialog:createShare', handleShareRequest);
