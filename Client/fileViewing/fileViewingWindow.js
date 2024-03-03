@@ -1,9 +1,10 @@
-const { BrowserWindow , ipcMain, Menu, dialog } = require('electron');
+const { BrowserWindow , ipcMain, Menu, dialog, clipboard  } = require('electron');
 const path = require('path');
 const communicator = require("../communicator.js");
 const getMain = () => require('../main.js');
 const codes = require('../windowCodes.js');
 const compilingDialog = require('../compilingDialog/compilingDialogWindow.js');
+const shareManagementDialog = require('../shareManagementDialog/shareManagementDialogWindow.js')
 
 let mainWindow;
 let locationPath = "";
@@ -15,7 +16,8 @@ const GET_FILES_AND_FOLDERS_REQUEST = 7;
 const GET_SHARE_CODE = 9;
 const CONNECT_TO_SHARED_OBJECT_REQUEST = 10;
 const GET_SHARED_FILES_AND_FOLDERS_REQUEST = 11;
-const DELETE_SELECTION = 15;
+const GET_FILE_SHARES = 13;
+const DELETE_SELECTION = 14;
 
 function dataHandler(jsonObject)
 {
@@ -67,9 +69,32 @@ function dataHandler(jsonObject)
                     type: 'info',
                     title: 'Shared successfully',
                     message: `Your share code: ${data.shareCode}`,
-                    buttons: ['OK']
+                    buttons: ['Copy'],
                 }
-            )
+            ).then((response) => {
+                if (response.response === 0) // 'Copy to Clipboard' button clicked
+                {
+                  clipboard.writeText(data.shareCode);
+                }
+              }).catch((err) => {
+                console.log(err);
+              });
+        }
+        else
+        {
+            dialog.showMessageBox({
+                type: 'error',
+                title: 'Error',
+                message: "There was an error while trying to create a share code for this object.\nPlease try again later.",
+                buttons: ['OK']
+            });
+        }
+    }
+    else if (jsonObject.code === GET_FILE_SHARES)
+    {
+        if(data.status === "success")
+        {
+            shareManagementDialog.openShareManagementDialog(data.users);
         }
         else
         {
@@ -226,6 +251,19 @@ function handleGetShareCode(event, objectName, location, isFolder)
     communicator.sendMessage(messageDataJson, GET_SHARE_CODE);
 }
 
+function handleGetFileShares(event, objectName, location, isFolder)
+{
+    const messageData = {
+        data: {
+            name: objectName,
+            is_folder: isFolder,
+            location: location
+        },
+    };
+    const messageDataJson = JSON.stringify(messageData);
+    communicator.sendMessage(messageDataJson, GET_FILE_SHARES);
+}
+
 function handleSendRequestToDelete(event, objectName, location, isFolder)
 {
     const messageData = {
@@ -280,6 +318,7 @@ function createWindow() {
         ipcMain.handle('dialog:getFilesAndFolders', handleGetFilesAndFolders);
         ipcMain.handle('dialog:switchToEditFile', handleSwitchToEditFile);
         ipcMain.handle('dialog:getShareCode', handleGetShareCode);
+        ipcMain.handle('dialog:getFileShares', handleGetFileShares);
         ipcMain.handle('dialog:sendRequestToDelete', handleSendRequestToDelete);
         ipcMain.handle('dialog:getSharedFilesAndFolders', handleGetSharedFilesAndFolders);
         ipcMain.handle('dialog:switchToSharedEditFile', handleSwitchToSharedEditFile);
