@@ -199,18 +199,18 @@ textarea::-webkit-scrollbar-thumb:hover {
   font-style: italic;
 }
 
-.compile-container {
+.compile-container, .shares-container {
   margin-bottom: 10px;
   text-align: left;
 }
 
-.compile-container label {
+.compile-container, .shares-container label {
   display: flex;
   line-height: 25px;
   color: #023939;
 }
 
-.compile-container h4 {
+.compile-container, .shares-container h4 {
   margin-top: -10px;
 }
 
@@ -241,7 +241,41 @@ input[type="checkbox"]:checked::before {
 }
 
 .context-menu {
-  display: none;
   position: absolute;
-  z-index: 10;
+  background-color: #78C6A3;
+  border: 2px solid #023939;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  padding: 5px 0;
+  z-index: 1000;
+  display: none;
+}
+
+.context-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.context-menu li {
+  padding: 8px 15px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.context-menu li:hover {
+  background-color: #78C6A3;
+}
+
+.context-menu li img {
+  margin-right: 10px;
+}
+.context-menu-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.shares-form {
+  text-align: left;
 }

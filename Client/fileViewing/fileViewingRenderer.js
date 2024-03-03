@@ -3,12 +3,8 @@ dynamicallyCreateItem("../images/folder.png", "Shared");
 const fileViewingForm = document.getElementById('fileViewingForm');
 
 var usernameFolder;
-var menuState = 0;
-var contextMenuActive = "block";
-var menu;
 var pressedFile;
 var isFolder;
-var menuIsSet;
 
 window.addEventListener('DOMContentLoaded', () => {
     window.electronAPI.requestUsername();
@@ -16,23 +12,6 @@ window.addEventListener('DOMContentLoaded', () => {
     menuIsSet = false;
     fileViewingForm.addEventListener('click', handleImageClick);
     fileViewingForm.alt = ""; //used to keep track on the location the user is in
-    menu = document.querySelector(".context-menu");
-    document.addEventListener("click", (e) => {
-        var button = e.which || e.button;
-        if (button === 1) {
-          toggleMenuOff();
-        }
-      });
-      
-      // Close Context Menu on Esc key press
-      window.onkeyup = function (e) {
-        if (e.keyCode === 27) {
-          toggleMenuOff();
-        }
-      }
-    document.getElementById("shareButtonDiv").addEventListener("click", (event) => {
-        createShareRequest(pressedFile, fileViewingForm.alt, isFolder);
-    })
   });
 
 window.electronAPI.getUsername((event, username) => {
@@ -175,97 +154,51 @@ function dynamicallyCreateItem(imageSrc, labelText, location) {
     img.height = 65;
     img.style.margin = '5px';
 
+    img.addEventListener('contextmenu', function(event) {
+      //the main folders, the folder used to go back to the parent folder and the files in the shared folder don't have a context menu
+      if (labelText !== "Owned/" && labelText !== "Shared/" && labelText !== "../" && !fileViewingForm.alt.startsWith("Shared"))
+      {
+        pressedFile = labelText;
+        isFolder = imageSrc === "../images/folder.png";
+        event.preventDefault(); 
+        showContextMenu(event.clientX, event.clientY);
+      }
+  });
+
     container.appendChild(img);
     container.appendChild(label);
-
-    container.addEventListener('contextmenu', (event) => 
-    {
-        event.preventDefault();
-        toggleMenuOn();
-        pressedFile = labelText;
-        if (imageSrc === "../images/folder.png")
-        {
-            isFolder = true;
-        }
-        else
-        {
-            isFolder = false;
-        }
-        positionMenu(event);
-        return false;
-    }, false);
-
     document.getElementById('fileViewingForm').appendChild(container);
 }
 
-function createShareRequest(objectName, location, isFolder)
-{
-    window.electronAPI.getShareCode(objectName, location, isFolder);
+function showContextMenu(x, y) {
+  const contextMenu = document.getElementById('contextMenu');
+  contextMenu.style.display = 'block';
+  contextMenu.style.left = `${x}px`;
+  contextMenu.style.top = `${y}px`;
+
+  // Handle click on Share option
+  const shareOption = document.getElementById('shareOption');
+  shareOption.addEventListener('click', share);
+
+  const manageOption = document.getElementById('manageOption');
+  manageOption.addEventListener('click', manage);
+
+  // Hide the context menu when clicking outside of it
+  document.addEventListener('click', function hideContextMenu() {
+      contextMenu.style.display = 'none';
+      document.removeEventListener('click', hideContextMenu);
+  });
+}
+
+function share() {
+    window.electronAPI.getShareCode(pressedFile, fileViewingForm.alt, isFolder);
+}
+
+function manage() {
+    window.electronAPI.getFileShares(pressedFile, fileViewingForm.alt, isFolder);
 }
 
 function deleteAllItems() {
     var container = document.getElementById('fileViewingForm');
     container.innerHTML = '';
 }
-
-function toggleMenuOn() {
-    if (menuState !== 1) {
-      menuState = 1;
-      menu.classList.add(contextMenuActive);
-    }
-  }
-
-  function toggleMenuOff() {
-    if (menuState !== 0) {
-      menuState = 0;
-      menu.classList.remove(contextMenuActive);
-    }
-  }
-
-  function getPosition(e) {
-    var posx = 0;
-    var posy = 0;
-  
-    if (!e) var e = window.event;
-  
-    if (e.pageX || e.pageY) {
-      posx = e.pageX;
-      posy = e.pageY;
-    } else if (e.clientX || e.clientY) {
-      posx =
-        e.clientX +
-        document.body.scrollLeft +
-        document.documentElement.scrollLeft;
-      posy =
-        e.clientY + document.body.scrollTop + document.documentElement.scrollTop;
-    }
-  
-    return {
-      x: posx,
-      y: posy
-    };
-  }
-
-  function positionMenu(e) {
-    let clickCoords = getPosition(e);
-    let clickCoordsX = clickCoords.x;
-    let clickCoordsY = clickCoords.y;
-  
-    let menuWidth = menu.offsetWidth + 4;
-    let menuHeight = menu.offsetHeight + 4;
-  
-    let windowWidth = window.innerWidth;
-    let windowHeight = window.innerHeight;
-  
-    if (windowWidth - clickCoordsX < menuWidth) {
-      menu.style.left = windowWidth - menuWidth + "px";
-    } else {
-      menu.style.left = clickCoordsX + "px";
-    }
-  
-    if (windowHeight - clickCoordsY < menuHeight) {
-      menu.style.top = windowHeight - menuHeight + "px";
-    } else {
-      menu.style.top = clickCoordsY + "px";
-    }
-  }

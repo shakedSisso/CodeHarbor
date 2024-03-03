@@ -12,6 +12,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getLocation: (callback) => ipcRenderer.on('send-location', callback),
   switchToEditFile: (file_name) => ipcRenderer.invoke('dialog:switchToEditFile', file_name),
   getShareCode: (objectName, location, isFolder) => ipcRenderer.invoke('dialog:getShareCode', objectName, location, isFolder),
+  getFileShares: (objectName, location, isFolder) => ipcRenderer.invoke('dialog:getFileShares', objectName, location, isFolder),
   getSharedFilesAndFolders: (location) => ipcRenderer.invoke('dialog:getSharedFilesAndFolders', location),
   switchToSharedEditFile: (fileName, location) => ipcRenderer.invoke('dialog:switchToSharedEditFile', fileName, location),
 });
