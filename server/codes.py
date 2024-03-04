@@ -14,4 +14,4 @@ class RequestCodes(Enum):
     GET_SHARED_FILES_AND_FOLDERS = 11
     GET_FILES = 12
     GET_FILES_SHARES = 13
-
+    REMOVE_SHARE = 14
