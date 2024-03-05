@@ -1,5 +1,6 @@
 const { BrowserWindow , ipcMain, Menu, dialog, clipboard  } = require('electron');
 const path = require('path');
+const fs = require('fs');
 const communicator = require("../communicator.js");
 const getMain = () => require('../main.js');
 const codes = require('../windowCodes.js');
@@ -17,6 +18,7 @@ const GET_SHARE_CODE = 9;
 const CONNECT_TO_SHARED_OBJECT_REQUEST = 10;
 const GET_SHARED_FILES_AND_FOLDERS_REQUEST = 11;
 const GET_FILE_SHARES = 13;
+const DOWNLOAD_FILES = 15;
 const DELETE_SELECTION = 16;
 
 function dataHandler(jsonObject)
@@ -154,13 +156,18 @@ function dataHandler(jsonObject)
             });
         }
     }
+    else if (jsonObject.code === DOWNLOAD_FILES)
+    {
+        selectFolderAndCreateStructure(jsonObject.data);
+    }
 }
 
 function handleCreateRequest(event, name, isFolder)
 {
     fileName = name;
     var code, messageData;
-    if (isFolder) {
+    if (isFolder) 
+    {
         code = NEW_FOLDER_REQUEST;
         messageData = {
             data: {
@@ -169,7 +176,8 @@ function handleCreateRequest(event, name, isFolder)
             },
         }; 
     }
-    else {
+    else 
+    {
         code = NEW_FILE_REQUEST;
         messageData = {
             data: {
@@ -277,6 +285,54 @@ function handleSendRequestToDelete(event, objectName, location, isFolder)
     communicator.sendMessage(messageDataJson, DELETE_SELECTION);
 }
 
+function handleGetChosenFiles(event, objectName, location, isFolder)
+{
+    const messageData = {
+        data: {
+            name: objectName,
+            is_folder: isFolder,
+            location: location
+        },
+    };
+    const messageDataJson = JSON.stringify(messageData);
+    communicator.sendMessage(messageDataJson, DOWNLOAD_FILES);
+}
+
+async function openFolderSelectionDialog() {
+    const result = await dialog.showOpenDialog({
+      properties: ['openDirectory']
+    });
+    return result.filePaths[0]; // return the selected folder path
+  }
+  
+  // Function to create folders and files based on the provided structure
+  async function createFoldersAndFiles(directory, structure) {
+      for (const [name, content] of Object.entries(structure)) {
+          const newPath = path.join(directory, name);
+          if (Array.isArray(content)) {
+              fs.writeFileSync(newPath, content.join(''));
+          } else {
+              fs.mkdirSync(newPath);
+              await createFoldersAndFiles(newPath, content);
+          }
+      }
+  }
+  
+  // Open folder selection dialog and call createFoldersAndFiles with selected folder
+  async function selectFolderAndCreateStructure(structure) {
+    try {
+      const selectedFolder = await openFolderSelectionDialog();
+      await createFoldersAndFiles(selectedFolder, structure);
+      dialog.showMessageBox({
+        type: 'info',
+        title: 'Download successfully',
+        message: "The chosen file or folder were downloaded successfully",
+        buttons: ['OK']
+    });
+    } catch (error) {
+    }
+  }
+
 function handleGetSharedFilesAndFolders(event, location)
 {
     if (location != locationPath) {
@@ -320,6 +376,7 @@ function createWindow() {
         ipcMain.handle('dialog:getShareCode', handleGetShareCode);
         ipcMain.handle('dialog:getFileShares', handleGetFileShares);
         ipcMain.handle('dialog:sendRequestToDelete', handleSendRequestToDelete);
+        ipcMain.handle('dialog:getChosenFiles', handleGetChosenFiles);
         ipcMain.handle('dialog:getSharedFilesAndFolders', handleGetSharedFilesAndFolders);
         ipcMain.handle('dialog:switchToSharedEditFile', handleSwitchToSharedEditFile);
         ipcMain.handle('dialog:createShare', handleShareRequest);
