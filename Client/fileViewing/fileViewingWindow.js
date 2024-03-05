@@ -17,7 +17,7 @@ const GET_SHARE_CODE = 9;
 const CONNECT_TO_SHARED_OBJECT_REQUEST = 10;
 const GET_SHARED_FILES_AND_FOLDERS_REQUEST = 11;
 const GET_FILE_SHARES = 13;
-const DELETE_SELECTION = 14;
+const DELETE_SELECTION = 16;
 
 function dataHandler(jsonObject)
 {
