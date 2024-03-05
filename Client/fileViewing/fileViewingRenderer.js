@@ -156,7 +156,7 @@ function dynamicallyCreateItem(imageSrc, labelText, location) {
 
     img.addEventListener('contextmenu', function(event) {
       //the main folders, the folder used to go back to the parent folder and the files in the shared folder don't have a context menu
-      if (labelText !== "Owned/" && labelText !== "Shared/" && labelText !== "../" && !fileViewingForm.alt.startsWith("Shared"))
+      if (labelText !== "Owned/" && labelText !== "Shared/" && labelText !== "../")
       {
         pressedFile = labelText;
         isFolder = imageSrc === "../images/folder.png";
@@ -186,6 +186,20 @@ function showContextMenu(x, y) {
   const deleteOption = document.getElementById('deleteOption');
   deleteOption.addEventListener('click', remove);
 
+  const downloadOption = document.getElementById('downloadOption');
+  downloadOption.addEventListener('click', download);
+
+  if (fileViewingForm.alt.startsWith("Shared"))
+  {
+    shareOption.style.display = 'none';
+    manageOption.style.display = 'none';
+  }
+  else 
+  {
+    shareOption.style.display = 'flex';
+    manageOption.style.display = 'flex';
+  }
+
   // Hide the context menu when clicking outside of it
   document.addEventListener('click', function hideContextMenu() {
       contextMenu.style.display = 'none';
@@ -203,6 +217,10 @@ function manage() {
 
 function remove() {
     window.electronAPI.sendRequestToDelete(pressedFile, fileViewingForm.alt, isFolder);
+}
+
+function download() {
+    window.electronAPI.getChosenFiles(pressedFile, fileViewingForm.alt, isFolder);
 }
 
 function deleteAllItems() {
