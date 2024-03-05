@@ -8,7 +8,9 @@ const shareManagementDialog = require('../shareManagementDialog/shareManagementD
 
 let mainWindow;
 let locationPath = "";
+let fileLocation;
 let fileName;
+let folderOrNot;
 let files = [];
 const NEW_FILE_REQUEST = 3;
 const NEW_FOLDER_REQUEST = 6;
@@ -94,7 +96,7 @@ function dataHandler(jsonObject)
     {
         if(data.status === "success")
         {
-            shareManagementDialog.openShareManagementDialog(data.users);
+            shareManagementDialog.openShareManagementDialog(data.users, fileName, fileLocation, folderOrNot);
         }
         else
         {
@@ -253,6 +255,9 @@ function handleGetShareCode(event, objectName, location, isFolder)
 
 function handleGetFileShares(event, objectName, location, isFolder)
 {
+    fileName = objectName;
+    fileLocation = location;
+    folderOrNot = isFolder;
     const messageData = {
         data: {
             name: objectName,

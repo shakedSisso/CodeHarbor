@@ -4,6 +4,9 @@ const communicator = require('../communicator.js');
 
 let inputDialog;
 var usernames = [];
+let file_name;
+let file_location;
+let is_folder;
 const REMOVE_SHARES = 14;
 
 function dataHandler(jsonObject)
@@ -14,8 +17,11 @@ function dataHandler(jsonObject)
     }
 }
 
-function openShareManagementDialog(users) {
+function openShareManagementDialog(users, fileName, location, isFolder) {
     usernames = users;
+    file_name = fileName;
+    file_location = location;
+    is_folder - isFolder;
     inputDialog = new BrowserWindow({
         width: 550,
         height: 425,
@@ -50,7 +56,14 @@ function handleGetFileSharesNames()
 
 function handleRemoveShares(users)
 {
-    const messageData = { data : { usernames: users}};
+    const messageData = { 
+        data : { 
+            usernames: users,
+            name: file_name,
+            location: file_location,
+            isFolder: is_folder
+        }
+    };
     const messageDataJson = JSON.stringify(messageData);
     communicator.sendMessage(messageDataJson, REMOVE_SHARES);
 }
