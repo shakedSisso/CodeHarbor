@@ -9,7 +9,9 @@ const shareManagementDialog = require('../shareManagementDialog/shareManagementD
 
 let mainWindow;
 let locationPath = "";
+let fileLocation;
 let fileName;
+let folderOrNot;
 let files = [];
 const NEW_FILE_REQUEST = 3;
 const NEW_FOLDER_REQUEST = 6;
@@ -19,6 +21,7 @@ const CONNECT_TO_SHARED_OBJECT_REQUEST = 10;
 const GET_SHARED_FILES_AND_FOLDERS_REQUEST = 11;
 const GET_FILE_SHARES = 13;
 const DOWNLOAD_FILES = 15;
+const DELETE_SELECTION = 16;
 
 function dataHandler(jsonObject)
 {
@@ -95,7 +98,7 @@ function dataHandler(jsonObject)
     {
         if(data.status === "success")
         {
-            shareManagementDialog.openShareManagementDialog(data.users);
+            shareManagementDialog.openShareManagementDialog(data.users, fileName, fileLocation, folderOrNot);
         }
         else
         {
@@ -116,6 +119,30 @@ function dataHandler(jsonObject)
                     type: 'info',
                     title: 'Object Shared successfully',
                     message: 'Object shared successfully',
+                    buttons: ['OK']
+                }
+            );
+            handleGetFilesAndFolders(null, locationPath);
+        }
+        else if(data.status === "error")
+        {
+            dialog.showMessageBox({
+                type: 'error',
+                title: 'Error',
+                message: data.message,
+                buttons: ['OK']
+            });
+        }
+    }
+    else if (jsonObject.code === DELETE_SELECTION)
+    {
+        if(data.status === "success")
+        {
+            dialog.showMessageBox(
+                {
+                    type: 'info',
+                    title: 'Object Deleted successfully',
+                    message: 'Object deleted successfully',
                     buttons: ['OK']
                 }
             );
@@ -236,6 +263,9 @@ function handleGetShareCode(event, objectName, location, isFolder)
 
 function handleGetFileShares(event, objectName, location, isFolder)
 {
+    fileName = objectName;
+    fileLocation = location;
+    folderOrNot = isFolder;
     const messageData = {
         data: {
             name: objectName,
@@ -245,6 +275,19 @@ function handleGetFileShares(event, objectName, location, isFolder)
     };
     const messageDataJson = JSON.stringify(messageData);
     communicator.sendMessage(messageDataJson, GET_FILE_SHARES);
+}
+
+function handleSendRequestToDelete(event, objectName, location, isFolder)
+{
+    const messageData = {
+        data: {
+            name: objectName,
+            is_folder: isFolder,
+            location: location
+        },
+    };
+    const messageDataJson = JSON.stringify(messageData);
+    communicator.sendMessage(messageDataJson, DELETE_SELECTION);
 }
 
 function handleGetChosenFiles(event, objectName, location, isFolder)
@@ -337,6 +380,7 @@ function createWindow() {
         ipcMain.handle('dialog:switchToEditFile', handleSwitchToEditFile);
         ipcMain.handle('dialog:getShareCode', handleGetShareCode);
         ipcMain.handle('dialog:getFileShares', handleGetFileShares);
+        ipcMain.handle('dialog:sendRequestToDelete', handleSendRequestToDelete);
         ipcMain.handle('dialog:getChosenFiles', handleGetChosenFiles);
         ipcMain.handle('dialog:getSharedFilesAndFolders', handleGetSharedFilesAndFolders);
         ipcMain.handle('dialog:switchToSharedEditFile', handleSwitchToSharedEditFile);
