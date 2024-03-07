@@ -183,6 +183,9 @@ function showContextMenu(x, y) {
   const manageOption = document.getElementById('manageOption');
   manageOption.addEventListener('click', manage);
 
+  const deleteOption = document.getElementById('deleteOption');
+  deleteOption.addEventListener('click', remove);
+
   const downloadOption = document.getElementById('downloadOption');
   downloadOption.addEventListener('click', download);
 
@@ -210,6 +213,10 @@ function share() {
 
 function manage() {
     window.electronAPI.getFileShares(pressedFile, fileViewingForm.alt, isFolder);
+}
+
+function remove() {
+    window.electronAPI.sendRequestToDelete(pressedFile, fileViewingForm.alt, isFolder);
 }
 
 function download() {
