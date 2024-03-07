@@ -41,7 +41,7 @@ class server():
             RequestCodes.GET_SHARED_FILES_AND_FOLDERS.value: self.get_shared_files_and_folders,
             RequestCodes.GET_FILES.value: self.get_files,
             RequestCodes.GET_FILES_SHARES: self.get_file_shares,
-            RequestCodes.REMOVE_SHARE:
+            RequestCodes.REMOVE_SHARE: self.remove_share_from_file
             }
         
     
