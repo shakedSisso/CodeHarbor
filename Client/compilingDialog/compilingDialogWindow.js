@@ -1,27 +1,26 @@
 const { BrowserWindow , ipcMain, dialog } = require('electron');
+const { exec, spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
-const { exec, spawn } = require('child_process');
+
 const communicator = require('../communicator.js');
+const requestCodes = require('../requestCodes.js');
 
 let inputDialog;
 var filesNames = [];
 var executableName = "";
-const GET_FILES_REQUEST = 12;
 
 function dataHandler(jsonObject)
 {
     data = jsonObject.data;
-    if (jsonObject.code === GET_FILES_REQUEST) {
-        let files = [];
-        for (let fileName in data.files)
-        {
-            files.push(fileName);
-            const fileContent = data.files[fileName].join('');
-            createLocalFile(fileName, fileContent);
-        }
-        compileAndRun(files);
+    let files = [];
+    for (let fileName in data.files)
+    {
+        files.push(fileName);
+        const fileContent = data.files[fileName].join('');
+        createLocalFile(fileName, fileContent);
     }
+    compileAndRun(files);
 }
 
 function createLocalFile(fileName, content) {
@@ -90,7 +89,7 @@ function getFilesAndCreateLocalVersions(fileNames)
 {
     const messageData = { data : { file_names: fileNames}};
     const messageDataJson = JSON.stringify(messageData);
-    communicator.sendMessage(messageDataJson, GET_FILES_REQUEST);
+    communicator.sendMessage(messageDataJson, requestCodes.GET_FILES_REQUEST);
 }
 
 function handleGetFilesAndRun (event, exeName, fileNames) {

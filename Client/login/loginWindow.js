@@ -1,12 +1,12 @@
 const { BrowserWindow , ipcMain} = require('electron');
 const path = require('path');
+
 const getMain = () => require('../main.js');
 const communicator = require("../communicator.js");
-const codes = require('../windowCodes.js');
+const windowCodes = require('../windowCodes.js');
+const requestCodes = require('../requestCodes.js');
 
-let mainWindow;
-let name;
-const LOGIN_REQUEST = 5;
+let mainWindow, name;
 
 function dataHandler(jsonObject)
 {
@@ -15,13 +15,13 @@ function dataHandler(jsonObject)
         mainWindow.webContents.send('show-error', 'Username or password are incorrect');
     } else  {
         getMain().setUsername(name);
-        getMain().switchWindow(codes.FILE_VIEW);
+        getMain().switchWindow(windowCodes.FILE_VIEW);
     }
 }
 
 function handleSwitchToSignUp()
 {
-    getMain().switchWindow(codes.SIGNUP);
+    getMain().switchWindow(windowCodes.SIGNUP);
 }
 
 function handleSendLoginDetails(event, username, password)
@@ -34,7 +34,7 @@ function handleSendLoginDetails(event, username, password)
         },
     };
     const messageDataJson = JSON.stringify(messageData);
-    communicator.sendMessage(messageDataJson, LOGIN_REQUEST);
+    communicator.sendMessage(messageDataJson, requestCodes.LOGIN_REQUEST);
 }
 
 function createWindow() {

@@ -1,20 +1,15 @@
 const { BrowserWindow , ipcMain } = require('electron');
 const path = require('path');
-const communicator = require('../communicator.js');
 
-let inputDialog;
+const communicator = require('../communicator.js');
+const requestCodes = require('../requestCodes.js');
+
 var usernames = [];
-let file_name;
-let file_location;
-let is_folder;
-const REMOVE_SHARES = 14;
+let inputDialog, file_name, file_location, is_folder;
 
 function dataHandler(jsonObject)
 {
-    data = jsonObject.data;
-    if (jsonObject.code === REMOVE_SHARES) {
-        inputDialog.close();
-    }
+    inputDialog.close();
 }
 
 function openShareManagementDialog(users, fileName, location, isFolder) {
@@ -65,7 +60,7 @@ function handleRemoveShares(users)
         }
     };
     const messageDataJson = JSON.stringify(messageData);
-    communicator.sendMessage(messageDataJson, REMOVE_SHARES);
+    communicator.sendMessage(messageDataJson, requestCodes.REMOVE_SHARES);
 }
 
 module.exports = {

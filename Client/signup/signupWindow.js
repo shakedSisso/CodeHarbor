@@ -1,12 +1,13 @@
 const { BrowserWindow , ipcMain} = require('electron');
 const path = require('path');
+
 const getMain = () => require('../main.js');
 const communicator = require("../communicator.js");
-const codes = require('../windowCodes.js');
+const windowCodes = require('../windowCodes.js');
+const requestCodes = require('../requestCodes.js');
 
 let mainWindow;
 let name;
-const SIGNUP_REQUEST = 4;
 
 function dataHandler(jsonObject)
 {
@@ -15,13 +16,13 @@ function dataHandler(jsonObject)
         mainWindow.webContents.send('show-error', 'Username is already taken by another user');
     } else  {
         getMain().setUsername(name);
-        getMain().switchWindow(codes.FILE_VIEW);
+        getMain().switchWindow(windowCodes.FILE_VIEW);
     }
 }
 
 function handleSwitchToLogin()
 {
-    getMain().switchWindow(codes.LOGIN);
+    getMain().switchWindow(windowCodes.LOGIN);
 }
 
 function handleSendSignUpDetails(event, username, password, email)
@@ -35,7 +36,7 @@ function handleSendSignUpDetails(event, username, password, email)
         },
     };
     const messageDataJson = JSON.stringify(messageData);
-    communicator.sendMessage(messageDataJson, SIGNUP_REQUEST);
+    communicator.sendMessage(messageDataJson, requestCodes.SIGNUP_REQUEST);
 }
 
 function createWindow() {

@@ -1,32 +1,22 @@
 const { BrowserWindow , ipcMain, Menu, dialog, clipboard  } = require('electron');
 const path = require('path');
 const fs = require('fs');
+
+const shareManagementDialog = require('../shareManagementDialog/shareManagementDialogWindow.js');
+const compilingDialog = require('../compilingDialog/compilingDialogWindow.js');
 const communicator = require("../communicator.js");
 const getMain = () => require('../main.js');
-const codes = require('../windowCodes.js');
-const compilingDialog = require('../compilingDialog/compilingDialogWindow.js');
-const shareManagementDialog = require('../shareManagementDialog/shareManagementDialogWindow.js')
+const windowCodes = require('../windowCodes.js');
+const requestCodes = require('../requestCodes.js');
 
-let mainWindow;
 let locationPath = "";
-let fileLocation;
-let fileName;
-let folderOrNot;
+let mainWindow, fileLocation, fileName, folderOrNot;
 let files = [];
-const NEW_FILE_REQUEST = 3;
-const NEW_FOLDER_REQUEST = 6;
-const GET_FILES_AND_FOLDERS_REQUEST = 7;
-const GET_SHARE_CODE = 9;
-const CONNECT_TO_SHARED_OBJECT_REQUEST = 10;
-const GET_SHARED_FILES_AND_FOLDERS_REQUEST = 11;
-const GET_FILE_SHARES = 13;
-const DOWNLOAD_FILES = 15;
-const DELETE_SELECTION = 16;
 
 function dataHandler(jsonObject)
 {
     data = jsonObject.data;
-    if (jsonObject.code === GET_FILES_AND_FOLDERS_REQUEST || jsonObject.code === GET_SHARED_FILES_AND_FOLDERS_REQUEST)
+    if (jsonObject.code === requestCodes.GET_FILES_AND_FOLDERS_REQUEST || jsonObject.code === requestCodes.GET_SHARED_FILES_AND_FOLDERS_REQUEST)
     {
         if (data.status === "success"){
             for (const fileData of data.files) {
@@ -41,9 +31,9 @@ function dataHandler(jsonObject)
                 buttons: ['OK']
             });
         }
-    } else if (jsonObject.code === NEW_FILE_REQUEST) {
+    } else if (jsonObject.code === requestCodes.NEW_FILE_REQUEST) {
         if (data.status === "success")
-            getMain().switchWindow(codes.EDIT);
+            getMain().switchWindow(windowCodes.EDIT);
         else {
             dialog.showMessageBox({
                 type: 'error',
@@ -52,7 +42,7 @@ function dataHandler(jsonObject)
                 buttons: ['OK']
             });
         }
-    } else if (jsonObject.code === NEW_FOLDER_REQUEST) { 
+    } else if (jsonObject.code === requestCodes.NEW_FOLDER_REQUEST) { 
         if (data.status === "success")
             handleGetFilesAndFolders(null, locationPath); //when a user creates a folder, we don't enter that folder
         else {
@@ -64,7 +54,7 @@ function dataHandler(jsonObject)
             });
         }
     }
-    else if (jsonObject.code === GET_SHARE_CODE)
+    else if (jsonObject.code === requestCodes.GET_SHARE_CODE)
     {
         if(data.status === "success")
         {
@@ -94,7 +84,7 @@ function dataHandler(jsonObject)
             });
         }
     }
-    else if (jsonObject.code === GET_FILE_SHARES)
+    else if (jsonObject.code === requestCodes.GET_FILE_SHARES)
     {
         if(data.status === "success")
         {
@@ -110,7 +100,7 @@ function dataHandler(jsonObject)
             });
         }
     }
-    else if (jsonObject.code === CONNECT_TO_SHARED_OBJECT_REQUEST)
+    else if (jsonObject.code === requestCodes.CONNECT_TO_SHARED_OBJECT_REQUEST)
     {
         if(data.status === "success")
         {
@@ -134,7 +124,7 @@ function dataHandler(jsonObject)
             });
         }
     }
-    else if (jsonObject.code === DELETE_SELECTION)
+    else if (jsonObject.code === requestCodes.DELETE_SELECTION)
     {
         if(data.status === "success")
         {
@@ -158,7 +148,7 @@ function dataHandler(jsonObject)
             });
         }
     }
-    else if (jsonObject.code === DOWNLOAD_FILES)
+    else if (jsonObject.code === requestCodes.DOWNLOAD_FILES)
     {
         selectFolderAndCreateStructure(jsonObject.data);
     }
@@ -170,7 +160,7 @@ function handleCreateRequest(event, name, isFolder)
     var code, messageData;
     if (isFolder) 
     {
-        code = NEW_FOLDER_REQUEST;
+        code = requestCodes.NEW_FOLDER_REQUEST;
         messageData = {
             data: {
                 folder_name: name,
@@ -180,7 +170,7 @@ function handleCreateRequest(event, name, isFolder)
     }
     else 
     {
-        code = NEW_FILE_REQUEST;
+        code = requestCodes.NEW_FILE_REQUEST;
         messageData = {
             data: {
                 file_name: name,
@@ -202,7 +192,7 @@ function handleShareRequest(event, objectName, shareCode, isFolder)
         },
     };
     const messageDataJson = JSON.stringify(messageData);
-    communicator.sendMessage(messageDataJson, CONNECT_TO_SHARED_OBJECT_REQUEST);
+    communicator.sendMessage(messageDataJson, requestCodes.CONNECT_TO_SHARED_OBJECT_REQUEST);
 }
 
 function handleGetFilesAndFolders(event, location)
@@ -216,13 +206,13 @@ function handleGetFilesAndFolders(event, location)
         },
     };
     const messageDataJson = JSON.stringify(messageData);
-    communicator.sendMessage(messageDataJson, GET_FILES_AND_FOLDERS_REQUEST);
+    communicator.sendMessage(messageDataJson, requestCodes.GET_FILES_AND_FOLDERS_REQUEST);
 }
 
 function handleSwitchToEditFile(event, name)
 {
     fileName = name;
-    getMain().switchWindow(codes.EDIT);
+    getMain().switchWindow(windowCodes.EDIT);
 }
 
 function handleSwitchToSharedEditFile(event, name, location)
@@ -231,7 +221,7 @@ function handleSwitchToSharedEditFile(event, name, location)
     locationPath = location;
     locationPath = locationPath.substring(locationPath.indexOf("/") + 1);
     locationPath = locationPath.substring(locationPath.indexOf("/") + 1);
-    getMain().switchWindow(codes.EDIT);
+    getMain().switchWindow(windowCodes.EDIT);
 }
 
 function handleResetLocation(event) {
@@ -258,7 +248,7 @@ function handleGetShareCode(event, objectName, location, isFolder)
         },
     };
     const messageDataJson = JSON.stringify(messageData);
-    communicator.sendMessage(messageDataJson, GET_SHARE_CODE);
+    communicator.sendMessage(messageDataJson, requestCodes.GET_SHARE_CODE);
 }
 
 function handleGetFileShares(event, objectName, location, isFolder)
@@ -274,7 +264,7 @@ function handleGetFileShares(event, objectName, location, isFolder)
         },
     };
     const messageDataJson = JSON.stringify(messageData);
-    communicator.sendMessage(messageDataJson, GET_FILE_SHARES);
+    communicator.sendMessage(messageDataJson, requestCodes.GET_FILE_SHARES);
 }
 
 function handleSendRequestToDelete(event, objectName, location, isFolder)
@@ -287,7 +277,7 @@ function handleSendRequestToDelete(event, objectName, location, isFolder)
         },
     };
     const messageDataJson = JSON.stringify(messageData);
-    communicator.sendMessage(messageDataJson, DELETE_SELECTION);
+    communicator.sendMessage(messageDataJson, requestCodes.DELETE_SELECTION);
 }
 
 function handleGetChosenFiles(event, objectName, location, isFolder)
@@ -300,7 +290,7 @@ function handleGetChosenFiles(event, objectName, location, isFolder)
         },
     };
     const messageDataJson = JSON.stringify(messageData);
-    communicator.sendMessage(messageDataJson, DOWNLOAD_FILES);
+    communicator.sendMessage(messageDataJson, requestCodes.DOWNLOAD_FILES);
 }
 
 async function openFolderSelectionDialog() {
@@ -349,7 +339,7 @@ function handleGetSharedFilesAndFolders(event, location)
         },
     };
     const messageDataJson = JSON.stringify(messageData);
-    communicator.sendMessage(messageDataJson, GET_SHARED_FILES_AND_FOLDERS_REQUEST);
+    communicator.sendMessage(messageDataJson, requestCodes.GET_SHARED_FILES_AND_FOLDERS_REQUEST);
 }
 
 function createWindow() {

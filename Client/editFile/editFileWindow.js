@@ -1,17 +1,15 @@
 const { BrowserWindow , ipcMain, Menu, dialog} = require('electron');
 const { exec, spawn } = require('child_process');
-const fs = require('fs');
 const path = require('path');
+const fs = require('fs');
 
 const getMain = () => require('../main.js');
 const communicator = require("../communicator.js");
-const codes = require('../windowCodes.js');
+const windowCodes = require('../windowCodes.js');
+const requestCodes = require('../requestCodes.js');
 
 let mainWindow;
-const FILE_REQUEST = 1;
-const UPDATE_REQUEST = 2;
-const DISCONNECT_FROM_FILE_REQUEST = 8;
-var fileName = "", newFile, location = "";
+var fileName = "", location = "";
 
 function handleChangesInMain(event, changes, lineCount) {
     //create message and send it to server
@@ -22,7 +20,7 @@ function handleChangesInMain(event, changes, lineCount) {
         },
     };
     const messageDataJson = JSON.stringify(messageData);
-    communicator.sendMessage(messageDataJson, UPDATE_REQUEST);
+    communicator.sendMessage(messageDataJson, requestCodes.UPDATE_REQUEST);
     updateLocalFile(changes);
 }
 
@@ -35,7 +33,7 @@ function connectToFileRequest()
         },
     };
     const messageDataJson = JSON.stringify(messageData);
-    communicator.sendMessage(messageDataJson, FILE_REQUEST);
+    communicator.sendMessage(messageDataJson, requestCodes.FILE_REQUEST);
 }
 
 function compileAndRun() 
@@ -80,19 +78,17 @@ function compileAndRun()
 
 function disconnectFromFile()
 {
-    const messageData = {
-        data: {}
-    };
+    const messageData = { data: {} };
     const messageDataJson = JSON.stringify(messageData);
-    communicator.sendMessage(messageDataJson, DISCONNECT_FROM_FILE_REQUEST)
+    communicator.sendMessage(messageDataJson, requestCodes.DISCONNECT_FROM_FILE_REQUEST)
 }
 
 function dataHandler(jsonObject)
 {
-    if (jsonObject.code === FILE_REQUEST) {
+    if (jsonObject.code === requestCodes.FILE_REQUEST) {
         updateScreenAndCreateLocalFile(jsonObject.data)
     }
-    else if (jsonObject.code === UPDATE_REQUEST)
+    else if (jsonObject.code === requestCodes.UPDATE_REQUEST)
     {
         mainWindow.webContents.send('file-updates', jsonObject.data);
         updateLocalFile(jsonObject.data.updates);
@@ -148,7 +144,7 @@ function createWindow(locationPath, name) {
                     label: 'Exit File',
                     click: () => {
                         disconnectFromFile();
-                        getMain().switchWindow(codes.FILE_VIEW);
+                        getMain().switchWindow(windowCodes.FILE_VIEW);
                         },
                     },
                 ],
