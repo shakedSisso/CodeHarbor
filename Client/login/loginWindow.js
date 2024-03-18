@@ -33,8 +33,7 @@ function handleSendLoginDetails(event, username, password)
             password: password,
         },
     };
-    const messageDataJson = JSON.stringify(messageData);
-    communicator.sendMessage(messageDataJson, requestCodes.LOGIN_REQUEST);
+    communicator.sendMessage(messageData, requestCodes.LOGIN_REQUEST);
 }
 
 function createWindow() {

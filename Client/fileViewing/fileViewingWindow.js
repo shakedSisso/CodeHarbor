@@ -178,8 +178,8 @@ function handleCreateRequest(event, name, isFolder)
             },
         }; 
     }
-    const messageDataJson = JSON.stringify(messageData);
-    communicator.sendMessage(messageDataJson, code);
+    
+    communicator.sendMessage(messageData, code);
 }
 
 function handleShareRequest(event, objectName, shareCode, isFolder)
@@ -191,8 +191,7 @@ function handleShareRequest(event, objectName, shareCode, isFolder)
             is_folder: isFolder,
         },
     };
-    const messageDataJson = JSON.stringify(messageData);
-    communicator.sendMessage(messageDataJson, requestCodes.CONNECT_TO_SHARED_OBJECT_REQUEST);
+    communicator.sendMessage(messageData, requestCodes.CONNECT_TO_SHARED_OBJECT_REQUEST);
 }
 
 function handleGetFilesAndFolders(event, location)
@@ -205,8 +204,7 @@ function handleGetFilesAndFolders(event, location)
             location: locationPath
         },
     };
-    const messageDataJson = JSON.stringify(messageData);
-    communicator.sendMessage(messageDataJson, requestCodes.GET_FILES_AND_FOLDERS_REQUEST);
+    communicator.sendMessage(messageData, requestCodes.GET_FILES_AND_FOLDERS_REQUEST);
 }
 
 function handleSwitchToEditFile(event, name)
@@ -247,8 +245,7 @@ function handleGetShareCode(event, objectName, location, isFolder)
             location: location
         },
     };
-    const messageDataJson = JSON.stringify(messageData);
-    communicator.sendMessage(messageDataJson, requestCodes.GET_SHARE_CODE);
+    communicator.sendMessage(messageData, requestCodes.GET_SHARE_CODE);
 }
 
 function handleGetFileShares(event, objectName, location, isFolder)
@@ -263,8 +260,7 @@ function handleGetFileShares(event, objectName, location, isFolder)
             location: location
         },
     };
-    const messageDataJson = JSON.stringify(messageData);
-    communicator.sendMessage(messageDataJson, requestCodes.GET_FILE_SHARES);
+    communicator.sendMessage(messageData, requestCodes.GET_FILE_SHARES);
 }
 
 function handleSendRequestToDelete(event, objectName, location, isFolder)
@@ -276,8 +272,7 @@ function handleSendRequestToDelete(event, objectName, location, isFolder)
             location: location
         },
     };
-    const messageDataJson = JSON.stringify(messageData);
-    communicator.sendMessage(messageDataJson, requestCodes.DELETE_SELECTION);
+    communicator.sendMessage(messageData, requestCodes.DELETE_SELECTION);
 }
 
 function handleGetChosenFiles(event, objectName, location, isFolder)
@@ -289,8 +284,7 @@ function handleGetChosenFiles(event, objectName, location, isFolder)
             location: location
         },
     };
-    const messageDataJson = JSON.stringify(messageData);
-    communicator.sendMessage(messageDataJson, requestCodes.DOWNLOAD_FILES);
+    communicator.sendMessage(messageData, requestCodes.DOWNLOAD_FILES);
 }
 
 async function openFolderSelectionDialog() {
@@ -338,8 +332,7 @@ function handleGetSharedFilesAndFolders(event, location)
             location: locationPath
         },
     };
-    const messageDataJson = JSON.stringify(messageData);
-    communicator.sendMessage(messageDataJson, requestCodes.GET_SHARED_FILES_AND_FOLDERS_REQUEST);
+    communicator.sendMessage(messageData, requestCodes.GET_SHARED_FILES_AND_FOLDERS_REQUEST);
 }
 
 function createWindow() {

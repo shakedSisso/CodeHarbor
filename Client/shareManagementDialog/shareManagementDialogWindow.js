@@ -59,8 +59,7 @@ function handleRemoveShares(users)
             isFolder: is_folder
         }
     };
-    const messageDataJson = JSON.stringify(messageData);
-    communicator.sendMessage(messageDataJson, requestCodes.REMOVE_SHARES);
+    communicator.sendMessage(messageData, requestCodes.REMOVE_SHARES);
 }
 
 module.exports = {

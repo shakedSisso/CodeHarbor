@@ -35,8 +35,7 @@ function handleSendSignUpDetails(event, username, password, email)
             email: email,
         },
     };
-    const messageDataJson = JSON.stringify(messageData);
-    communicator.sendMessage(messageDataJson, requestCodes.SIGNUP_REQUEST);
+    communicator.sendMessage(messageData, requestCodes.SIGNUP_REQUEST);
 }
 
 function createWindow() {

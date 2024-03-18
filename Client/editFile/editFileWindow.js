@@ -19,8 +19,7 @@ function handleChangesInMain(event, changes, lineCount) {
             line_count: lineCount,
         },
     };
-    const messageDataJson = JSON.stringify(messageData);
-    communicator.sendMessage(messageDataJson, requestCodes.UPDATE_REQUEST);
+    communicator.sendMessage(messageData, requestCodes.UPDATE_REQUEST);
     updateLocalFile(changes);
 }
 
@@ -32,8 +31,7 @@ function connectToFileRequest()
             location: location,
         },
     };
-    const messageDataJson = JSON.stringify(messageData);
-    communicator.sendMessage(messageDataJson, requestCodes.FILE_REQUEST);
+    communicator.sendMessage(messageData, requestCodes.FILE_REQUEST);
 }
 
 function compileAndRun() 
@@ -79,8 +77,7 @@ function compileAndRun()
 function disconnectFromFile()
 {
     const messageData = { data: {} };
-    const messageDataJson = JSON.stringify(messageData);
-    communicator.sendMessage(messageDataJson, requestCodes.DISCONNECT_FROM_FILE_REQUEST)
+    communicator.sendMessage(messageData, requestCodes.DISCONNECT_FROM_FILE_REQUEST)
 }
 
 function dataHandler(jsonObject)

@@ -88,8 +88,7 @@ function handleGetFiles()
 function getFilesAndCreateLocalVersions(fileNames)
 {
     const messageData = { data : { file_names: fileNames}};
-    const messageDataJson = JSON.stringify(messageData);
-    communicator.sendMessage(messageDataJson, requestCodes.GET_FILES_REQUEST);
+    communicator.sendMessage(messageData, requestCodes.GET_FILES_REQUEST);
 }
 
 function handleGetFilesAndRun (event, exeName, fileNames) {

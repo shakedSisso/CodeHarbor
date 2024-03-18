@@ -24,7 +24,7 @@ function connectToServer(callback)
 function disconnectFromServer()
 {
     if (isConnected) {
-        sendMessage("", 0); //0 is the disconnection code
+        sendMessage({}, 0); //0 is the disconnection code
         socket.end();
         isConnected = false;
     }
@@ -45,8 +45,10 @@ socket.on('error', (error) => {
     getMain().closeWindowWhenDisconnected();
   });
 
-function sendMessage(messageDataJson, code)
+function sendMessage(messageData, code)
 {
+    const messageDataJson = JSON.stringify(messageData);
+    
     const messageCode = Buffer.alloc(MESSAGE_CODE_FIELD_SIZE);
     messageCode.writeUInt16BE(code);
 
