@@ -27,6 +27,11 @@ class MongoDBWrapper:
     def delete_document(query, collection):
         result = collection.delete_one(query)
         return result.deleted_count
+    
+    @staticmethod
+    def delete_documents(query, collection):
+        result = collection.delete_many(query)
+        return result.deleted_count
 
     @staticmethod
     def find_documents(query, collection):

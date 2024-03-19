@@ -29,6 +29,10 @@ class FSWrapper():
         return file_lines
     
     @staticmethod
+    def delete_file(file_path, file_name):
+        os.remove(os.path.join(file_path, file_name))
+    
+    @staticmethod
     def create_folder(folder_path, folder_name):
         os.makedirs(os.path.join(folder_path, folder_name))
 
