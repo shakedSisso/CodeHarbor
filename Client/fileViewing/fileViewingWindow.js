@@ -5,6 +5,7 @@ const fs = require('fs');
 const shareManagementDialog = require('../shareManagementDialog/shareManagementDialogWindow.js');
 const compilingDialog = require('../compilingDialog/compilingDialogWindow.js');
 const communicator = require("../communicator.js");
+const storeManager = require('../storeManager.js');
 const getMain = () => require('../main.js');
 const windowCodes = require('../windowCodes.js');
 const requestCodes = require('../requestCodes.js');
@@ -336,9 +337,12 @@ function handleGetSharedFilesAndFolders(event, location)
 }
 
 function createWindow() {
+    const position = storeManager.getValueFromStroe('lastWindowPosition');
     mainWindow = new BrowserWindow({
         width: 800,
         height: 600,
+        x: position.x,
+        y: position.y,
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: true,

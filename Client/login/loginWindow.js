@@ -1,8 +1,9 @@
-const { BrowserWindow , ipcMain} = require('electron');
+const { BrowserWindow , ipcMain } = require('electron');
 const path = require('path');
 
 const getMain = () => require('../main.js');
 const communicator = require("../communicator.js");
+const storeManager = require('../storeManager.js');
 const windowCodes = require('../windowCodes.js');
 const requestCodes = require('../requestCodes.js');
 
@@ -37,9 +38,12 @@ function handleSendLoginDetails(event, username, password)
 }
 
 function createWindow() {
+    const position = storeManager.getValueFromStroe('lastWindowPosition');
     mainWindow = new BrowserWindow({
         width: 800,
         height: 600,
+        x: position.x,
+        y: position.y,
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: true,
