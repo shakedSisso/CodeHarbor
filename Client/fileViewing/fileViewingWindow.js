@@ -5,7 +5,6 @@ const fs = require('fs');
 const shareManagementDialog = require('../shareManagementDialog/shareManagementDialogWindow.js');
 const compilingDialog = require('../compilingDialog/compilingDialogWindow.js');
 const communicator = require("../communicator.js");
-const storeManager = require('../storeManager.js');
 const getMain = () => require('../main.js');
 const windowCodes = require('../windowCodes.js');
 const requestCodes = require('../requestCodes.js');
@@ -295,33 +294,33 @@ async function openFolderSelectionDialog() {
     return result.filePaths[0]; // return the selected folder path
   }
   
-  // Function to create folders and files based on the provided structure
-  async function createFoldersAndFiles(directory, structure) {
-      for (const [name, content] of Object.entries(structure)) {
-          const newPath = path.join(directory, name);
-          if (Array.isArray(content)) {
-              fs.writeFileSync(newPath, content.join(''));
-          } else {
-              fs.mkdirSync(newPath);
-              await createFoldersAndFiles(newPath, content);
-          }
-      }
-  }
-  
-  // Open folder selection dialog and call createFoldersAndFiles with selected folder
-  async function selectFolderAndCreateStructure(structure) {
-    try {
-      const selectedFolder = await openFolderSelectionDialog();
-      await createFoldersAndFiles(selectedFolder, structure);
-      dialog.showMessageBox({
-        type: 'info',
-        title: 'Download successfully',
-        message: "The chosen file or folder were downloaded successfully",
-        buttons: ['OK']
-    });
-    } catch (error) {
+// Function to create folders and files based on the provided structure
+async function createFoldersAndFiles(directory, structure) {
+    for (const [name, content] of Object.entries(structure)) {
+        const newPath = path.join(directory, name);
+        if (Array.isArray(content)) {
+            fs.writeFileSync(newPath, content.join(''));
+        } else {
+            fs.mkdirSync(newPath);
+            await createFoldersAndFiles(newPath, content);
+        }
     }
-  }
+}
+
+// Open folder selection dialog and call createFoldersAndFiles with selected folder
+async function selectFolderAndCreateStructure(structure) {
+try {
+    const selectedFolder = await openFolderSelectionDialog();
+    await createFoldersAndFiles(selectedFolder, structure);
+    dialog.showMessageBox({
+    type: 'info',
+    title: 'Download successfully',
+    message: "The chosen file or folder were downloaded successfully",
+    buttons: ['OK']
+});
+} catch (error) {
+}
+}
 
 function handleGetSharedFilesAndFolders(event, location)
 {
@@ -336,13 +335,12 @@ function handleGetSharedFilesAndFolders(event, location)
     communicator.sendMessage(messageData, requestCodes.GET_SHARED_FILES_AND_FOLDERS_REQUEST);
 }
 
-function createWindow() {
-    const position = storeManager.getValueFromStroe('lastWindowPosition');
+function createWindow(bounds) {
     mainWindow = new BrowserWindow({
-        width: 800,
-        height: 600,
-        x: position.x,
-        y: position.y,
+        width: bounds.width,
+        height: bounds.height,
+        x: bounds.x,
+        y: bounds.y,
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: true,
@@ -433,12 +431,14 @@ function deleteWindow()
     }
 }
 
-function openAddSharedFileDialog()
+async function openAddSharedFileDialog()
 {
-    const inputDialog = new BrowserWindow({
-        width: 525,
-        height: 400,
-        show: false,
+    const position = await getMain().middleOfWindow();
+    inputDialog = new BrowserWindow({
+        width: 550,
+        height: 430,
+        x: position.x,
+        y: position.y,
         webPreferences: {
         nodeIntegration: true,
         contextIsolation: true,
@@ -458,28 +458,31 @@ function openAddSharedFileDialog()
     });
 }
 
-function openCreateFileOrFolderDialog() {
-        const inputDialog = new BrowserWindow({
-            width: 525,
-            height: 400,
-            show: false,
-            webPreferences: {
-            nodeIntegration: true,
-            contextIsolation: true,
-            preload: path.join(__dirname, '../creationDialog/creationDialogPreload.js'),
-            },
-            autoHideMenuBar: true,
-        });
-        // Load an HTML file for the dialog
-        inputDialog.loadFile('creationDialog/creationDialog.html');
+async function openCreateFileOrFolderDialog() 
+{
+    const position = await getMain().middleOfWindow();
+    inputDialog = new BrowserWindow({
+        width: 550,
+        height: 430,
+        x: position.x,
+        y: position.y,
+        webPreferences: {
+        nodeIntegration: true,
+        contextIsolation: true,
+        preload: path.join(__dirname, '../creationDialog/creationDialogPreload.js'),
+        },
+        autoHideMenuBar: true,
+    });
+    // Load an HTML file for the dialog
+    inputDialog.loadFile('creationDialog/creationDialog.html');
 
-        inputDialog.once('ready-to-show', () => {
-            inputDialog.show();
-        });
+    inputDialog.once('ready-to-show', () => {
+        inputDialog.show();
+    });
 
-        inputDialog.on('closed', () => {
-            // Handle the closed event if needed
-        });
+    inputDialog.on('closed', () => {
+        // Handle the closed event if needed
+    });
   }
 
 function getLocationPath(){

@@ -2,6 +2,7 @@ const { BrowserWindow , ipcMain } = require('electron');
 const path = require('path');
 
 const communicator = require('../communicator.js');
+const getMain = () => require('../main.js');
 const requestCodes = require('../requestCodes.js');
 
 var usernames = [];
@@ -12,15 +13,17 @@ function dataHandler(jsonObject)
     inputDialog.close();
 }
 
-function openShareManagementDialog(users, fileName, location, isFolder) {
+async function openShareManagementDialog(users, fileName, location, isFolder) {
     usernames = users;
     file_name = fileName;
     file_location = location;
     is_folder - isFolder;
+    const position = await getMain().middleOfWindow();
     inputDialog = new BrowserWindow({
         width: 550,
-        height: 425,
-        show: false,
+        height: 430,
+        x: position.x,
+        y:position.y,
         webPreferences: {
         nodeIntegration: true,
         contextIsolation: true,

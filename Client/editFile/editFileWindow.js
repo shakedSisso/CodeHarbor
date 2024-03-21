@@ -5,7 +5,6 @@ const fs = require('fs');
 
 const getMain = () => require('../main.js');
 const communicator = require("../communicator.js");
-const storeManager = require('../storeManager.js');
 const windowCodes = require('../windowCodes.js');
 const requestCodes = require('../requestCodes.js');
 
@@ -93,15 +92,14 @@ function dataHandler(jsonObject)
     }
 }
 
-function createWindow(locationPath, name) {
+function createWindow(bounds, locationPath, name) {
     location = locationPath;
     fileName = name;
-    const position = storeManager.getValueFromStroe('lastWindowPosition');
     mainWindow = new BrowserWindow({
-        width: 800,
-        height: 600,
-        x: position.x,
-        y: position.y,
+        width: bounds.width,
+        height: bounds.height,
+        x: bounds.x,
+        y: bounds.y,
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: true,
@@ -123,6 +121,8 @@ function createWindow(locationPath, name) {
 
     return mainWindow;
 }  
+
+
     
     ipcMain.on('set-menu-editFile', (event) => {
         const template = [

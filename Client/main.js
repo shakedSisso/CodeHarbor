@@ -6,10 +6,9 @@ const loginWindow = require("./login/loginWindow.js");
 const signupWindow = require("./signup/signupWindow.js");
 const fileViewingWindow = require("./fileViewing/fileViewingWindow.js");
 const communicator = require("./communicator.js");
-const storeManager = require('./storeManager.js');
 const codes = require('./windowCodes.js');
 
-let currentWindowCode, currentWindow, username, doesCompilerExists;
+let currentWindowCode, currentWindow, username, doesCompilerExists, windowBounds;
 
 function checkGCCInstallation() {
   exec('gcc --version', (error, stdout, stderr) => {
@@ -29,21 +28,13 @@ function checkGCCInstallation() {
       communicator.connectToServer(() => {
         if (communicator.getIsConnected()){
             doesCompilerExists = true;
-            initializePositionInStore();
-            currentWindow = loginWindow.createWindow();
+            windowBounds = { x: 368, y: 108, width: 800, height: 600 }; //automatic bounds in the middle of the screen
+            currentWindow = loginWindow.createWindow(windowBounds);
             currentWindowCode = codes.LOGIN;
         }
     });
     }
   });
-}
-
-function initializePositionInStore(){
-    const { width, height } = screen.getPrimaryDisplay().workAreaSize;
-    const middleX = Math.floor(width / 2) - 400; // (width / 2) - halfOfTheScreenWidth
-    const middleY = Math.floor(height / 2) - 300; // (height / 2) - halfOfTheScreenHeight
-    position = {x:middleX, y:middleY};
-    storeManager.setValueInStore('lastWindowPosition', position);
 }
 
 function switchWindow(code) {
@@ -66,16 +57,16 @@ function switchWindow(code) {
 function openRequestedWindow(code){
     switch(code){
         case codes.LOGIN:
-            currentWindow = loginWindow.createWindow();
+            currentWindow = loginWindow.createWindow(windowBounds);
             break;
         case codes.SIGNUP:
-            currentWindow = signupWindow.createWindow();
+            currentWindow = signupWindow.createWindow(windowBounds);
             break;
         case codes.EDIT:
-            currentWindow = editFileWindow.createWindow(fileViewingWindow.getLocationPath(), fileViewingWindow.getFileName());
+            currentWindow = editFileWindow.createWindow(windowBounds, fileViewingWindow.getLocationPath(), fileViewingWindow.getFileName());
             break;
         case codes.FILE_VIEW:
-            currentWindow = fileViewingWindow.createWindow();
+            currentWindow = fileViewingWindow.createWindow(windowBounds);
             break;
         default:
             throw new Error(`Couldn't find requested window`);
@@ -84,7 +75,7 @@ function openRequestedWindow(code){
 }
 
 function closeLastWindow() {
-    storeManager.setValueInStore('lastWindowPosition', currentWindow.getBounds());
+    windowBounds = currentWindow.getBounds();
     
     switch(currentWindowCode){
         case codes.LOGIN:
@@ -126,7 +117,6 @@ app.on('window-all-closed', () => {
 })
 
 app.on('before-quit', () => {
-    storeManager.initializeStore();
     communicator.disconnectFromServer();
 });
 
@@ -142,10 +132,18 @@ function getDoesCompilerExists(){
     return doesCompilerExists;
 }
 
+function middleOfWindow() {
+    const parent = currentWindow.getBounds();
+    const dialogX = Math.floor(parent.x + ((parent.width / 2) - 275)); // (width / 2) - halfOfTheScreenWidth
+    const dialogY = Math.floor(parent.y + ((parent.height / 2) - 215)); // (height / 2) - halfOfTheScreenHeight
+    return {x: dialogX, y: dialogY};
+}
+
 module.exports = {
     switchWindow,
     closeWindowWhenDisconnected,
     getUsername,
     setUsername, 
-    getDoesCompilerExists
+    getDoesCompilerExists,
+    middleOfWindow
 }

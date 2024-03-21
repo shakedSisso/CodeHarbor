@@ -1,8 +1,9 @@
-const { BrowserWindow , ipcMain, dialog } = require('electron');
+const { BrowserWindow ,ipcMain ,dialog } = require('electron');
 const { exec, spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 
+const getMain = () => require('../main.js');
 const communicator = require('../communicator.js');
 const requestCodes = require('../requestCodes.js');
 
@@ -51,16 +52,20 @@ function deleteLocalFile(file_name) {
         });
 }
 
-function openCompilingDialog(files) {
+async function openCompilingDialog(files) {
     filesNames = files;
+
+    const position = await getMain().middleOfWindow();
     inputDialog = new BrowserWindow({
         width: 550,
-        height: 425,
+        height: 430,
         show: false,
+        x: position.x,
+        y: position.y,
         webPreferences: {
-        nodeIntegration: true,
-        contextIsolation: true,
-        preload: path.join(__dirname, './compilingDialogPreload.js'),
+            nodeIntegration: true,
+            contextIsolation: true,
+            preload: path.join(__dirname, './compilingDialogPreload.js'),
         },
         autoHideMenuBar: true,
     });
@@ -69,7 +74,7 @@ function openCompilingDialog(files) {
     try {
         ipcMain.handle('dialog:getFiles', handleGetFiles);
         ipcMain.handle('dialog:getFilesAndRun', handleGetFilesAndRun);
-    } catch {} //used in case the handlers already exists
+    } catch {} //used in case the handlers already exist
 
     inputDialog.loadFile('compilingDialog/compilingDialog.html');
     inputDialog.show();
@@ -77,7 +82,6 @@ function openCompilingDialog(files) {
     inputDialog.on('closed', () => {
         // Handle the closed event if needed
     });
-    
 }
 
 function handleGetFiles()
