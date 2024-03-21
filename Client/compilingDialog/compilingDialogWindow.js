@@ -12,6 +12,10 @@ let inputDialog;
 var filesNames = [];
 var executableName = "";
 
+/**
+ * Handles data received from the main process.
+ * @param {Object} jsonObject - The JSON object containing data.
+ */
 function dataHandler(jsonObject)
 {
     data = jsonObject.data;
@@ -25,6 +29,11 @@ function dataHandler(jsonObject)
     compileAndRun(files);
 }
 
+/**
+ * Creates a local file with the given content.
+ * @param {string} fileName - The name of the file to create.
+ * @param {string} content - The content to write to the file.
+ */
 function createLocalFile(fileName, content) {
     fs.writeFile("./" + fileName, content, (err) => {
         if (err) {
@@ -33,6 +42,10 @@ function createLocalFile(fileName, content) {
     });
 }
 
+/**
+ * Deletes local files with the given names.
+ * @param {Array<string>} fileNames - An array of file names to delete.
+ */
 function deleteLocalFiles(fileNames)
 {
     fileNames.forEach(name =>{
@@ -40,6 +53,10 @@ function deleteLocalFiles(fileNames)
     })
 }
 
+/**
+ * Deletes a local file with the given name.
+ * @param {string} file_name - The name of the file to delete.
+ */
 function deleteLocalFile(file_name) {
     fs.promises.unlink("./" + file_name)
         .then(() => {
@@ -53,6 +70,10 @@ function deleteLocalFile(file_name) {
         });
 }
 
+/**
+ * Opens a dialog for compiling files.
+ * @param {Array<string>} files - An array of file names to compile.
+ */
 async function openCompilingDialog(files) {
     filesNames = files;
 
@@ -75,7 +96,7 @@ async function openCompilingDialog(files) {
     try {
         ipcMain.handle('dialog:getFiles', handleGetFiles);
         ipcMain.handle('dialog:getFilesAndRun', handleGetFilesAndRun);
-    } catch {} //used in case the handlers already exist
+    } catch {} //used in case the handlers already exist because the window was created before
 
     inputDialog.loadFile('compilingDialog/compilingDialog.html');
     inputDialog.show();
@@ -86,23 +107,40 @@ async function openCompilingDialog(files) {
     });
 }
 
+/**
+ * Handles the event to get files in the dialog window.
+ */
 function handleGetFiles()
 {
     inputDialog.webContents.send('get-files', filesNames);
 }
 
+/**
+ * Gets files and creates local versions for compilation.
+ * @param {Array<string>} fileNames - An array of file names to fetch.
+ */
 function getFilesAndCreateLocalVersions(fileNames)
 {
     const messageData = { data : { file_names: fileNames}};
     communicator.sendMessage(messageData, requestCodes.GET_FILES_REQUEST);
 }
 
+/**
+ * Handles the event to get files and run the compilation.
+ * @param {Object} event - The event object.
+ * @param {string} exeName - The name of the executable.
+ * @param {Array<string>} fileNames - An array of file names to compile.
+ */
+
 function handleGetFilesAndRun (event, exeName, fileNames) {
     executableName = exeName;
     getFilesAndCreateLocalVersions(fileNames);
 }
 
-
+/**
+ * Compiles and runs the specified files.
+ * @param {Array<string>} fileNames - An array of file names to compile.
+ */
 function compileAndRun(fileNames) 
 {
     var compileCommand = `gcc -o ${executableName}.exe `;

@@ -3,8 +3,11 @@ var button = document.getElementById('signupButton');
 var input_username = document.getElementById('username');
 var input_password = document.getElementById('password');
 var input_email = document.getElementById('email');
+
+// Apply CSS class to error message element
 error.classList.toggle('bold-italic');
 
+// Add event listener to signup button
 button.addEventListener('click', () => {
   const username = input_username.value;
   const password = input_password.value;
@@ -15,9 +18,17 @@ button.addEventListener('click', () => {
   }
 });
 
+/**
+ * Checks if the input fields (username, password, email) are valid.
+ * @param {string} username - The username input value.
+ * @param {string} password - The password input value.
+ * @param {string} email - The email input value.
+ * @returns {boolean} True if inputs are valid, false otherwise.
+ */
 function checkIfInputValid(username, password, email) {
   if (username == "" || password == "" || email == "") {
     error.textContent = 'You must fill all the fields';
+    return false;
   }
 
   const usernameRegex = /^[a-zA-Z0-9_]{3,16}$/;
@@ -25,7 +36,7 @@ function checkIfInputValid(username, password, email) {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   
   if (!usernameRegex.test(username)){
-    error.textContent = 'Username must be between 3-16 characters and can only include english letters and numbers';
+    error.textContent = 'Username must be between 3-16 characters and can only include English letters and numbers';
     return false;
   } 
   
@@ -42,10 +53,14 @@ function checkIfInputValid(username, password, email) {
   return true;
 }
 
+/**
+ * Switches the form from signup to login.
+ */
 function switchForm() {
   window.electronAPI.switchToLogin();
 }
 
+// Listen for error event and update error message
 window.electronAPI.showError((event, value) => {
   error.textContent = value;
-})
+});

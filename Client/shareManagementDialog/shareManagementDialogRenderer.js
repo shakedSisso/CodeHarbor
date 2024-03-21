@@ -1,9 +1,12 @@
 const closeButton = document.getElementById('closeButton');
 
+// Event listener when the DOM content is loaded
 window.addEventListener('DOMContentLoaded', () => {
+    // Call the Electron API to get file shares names
     window.electronAPI.getFileSharesNames();
 });
 
+// Event listener for the close button click
 closeButton.addEventListener('click', () => {
     var isOneUnchecked = false;
     let users = [];
@@ -17,14 +20,20 @@ closeButton.addEventListener('click', () => {
     
     if (isOneUnchecked)
     {
+        // Remove shares for unchecked users
         window.electronAPI.removeShares(users);
     }
     else
     {
+        // Close the window
         window.close();
     }
 });
 
+/**
+ * Dynamically creates checkboxes based on the provided checkbox labels.
+ * @param {Array} checkboxLabels - An array of strings representing checkbox labels.
+ */
 function createCheckboxes(checkboxLabels) {
     const compilingForm = document.getElementById('sharesForm');
 
@@ -53,6 +62,7 @@ function createCheckboxes(checkboxLabels) {
     });
 }
 
+// Event listener to get current file shares and create checkboxes
 window.electronAPI.getCurrentFileShares((event, value) => {
     createCheckboxes(value);
-  })
+});

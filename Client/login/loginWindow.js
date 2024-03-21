@@ -8,6 +8,10 @@ const requestCodes = require('../requestCodes.js');
 
 let mainWindow, name;
 
+/**
+ * Handles incoming data from the server and performs actions based on the received data.
+ * @param {Object} jsonObject - The JSON object received from the server.
+ */
 function dataHandler(jsonObject)
 {
     const data = jsonObject.data;
@@ -19,11 +23,20 @@ function dataHandler(jsonObject)
     }
 }
 
+/**
+ * Handles the request to switch to the sign-up window.
+ */
 function handleSwitchToSignUp()
 {
     getMain().switchWindow(windowCodes.SIGNUP);
 }
 
+/**
+ * Handles the event when login details are sent.
+ * @param {Event} event - The event object.
+ * @param {string} username - The username entered by the user.
+ * @param {string} password - The password entered by the user.
+ */
 function handleSendLoginDetails(event, username, password)
 {
     name = username;
@@ -36,6 +49,11 @@ function handleSendLoginDetails(event, username, password)
     communicator.sendMessage(messageData, requestCodes.LOGIN_REQUEST);
 }
 
+/**
+ * Creates a new login window.
+ * @param {Object} bounds - The bounds object containing window dimensions and position.
+ * @returns {BrowserWindow} The newly created BrowserWindow object.
+ */
 function createWindow(bounds) {
     mainWindow = new BrowserWindow({
         width: bounds.width,
@@ -55,11 +73,14 @@ function createWindow(bounds) {
     try {
         ipcMain.handle('dialog:switchToSignup', handleSwitchToSignUp);
         ipcMain.handle('dialog:sendLoginDetails', handleSendLoginDetails);
-    } catch {} //used in case the handlers already exists
+    } catch {} //used in case the handlers already exist because the window was created before
 
     return mainWindow;
 }
 
+/**
+ * Deletes the login window if it exists.
+ */
 function deleteWindow()
 {
     if (mainWindow) {

@@ -11,6 +11,12 @@ const requestCodes = require('../requestCodes.js');
 let mainWindow;
 var fileName = "", location = "";
 
+/**
+ * Handles changes received from the main process and sends them to the server.
+ * @param {Event} event - The event object.
+ * @param {Object} changes - The changes to be handled.
+ * @param {number} lineCount - The line count of the changes.
+ */
 function handleChangesInMain(event, changes, lineCount) {
     //create message and send it to server
     const messageData = {
@@ -23,6 +29,9 @@ function handleChangesInMain(event, changes, lineCount) {
     updateLocalFile(changes);
 }
 
+/**
+ * Connects to the file request.
+ */
 function connectToFileRequest()
 {
     const messageData = {
@@ -34,6 +43,9 @@ function connectToFileRequest()
     communicator.sendMessage(messageData, requestCodes.FILE_REQUEST);
 }
 
+/**
+ * Compiles and runs the code.
+ */
 function compileAndRun() 
 {
     const exeName = fileName.substring(fileName, fileName.lastIndexOf('.'));
@@ -74,12 +86,19 @@ function compileAndRun()
     
 }
 
+/**
+ * Request to disconnects from the file on the server.
+ */
 function disconnectFromFile()
 {
     const messageData = { data: {} };
     communicator.sendMessage(messageData, requestCodes.DISCONNECT_FROM_FILE_REQUEST)
 }
 
+/**
+ * Handles the data received from the communication module.
+ * @param {Object} jsonObject - The JSON object containing the data.
+ */
 function dataHandler(jsonObject)
 {
     if (jsonObject.code === requestCodes.FILE_REQUEST) {
@@ -92,6 +111,13 @@ function dataHandler(jsonObject)
     }
 }
 
+/**
+ * Creates a new Electron window.
+ * @param {Object} bounds - The bounds of the window.
+ * @param {string} locationPath - The location path.
+ * @param {string} name - The name of the file.
+ * @returns {BrowserWindow} The created window.
+ */
 function createWindow(bounds, locationPath, name) {
     location = locationPath;
     fileName = name;
@@ -117,45 +143,55 @@ function createWindow(bounds, locationPath, name) {
     try {
         ipcMain.handle('dialog:getFile', connectToFileRequest);
         ipcMain.handle('dialog:sendChanges', handleChangesInMain);
-    } catch {} //used in case the handlers already exists
+    } catch {} //used in case the handlers already exist because the window was created before
 
     return mainWindow;
 }  
 
-
-    
-    ipcMain.on('set-menu-editFile', (event) => {
-        const template = [
-            {
-                label: 'Run',
-                submenu: [
-                    {
-                        label: 'Compile file',
-                        click: () => {
-                            compileAndRun();
-                        },
-                        enabled: getMain().getDoesCompilerExists(),
+/**
+ * Event listener for the 'set-menu-editFile' IPC message.
+ * Builds and sets the menu for editing files in the main window.
+ * @param {object} event - The IPC event object.
+ */
+ipcMain.on('set-menu-editFile', (event) => {
+    // Define the menu template
+    const template = [
+        {
+            label: 'Run',
+            submenu: [
+                {
+                    label: 'Compile file',
+                    click: () => {
+                        compileAndRun();
                     },
-                ],
-            },
-            {
-                label: 'Exit',
-                submenu: [
-                    {
+                    enabled: getMain().getDoesCompilerExists(),
+                },
+            ],
+        },
+        {
+            label: 'Exit',
+            submenu: [
+                {
                     label: 'Exit File',
                     click: () => {
                         disconnectFromFile();
                         getMain().switchWindow(windowCodes.FILE_VIEW);
-                        },
                     },
-                ],
-            },
-        ];
-        
-        const menuTemplate = Menu.buildFromTemplate(template);
-        mainWindow.setMenu(menuTemplate);
-    });
+                },
+            ],
+        },
+    ];
+    
+    // Build the menu from the template
+    const menuTemplate = Menu.buildFromTemplate(template);
+    // Set the menu in the main window
+    mainWindow.setMenu(menuTemplate);
+});
 
+
+/**
+ * Deletes the Electron window.
+ */
 function deleteWindow()
 {
     if (mainWindow) {
@@ -164,6 +200,10 @@ function deleteWindow()
     }
 }
 
+/**
+ * Updates the screen and creates a local file based on the data received.
+ * @param {Array} data - The data received.
+ */
 function updateScreenAndCreateLocalFile(data)
 {
     var arr = data
@@ -175,6 +215,10 @@ function updateScreenAndCreateLocalFile(data)
     createLocalFile(fileContent);
 }
 
+/**
+ * Creates a local file with the given content.
+ * @param {string} content - The content of the file.
+ */
 function createLocalFile(content) {
     const filePath = path.join('.', fileName); // '.' is used to create a file in the same folder as the app
     fs.writeFile(filePath, content, (err) => {
@@ -184,6 +228,10 @@ function createLocalFile(content) {
     });
 }
 
+/**
+ * Updates the local file based on the changes received.
+ * @param {Object} changes - The changes to be applied.
+ */
 function updateLocalFile(changes){
     const filePath = path.join('.', fileName); // '.' is used to access in file that is in the same folder as the app
     fs.readFile(filePath, 'utf8', (err, data) => {
@@ -210,6 +258,9 @@ function updateLocalFile(changes){
     });
 }
 
+/**
+ * Deletes the local file.
+ */
 function deleteLocalFile() {
     if (fileName == "") //to avoid trying to delete a fileName if it's empty
         return;

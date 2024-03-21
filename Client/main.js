@@ -10,6 +10,10 @@ const codes = require('./windowCodes.js');
 
 let currentWindowCode, currentWindow, username, doesCompilerExists, windowBounds;
 
+/**
+ * Checks if GCC (GNU Compiler Collection) is installed on the system.
+ * If not installed, opens a website with information on how to download GCC.
+ */
 function checkGCCInstallation() {
   exec('gcc --version', (error, stdout, stderr) => {
     if (error) {
@@ -37,6 +41,10 @@ function checkGCCInstallation() {
   });
 }
 
+/**
+ * Switches the application window based on the provided window code.
+ * @param {string} code - The code representing the window to switch to.
+ */
 function switchWindow(code) {
     try {
         closeLastWindow();
@@ -54,6 +62,10 @@ function switchWindow(code) {
     }
 }
 
+/**
+ * Opens the requested window based on the provided window code.
+ * @param {string} code - The code representing the window to open.
+ */
 function openRequestedWindow(code){
     switch(code){
         case codes.LOGIN:
@@ -74,6 +86,9 @@ function openRequestedWindow(code){
     currentWindowCode = code;
 }
 
+/**
+ * Closes the last active window based on the current window code.
+ */
 function closeLastWindow() {
     windowBounds = currentWindow.getBounds();
     
@@ -95,6 +110,9 @@ function closeLastWindow() {
     }
 }
 
+/**
+ * Displays an error message dialog and closes the application when disconnected from the server.
+ */
 function closeWindowWhenDisconnected() {
     dialog.showMessageBox({
       type: 'error',
@@ -120,18 +138,34 @@ app.on('before-quit', () => {
     communicator.disconnectFromServer();
 });
 
+/**
+ * Retrieves the username.
+ * @returns {string} The username.
+ */
 function getUsername() {
     return username;
 }
 
+/**
+ * Sets the username.
+ * @param {string} name - The username to set.
+ */
 function setUsername(name) {
     username = name;
 }
 
+/**
+ * Checks if GCC (GNU Compiler Collection) is installed on the system.
+ * @returns {boolean} True if GCC is installed, false otherwise.
+ */
 function getDoesCompilerExists(){
     return doesCompilerExists;
 }
 
+/**
+ * Calculates the coordinates to position a dialog window in the middle of the current window.
+ * @returns {Object} An object containing the x and y coordinates for the dialog window.
+ */
 function middleOfWindow() {
     const parent = currentWindow.getBounds();
     const dialogX = Math.floor(parent.x + ((parent.width / 2) - 275)); // (width / 2) - halfOfTheScreenWidth

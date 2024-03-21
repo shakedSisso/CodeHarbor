@@ -6,6 +6,11 @@ const hFileRadioButton = document.getElementById('hFile');
 const cFileRadioButton = document.getElementById('cFile');
 const folderRadioButton = document.getElementById('folder');
 
+/**
+ * Function that handles the click event on the "OK" button.
+ * Validates radio buttons, gets input value, determines file type,
+ * and calls the electronAPI.create function.
+ */
 okButton.addEventListener('click', () => {
   var input, isFolder;
   if (validateRadioButtons()) {
@@ -26,10 +31,18 @@ okButton.addEventListener('click', () => {
   }
 });
 
+/**
+ * Function that handles the click event on the "Cancel" button.
+ * Closes the window when the button is clicked.
+ */
 cancelButton.addEventListener('click', () => {
   window.close();
 });
 
+/**
+ * Function to get the checked radio button from a group of radio buttons.
+ * @returns {HTMLInputElement|null} The checked radio button element, or null if none is checked.
+ */
 function getCheckedRadioButton() {
   var radioButtons = document.getElementsByName('radioGroup');
 
@@ -41,6 +54,10 @@ function getCheckedRadioButton() {
   return null;
 }
 
+/**
+ * Function to validate if at least one radio button is checked.
+ * @returns {boolean} True if at least one radio button is checked, false otherwise.
+ */
 function validateRadioButtons() {
   var radioButtons = document.getElementsByName('radioGroup');
   var radioSelected = false;

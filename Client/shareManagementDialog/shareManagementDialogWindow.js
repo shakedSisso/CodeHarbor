@@ -8,11 +8,22 @@ const requestCodes = require('../requestCodes.js');
 var usernames = [];
 let inputDialog, file_name, file_location, is_folder;
 
+/**
+ * Handles incoming data from the server and closes the input dialog window.
+ * @param {Object} jsonObject - The JSON object received from the server.
+ */
 function dataHandler(jsonObject)
 {
     inputDialog.close();
 }
 
+/**
+ * Opens a share management dialog window.
+ * @param {Array} users - An array of usernames for sharing.
+ * @param {string} fileName - The name of the file to be shared.
+ * @param {string} location - The location of the file to be shared.
+ * @param {boolean} isFolder - Indicates whether the shared item is a folder.
+ */
 async function openShareManagementDialog(users, fileName, location, isFolder) {
     usernames = users;
     file_name = fileName;
@@ -23,7 +34,7 @@ async function openShareManagementDialog(users, fileName, location, isFolder) {
         width: 550,
         height: 430,
         x: position.x,
-        y:position.y,
+        y: position.y,
         webPreferences: {
         nodeIntegration: true,
         contextIsolation: true,
@@ -36,7 +47,7 @@ async function openShareManagementDialog(users, fileName, location, isFolder) {
     try {
         ipcMain.handle('dialog:getFileSharesNames', handleGetFileSharesNames);
         ipcMain.handle('dialog:removeShares', handleRemoveShares);
-    } catch {} //used in case the handlers already exists
+    } catch {} //used in case the handlers already exist because the window was created before
 
     inputDialog.loadFile('shareManagementDialog/shareManagementDialog.html');
     inputDialog.show();
@@ -47,11 +58,18 @@ async function openShareManagementDialog(users, fileName, location, isFolder) {
     
 }
 
+/**
+ * Handles the getFileSharesNames dialog event.
+ */
 function handleGetFileSharesNames()
 {
     inputDialog.webContents.send('get-file-shares', usernames);
 }
 
+/**
+ * Handles the removeShares dialog event.
+ * @param {Array} users - An array of usernames to remove shares for.
+ */
 function handleRemoveShares(users)
 {
     const messageData = { 

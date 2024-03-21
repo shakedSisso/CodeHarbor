@@ -6,6 +6,10 @@ const getMain = () => require('../main.js');
 const getFileViewing = () => require('../fileViewing/fileViewingWindow');
 const requestCodes = require('../requestCodes.js');
 
+/**
+ * Handles incoming data from the server and performs actions based on the received data.
+ * @param {Object} jsonObject - The JSON object received from the server.
+ */
 function dataHandler(jsonObject) 
 {
     data = jsonObject.data;
@@ -35,6 +39,13 @@ function dataHandler(jsonObject)
     }
 }
 
+/**
+ * Handles the share request by sending a message to the server with the required data.
+ * @param {Event} event - The event object.
+ * @param {string} objectName - The name of the object to share.
+ * @param {string} shareCode - The share code for accessing the shared object.
+ * @param {boolean} isFolder - Indicates whether the shared object is a folder.
+ */
 function handleShareRequest(event, objectName, shareCode, isFolder)
 {
     const messageData = {
@@ -47,6 +58,9 @@ function handleShareRequest(event, objectName, shareCode, isFolder)
     communicator.sendMessage(messageData, requestCodes.CONNECT_TO_SHARED_OBJECT_REQUEST);
 }
 
+/**
+ * Opens a dialog window for adding a shared file or folder.
+ */
 async function openAddSharedFileDialog()
 {
     const position = await getMain().middleOfWindow();
@@ -68,7 +82,7 @@ async function openAddSharedFileDialog()
 
     try {
         ipcMain.handle('dialog:createShare', handleShareRequest);
-    } catch {} //used in case the handlers already exists because the window was created before
+    } catch {} //used in case the handlers already exist because the window was created before
 
     inputDialog.once('ready-to-show', () => {
         inputDialog.show();

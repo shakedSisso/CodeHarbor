@@ -1,25 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Character encoding -->
     <meta charset="UTF-8">
+    <!-- External stylesheet and Google Fonts -->
     <link rel="stylesheet" href="../styles.css">
     <link href='http://fonts.googleapis.com/css?family=Ubuntu&subset=cyrillic,latin' rel='stylesheet' type='text/css' />
+    <!-- Tailwind CSS from CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Page title -->
     <title>CodeHarbor</title>
 </head>
 <body>
+  <!-- Container for file viewing -->
   <div class="files-container" id="fileViewingForm">
   </div>
+
   <!-- Context Menu -->
   <div id="contextMenu" class="context-menu">
     <ul>
+      <!-- Context menu options -->
       <li id="shareOption"><img src="../images/share-icon.png" alt="Share Icon" class="context-menu-icon"> Share</li>
       <li id="manageOption"><img src="../images/manage-icon.png" alt="Manage Icon" class="context-menu-icon"> Manage</li>
       <li id="deleteOption"><img src="../images/delete-icon.png" alt="Delete Icon" class="context-menu-icon"> Delete</li>
       <li id="downloadOption"><img src="../images/download-icon.png" alt="Download Icon" class="context-menu-icon"> Download</li>
     </ul>
   </div>
-<!-- Context Menu -->
+
+  <!-- JavaScript for file viewing -->
   <script src="./fileViewingRenderer.js"></script>
 </body>
 </html>

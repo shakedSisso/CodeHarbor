@@ -1,3 +1,4 @@
+// this codes are used to send requests to the server
 module.exports = {
     FILE_REQUEST: 1,
     UPDATE_REQUEST: 2,

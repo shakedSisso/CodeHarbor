@@ -10,6 +10,10 @@ const windowCodes = require('../windowCodes.js');
 
 var fileName;
 
+/**
+ * Handles incoming data from the communicator module based on the request code.
+ * @param {Object} jsonObject - The JSON object containing the data and code.
+ */
 function dataHandler(jsonObject) 
 {
     data = jsonObject.data;
@@ -41,6 +45,12 @@ function dataHandler(jsonObject)
     }
 }
 
+/**
+ * Handles the create request by sending a message to the communicator module.
+ * @param {Object} event - The event object.
+ * @param {string} name - The name of the file or folder to be created.
+ * @param {boolean} isFolder - Indicates whether the creation is for a folder (true) or a file (false).
+ */
 function handleCreateRequest(event, name, isFolder)
 {
     const locationPath = getFileViewing().getLocationPath();
@@ -70,6 +80,10 @@ function handleCreateRequest(event, name, isFolder)
     communicator.sendMessage(messageData, code);
 }
 
+/**
+ * Opens the create file or folder dialog window.
+ * This function initializes the dialog window, sets event handlers, and loads the HTML file.
+ */
 async function openCreateFileOrFolderDialog() 
 {
     const position = await getMain().middleOfWindow();
@@ -79,9 +93,9 @@ async function openCreateFileOrFolderDialog()
         x: position.x,
         y: position.y,
         webPreferences: {
-        nodeIntegration: true,
-        contextIsolation: true,
-        preload: path.join(__dirname, '../creationDialog/creationDialogPreload.js'),
+            nodeIntegration: true,
+            contextIsolation: true,
+            preload: path.join(__dirname, '../creationDialog/creationDialogPreload.js'),
         },
         autoHideMenuBar: true,
     });
@@ -91,7 +105,7 @@ async function openCreateFileOrFolderDialog()
 
     try {
         ipcMain.handle('dialog:create', handleCreateRequest);
-    } catch {} //used in case the handlers already exists
+    } catch {} //used in case the handlers already exist because the window was created before
 
     inputDialog.once('ready-to-show', () => {
         inputDialog.show();
@@ -101,7 +115,7 @@ async function openCreateFileOrFolderDialog()
         // Handle the closed event if needed
         communicator.setDataHandler(getFileViewing().dataHandler);
     });
-  }
+}
 
 module.exports = {
     openCreateFileOrFolderDialog

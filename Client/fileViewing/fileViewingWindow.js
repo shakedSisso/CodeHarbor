@@ -17,6 +17,10 @@ let locationPath = "";
 let mainWindow, fileLocation, fileName, folderOrNot;
 let files = [];
 
+/**
+ * Handles incoming data from the server and performs actions based on the received data.
+ * @param {Object} jsonObject - The JSON object received from the server.
+ */
 function dataHandler(jsonObject)
 {
     data = jsonObject.data;
@@ -112,6 +116,11 @@ function dataHandler(jsonObject)
     }
 }
 
+/**
+ * Handles the request to fetch files and folders from a specific location.
+ * @param {Event} event - The event object.
+ * @param {string} location - The location to fetch files and folders from.
+ */
 function handleGetFilesAndFolders(event, location)
 {
     if (location != locationPath) {
@@ -125,12 +134,23 @@ function handleGetFilesAndFolders(event, location)
     communicator.sendMessage(messageData, requestCodes.GET_FILES_AND_FOLDERS_REQUEST);
 }
 
+/**
+ * Handles the request to switch to editing a file.
+ * @param {Event} event - The event object.
+ * @param {string} name - The name of the file to edit.
+ */
 function handleSwitchToEditFile(event, name)
 {
     fileName = name;
     getMain().switchWindow(windowCodes.EDIT);
 }
 
+/**
+ * Handles the request to switch to editing a file from the shared folder.
+ * @param {Event} event - The event object.
+ * @param {string} name - The name of the file to edit.
+ * @param {string} location - The location of the file in the server.
+ */
 function handleSwitchToSharedEditFile(event, name, location)
 {
     fileName = name;
@@ -140,11 +160,19 @@ function handleSwitchToSharedEditFile(event, name, location)
     getMain().switchWindow(windowCodes.EDIT);
 }
 
+/**
+ * Handles the request to reset the location and hides the menu bar
+ * @param {Event} event - The event object.
+ */
 function handleResetLocation(event) {
     locationPath = "";
     mainWindow.setMenuBarVisibility(!mainWindow.isMenuBarVisible());
 }
 
+/**
+ * Handles the request to check the location and act accordingly
+ * @param {Event} event - The event object.
+ */
 function handleCheckLocation(event){
     if (locationPath != "") {
         mainWindow.webContents.send('send-location', locationPath);
@@ -154,6 +182,13 @@ function handleCheckLocation(event){
     }
 }
 
+/**
+ * Handles the request to get a share code to the file or folder.
+ * @param {Event} event - The event object.
+ * @param {string} objectName - The name of the file or folder.
+ * @param {string} location - The location of the file/folder
+ * @param {boolean} isFolder - The parameter that indicates if the chosen object is a file or a folder
+ */
 function handleGetShareCode(event, objectName, location, isFolder)
 {
     const messageData = {
@@ -166,6 +201,13 @@ function handleGetShareCode(event, objectName, location, isFolder)
     communicator.sendMessage(messageData, requestCodes.GET_SHARE_CODE);
 }
 
+/**
+ * Handles the request to get the shares of the chosen object
+ * @param {Event} event - The event object.
+ * @param {string} objectName - The name of the file or folder.
+ * @param {string} location - The location of the file/folder
+ * @param {boolean} isFolder - The parameter that indicates if the chosen object is a file or a folder
+ */
 function handleGetFileShares(event, objectName, location, isFolder)
 {
     fileName = objectName;
@@ -181,6 +223,13 @@ function handleGetFileShares(event, objectName, location, isFolder)
     communicator.sendMessage(messageData, requestCodes.GET_FILE_SHARES);
 }
 
+/**
+ * Handles the request to delete the file or folder.
+ * @param {Event} event - The event object.
+ * @param {string} objectName - The name of the file or folder.
+ * @param {string} location - The location of the file/folder
+ * @param {boolean} isFolder - The parameter that indicates if the chosen object is a file or a folder
+ */
 function handleSendRequestToDelete(event, objectName, location, isFolder)
 {
     const messageData = {
@@ -193,6 +242,13 @@ function handleSendRequestToDelete(event, objectName, location, isFolder)
     communicator.sendMessage(messageData, requestCodes.DELETE_SELECTION);
 }
 
+/**
+ * Handles the request to download the file or folder.
+ * @param {Event} event - The event object.
+ * @param {string} objectName - The name of the file or folder.
+ * @param {string} location - The location of the file/folder
+ * @param {boolean} isFolder - The parameter that indicates if the chosen object is a file or a folder
+ */
 function handleGetChosenFiles(event, objectName, location, isFolder)
 {
     const messageData = {
@@ -205,6 +261,10 @@ function handleGetChosenFiles(event, objectName, location, isFolder)
     communicator.sendMessage(messageData, requestCodes.DOWNLOAD_FILES);
 }
 
+/**
+ * Opens a folder selection dialog to choose a directory.
+ * @returns {Promise<string>} The selected folder path.
+ */
 async function openFolderSelectionDialog() {
     const result = await dialog.showOpenDialog({
       properties: ['openDirectory']
@@ -212,7 +272,11 @@ async function openFolderSelectionDialog() {
     return result.filePaths[0]; // return the selected folder path
   }
   
-// Function to create folders and files based on the provided structure
+/**
+ * Creates folders and files based on the provided structure.
+ * @param {string} directory - The directory where to create the folders and files.
+ * @param {Object} structure - The structure defining the folders and files to create.
+ */
 async function createFoldersAndFiles(directory, structure) {
     for (const [name, content] of Object.entries(structure)) {
         const newPath = path.join(directory, name);
@@ -225,21 +289,28 @@ async function createFoldersAndFiles(directory, structure) {
     }
 }
 
-// Open folder selection dialog and call createFoldersAndFiles with selected folder
+/**
+ * Opens the folder selection dialog and creates the folder structure based on the provided structure.
+ * @param {Object} structure - The structure defining the folders and files to create.
+ */
 async function selectFolderAndCreateStructure(structure) {
-try {
-    const selectedFolder = await openFolderSelectionDialog();
-    await createFoldersAndFiles(selectedFolder, structure);
-    dialog.showMessageBox({
-    type: 'info',
-    title: 'Download successfully',
-    message: "The chosen file or folder were downloaded successfully",
-    buttons: ['OK']
-});
-} catch (error) {
-}
+    try {
+        const selectedFolder = await openFolderSelectionDialog();
+        await createFoldersAndFiles(selectedFolder, structure);
+        dialog.showMessageBox({
+        type: 'info',
+        title: 'Download successfully',
+        message: "The chosen file or folder were downloaded successfully",
+        buttons: ['OK']
+    });
+    } catch (error) {}
 }
 
+/**
+ * Handles the "get shared files and folders" request from the client.
+ * @param {Event} event - The event object.
+ * @param {string} location - The location of the shared files and folders.
+ */
 function handleGetSharedFilesAndFolders(event, location)
 {
     if (location != locationPath) {
@@ -253,6 +324,11 @@ function handleGetSharedFilesAndFolders(event, location)
     communicator.sendMessage(messageData, requestCodes.GET_SHARED_FILES_AND_FOLDERS_REQUEST);
 }
 
+/**
+ * Creates a BrowserWindow instance and loads the fileViewing.html file.
+ * @param {Object} bounds - The bounds object containing window dimensions and position.
+ * @returns {BrowserWindow} The created BrowserWindow instance.
+ */
 function createWindow(bounds) {
     mainWindow = new BrowserWindow({
         width: bounds.width,
@@ -286,15 +362,24 @@ function createWindow(bounds) {
         ipcMain.handle('dialog:getChosenFiles', handleGetChosenFiles);
         ipcMain.handle('dialog:getSharedFilesAndFolders', handleGetSharedFilesAndFolders);
         ipcMain.handle('dialog:switchToSharedEditFile', handleSwitchToSharedEditFile);
-    } catch {} //used in case the handlers already exists
+    } catch {} //used in case the handlers already exist because the window was created before
 
     return mainWindow;
 }
 
+/**
+ * Handles the "request username" event by sending the username to the renderer process.
+ * @param {Event} event - The event object.
+ */
 function handleRequestUsername(event) {
     mainWindow.webContents.send('send-username', getMain().getUsername());
 }
 
+/**
+ * Sets the menu based on the main folder name and template.
+ * @param {Event} event - The event object.
+ * @param {string} mainFolderName - The main folder name.
+ */
 function handleSetMenu (event, mainFolderName) {
     let template = [
         {
@@ -334,11 +419,18 @@ function handleSetMenu (event, mainFolderName) {
     setMenu(template);
 }
 
+/**
+ * Sets the menu based on the provided template.
+ * @param {Object} template - The menu template object.
+ */
 function setMenu(template) {
     const menuTemplate = Menu.buildFromTemplate(template);
     mainWindow.setMenu(menuTemplate);
 }
 
+/**
+ * Closes the main window.
+ */
 function deleteWindow()
 {
     if (mainWindow) {
@@ -347,18 +439,33 @@ function deleteWindow()
     }
 }
 
+/**
+ * Retrieves the current location path.
+ * @returns {string} The current location path.
+ */
 function getLocationPath(){
     return locationPath;
 }
 
+/**
+ * Retrieves the current file name.
+ * @returns {string} The current file name.
+ */
 function getFileName(){
     return fileName;
 }
 
+/**
+ * Sets the current file name.
+ * @param {string} name - The file name to set.
+ */
 function setFileName(name){
     fileName = name;
 }
 
+/**
+ * Reloads the current file in the main window.
+ */
 function reloadCurrentFile() {
     handleGetFilesAndFolders(null, locationPath);
 }
