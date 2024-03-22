@@ -3,9 +3,13 @@ const path = require('path');
 const fs = require('fs');
 
 const shareManagementDialog = require('../shareManagementDialog/shareManagementDialogWindow.js');
+const creationDialog = require('../creationDialog/creationDialogWindow.js');
+const sharingDialog = require('../sharingDialog/sharingDialogWindow.js');
 const compilingDialog = require('../compilingDialog/compilingDialogWindow.js');
+
 const communicator = require("../communicator.js");
 const getMain = () => require('../main.js');
+
 const windowCodes = require('../windowCodes.js');
 const requestCodes = require('../requestCodes.js');
 
@@ -31,29 +35,7 @@ function dataHandler(jsonObject)
                 buttons: ['OK']
             });
         }
-    } else if (jsonObject.code === requestCodes.NEW_FILE_REQUEST) {
-        if (data.status === "success")
-            getMain().switchWindow(windowCodes.EDIT);
-        else {
-            dialog.showMessageBox({
-                type: 'error',
-                title: 'Error',
-                message: "This file name is already taken by another file in this location",
-                buttons: ['OK']
-            });
-        }
-    } else if (jsonObject.code === requestCodes.NEW_FOLDER_REQUEST) { 
-        if (data.status === "success")
-            handleGetFilesAndFolders(null, locationPath); //when a user creates a folder, we don't enter that folder
-        else {
-            dialog.showMessageBox({
-                type: 'error',
-                title: 'Error',
-                message: "This folder name is already taken by another folder in this location",
-                buttons: ['OK']
-            });
-        }
-    }
+    } 
     else if (jsonObject.code === requestCodes.GET_SHARE_CODE)
     {
         if(data.status === "success")
@@ -100,30 +82,6 @@ function dataHandler(jsonObject)
             });
         }
     }
-    else if (jsonObject.code === requestCodes.CONNECT_TO_SHARED_OBJECT_REQUEST)
-    {
-        if(data.status === "success")
-        {
-            dialog.showMessageBox(
-                {
-                    type: 'info',
-                    title: 'Object Shared successfully',
-                    message: 'Object shared successfully',
-                    buttons: ['OK']
-                }
-            );
-            handleGetFilesAndFolders(null, locationPath);
-        }
-        else if(data.status === "error")
-        {
-            dialog.showMessageBox({
-                type: 'error',
-                title: 'Error',
-                message: data.message,
-                buttons: ['OK']
-            });
-        }
-    }
     else if (jsonObject.code === requestCodes.DELETE_SELECTION)
     {
         if(data.status === "success")
@@ -152,46 +110,6 @@ function dataHandler(jsonObject)
     {
         selectFolderAndCreateStructure(jsonObject.data);
     }
-}
-
-function handleCreateRequest(event, name, isFolder)
-{
-    fileName = name;
-    var code, messageData;
-    if (isFolder) 
-    {
-        code = requestCodes.NEW_FOLDER_REQUEST;
-        messageData = {
-            data: {
-                folder_name: name,
-                location: locationPath,
-            },
-        }; 
-    }
-    else 
-    {
-        code = requestCodes.NEW_FILE_REQUEST;
-        messageData = {
-            data: {
-                file_name: name,
-                location: locationPath,
-            },
-        }; 
-    }
-    
-    communicator.sendMessage(messageData, code);
-}
-
-function handleShareRequest(event, objectName, shareCode, isFolder)
-{
-    const messageData = {
-        data: {
-            name: objectName,
-            share_code: shareCode,
-            is_folder: isFolder,
-        },
-    };
-    communicator.sendMessage(messageData, requestCodes.CONNECT_TO_SHARED_OBJECT_REQUEST);
 }
 
 function handleGetFilesAndFolders(event, location)
@@ -360,7 +278,6 @@ function createWindow(bounds) {
         ipcMain.handle('dialog:checkLocation', handleCheckLocation);
         ipcMain.handle('dialog:setMenu', handleSetMenu);
         ipcMain.handle('dialog:showMenu', ()=>{mainWindow.setMenuBarVisibility(!mainWindow.isMenuBarVisible());})
-        ipcMain.handle('dialog:create', handleCreateRequest);
         ipcMain.handle('dialog:getFilesAndFolders', handleGetFilesAndFolders);
         ipcMain.handle('dialog:switchToEditFile', handleSwitchToEditFile);
         ipcMain.handle('dialog:getShareCode', handleGetShareCode);
@@ -369,7 +286,6 @@ function createWindow(bounds) {
         ipcMain.handle('dialog:getChosenFiles', handleGetChosenFiles);
         ipcMain.handle('dialog:getSharedFilesAndFolders', handleGetSharedFilesAndFolders);
         ipcMain.handle('dialog:switchToSharedEditFile', handleSwitchToSharedEditFile);
-        ipcMain.handle('dialog:createShare', handleShareRequest);
     } catch {} //used in case the handlers already exists
 
     return mainWindow;
@@ -387,7 +303,7 @@ function handleSetMenu (event, mainFolderName) {
             {
                 label: 'Add Shared File/Folder',
                 click: () => {
-                    openAddSharedFileDialog();
+                    sharingDialog.openAddSharedFileDialog();
                 },
             }
         ],
@@ -411,7 +327,7 @@ function handleSetMenu (event, mainFolderName) {
         template[0].submenu.push({
             label: 'Create File/Folder',
             click: () => {
-                openCreateFileOrFolderDialog();
+                creationDialog.openCreateFileOrFolderDialog();
                 },
         });
     }
@@ -431,60 +347,6 @@ function deleteWindow()
     }
 }
 
-async function openAddSharedFileDialog()
-{
-    const position = await getMain().middleOfWindow();
-    inputDialog = new BrowserWindow({
-        width: 550,
-        height: 430,
-        x: position.x,
-        y: position.y,
-        webPreferences: {
-        nodeIntegration: true,
-        contextIsolation: true,
-        preload: path.join(__dirname, '../sharingDialog/sharingDialogPreload.js'),
-        },
-        autoHideMenuBar: true,
-    });
-    // Load an HTML file for the dialog
-    inputDialog.loadFile('sharingDialog/sharingDialog.html');
-
-    inputDialog.once('ready-to-show', () => {
-        inputDialog.show();
-    });
-
-    inputDialog.on('closed', () => {
-        // Handle the closed event if needed
-    });
-}
-
-async function openCreateFileOrFolderDialog() 
-{
-    const position = await getMain().middleOfWindow();
-    inputDialog = new BrowserWindow({
-        width: 550,
-        height: 430,
-        x: position.x,
-        y: position.y,
-        webPreferences: {
-        nodeIntegration: true,
-        contextIsolation: true,
-        preload: path.join(__dirname, '../creationDialog/creationDialogPreload.js'),
-        },
-        autoHideMenuBar: true,
-    });
-    // Load an HTML file for the dialog
-    inputDialog.loadFile('creationDialog/creationDialog.html');
-
-    inputDialog.once('ready-to-show', () => {
-        inputDialog.show();
-    });
-
-    inputDialog.on('closed', () => {
-        // Handle the closed event if needed
-    });
-  }
-
 function getLocationPath(){
     return locationPath;
 }
@@ -493,9 +355,20 @@ function getFileName(){
     return fileName;
 }
 
+function setFileName(name){
+    fileName = name;
+}
+
+function reloadCurrentFile() {
+    handleGetFilesAndFolders(null, locationPath);
+}
+
 module.exports = {
     createWindow,
     deleteWindow,
+    dataHandler,
     getLocationPath,
-    getFileName
+    getFileName,
+    setFileName,
+    reloadCurrentFile
 }

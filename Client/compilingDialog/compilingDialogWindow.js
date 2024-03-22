@@ -4,6 +4,7 @@ const path = require('path');
 const fs = require('fs');
 
 const getMain = () => require('../main.js');
+const getFileViewing = () => require('../fileViewing/fileViewingWindow');
 const communicator = require('../communicator.js');
 const requestCodes = require('../requestCodes.js');
 
@@ -81,6 +82,7 @@ async function openCompilingDialog(files) {
 
     inputDialog.on('closed', () => {
         // Handle the closed event if needed
+        communicator.setDataHandler(getFileViewing().dataHandler);
     });
 }
 
