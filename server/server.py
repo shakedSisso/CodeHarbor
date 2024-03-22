@@ -42,7 +42,7 @@ class server():
             RequestCodes.GET_FILES.value: self.get_files,
             RequestCodes.DELETE_OBJECT: self.delete_object_request,
             RequestCodes.GET_FILES_SHARES: self.get_file_shares,
-            RequestCodes.DOWNLOAD_FILES: 
+            RequestCodes.DOWNLOAD_FILES: self.get_file_for_download,
             RequestCodes.REMOVE_SHARE: self.remove_share_from_file
             }
         
