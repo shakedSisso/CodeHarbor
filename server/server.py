@@ -78,6 +78,8 @@ class server():
             response = self.handle_request(client_message_code, client_message_data_json, user)
             if response is not None:
                 user.send_message(response)
+            if client_message_code == RequestCodes.LOGOUT.value:
+                user = User(client_socket)
 
     def remove_and_disconnect(self, user):
         room = user.get_room()
@@ -99,7 +101,10 @@ class server():
         return message_json
 
     def handle_request(self, code, data, user):
-        response_data = self.handlers[code](data, user)
+        if code == RequestCodes.LOGOUT.value:
+            response_data = {"data": {"status": "success"}}
+        else:
+            response_data = self.handlers[code](data, user)
         if response_data is None:
             return None
         response_data["code"] = code

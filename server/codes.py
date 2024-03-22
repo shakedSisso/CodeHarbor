@@ -17,3 +17,4 @@ class RequestCodes(Enum):
     REMOVE_SHARE = 14
     DOWNLOAD_FILES = 15
     DELETE_OBJECT = 16
+    LOGOUT = 17
