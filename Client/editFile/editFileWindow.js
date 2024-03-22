@@ -180,6 +180,7 @@ function createWindow(locationPath, name) {
     });
 
     function logOut() {
+        disconnectFromFile();
         const messageDataJson = JSON.stringify({});
         communicator.sendMessage(messageDataJson, LOGOUT_REQUEST);
     }
