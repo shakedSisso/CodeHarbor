@@ -22,6 +22,7 @@ const GET_SHARED_FILES_AND_FOLDERS_REQUEST = 11;
 const GET_FILE_SHARES = 13;
 const DOWNLOAD_FILES = 15;
 const DELETE_SELECTION = 16;
+const LOGOUT_REQUEST = 17;
 
 function dataHandler(jsonObject)
 {
@@ -161,6 +162,11 @@ function dataHandler(jsonObject)
     else if (jsonObject.code === DOWNLOAD_FILES)
     {
         selectFolderAndCreateStructure(jsonObject.data);
+    }
+    else if (jsonObject.code === LOGOUT_REQUEST)
+    {
+        locationPath = "";
+        getMain().switchWindow(codes.LOGIN);
     }
 }
 
@@ -418,6 +424,23 @@ function handleSetMenu (event, mainFolderName) {
                     enabled: getMain().getDoesCompilerExists(),
                 },
             ],
+        },
+        {
+            label: 'Exit',
+            submenu: [
+                {
+                    label: 'Exit App',
+                    click: () => {
+                        mainWindow.close();
+                    },
+                },
+                {
+                    label: 'Log out',
+                    click: () => {
+                        logOut();
+                    },
+                }
+            ],
         }
     ];
     
@@ -431,6 +454,11 @@ function handleSetMenu (event, mainFolderName) {
         });
     }
     setMenu(template);
+}
+
+function logOut() {
+    const messageDataJson = JSON.stringify({});
+    communicator.sendMessage(messageDataJson, LOGOUT_REQUEST);
 }
 
 function setMenu(template) {
@@ -499,6 +527,11 @@ function getLocationPath(){
     return locationPath;
 }
 
+function resetLocation()
+{
+    locationPath = "";
+}
+
 function getFileName(){
     return fileName;
 }
@@ -507,5 +540,6 @@ module.exports = {
     createWindow,
     deleteWindow,
     getLocationPath,
+    resetLocation,
     getFileName
 }
