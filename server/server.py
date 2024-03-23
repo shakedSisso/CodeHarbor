@@ -77,7 +77,6 @@ class server():
                 self.remove_and_disconnect(user)
                 break
             response = self.handle_request(client_message_code, client_message_data_json, user)
-            print(response)
             if response is not None:
                 user.send_message(response)
             if client_message_code == RequestCodes.LOGOUT.value:
@@ -103,7 +102,6 @@ class server():
         return message_json
 
     def handle_request(self, code, data, user):
-        print(code, data)
         if code == RequestCodes.LOGOUT.value:
             response_data = {"data": {"status": "success"}}
         else:
@@ -367,7 +365,7 @@ class server():
         try:
             self.delete_folder(data["data"]["name"], data["data"]["location"], user.get_user_name())
         except Exception as e:
-            return {"data": {"status": "error", "message": e}}
+            return {"data": {"status": "error", "message": str(e)}}
         return {"data": {"status": "success"}}
 
 
@@ -442,7 +440,7 @@ class server():
                 else:
                     raise Exception("File {} @ {} is being used".format(file.get("file_name"), file.get("location")))
         except Exception as e:
-            return {"data": {"status": "error", "message": e}}
+            return {"data": {"status": "error", "message": str(e)}}
 
     def is_object_in_folder(self, object, folders):
         owner = object.get("owner")
@@ -476,7 +474,6 @@ class server():
     
 
     def get_folder_content_for_download(self, name, location, owner):
-        print("get folder content")
         files_collection = MongoDBWrapper.connect_to_mongo("Files")
         folders_collection = MongoDBWrapper.connect_to_mongo("Folders")
         folders_in_folder = MongoDBWrapper.find_documents({"location": location + "/" + name, "owner": owner}, folders_collection)
