@@ -40,10 +40,10 @@ class server():
             RequestCodes.CONNECT_TO_SHARED_FILE.value: self.connect_to_shared_file,
             RequestCodes.GET_SHARED_FILES_AND_FOLDERS.value: self.get_shared_files_and_folders,
             RequestCodes.GET_FILES.value: self.get_files,
-            RequestCodes.DELETE_OBJECT: self.delete_object_request,
-            RequestCodes.GET_FILES_SHARES: self.get_file_shares,
-            RequestCodes.DOWNLOAD_FILES: self.get_file_for_download,
-            RequestCodes.REMOVE_SHARE: self.remove_share_from_file
+            RequestCodes.DELETE_OBJECT.value: self.delete_object_request,
+            RequestCodes.GET_FILES_SHARES.value: self.get_file_shares,
+            RequestCodes.DOWNLOAD_FILES.value: self.get_file_for_download,
+            RequestCodes.REMOVE_SHARE.value: self.remove_share_from_file
             }
         
     
