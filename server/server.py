@@ -493,9 +493,9 @@ class server():
 
     def check_if_file_used(self, name, location):
         file_room = [room for room in self.rooms if room.get_file_name() == name and room.get_file_path() == location]
-        if not file_room is None:
-           return True
-        return False  
+        if not file_room:
+           return False
+        return True  
     
     def clear_object_db_fs(self, document, is_folder):
         files_collection = MongoDBWrapper.connect_to_mongo("Files")
