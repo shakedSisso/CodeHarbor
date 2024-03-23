@@ -35,7 +35,7 @@ function dataHandler(jsonObject)
             dialog.showMessageBox({
                 type: 'error',
                 title: 'Error',
-                message: "Couldn't find the requested folder",
+                message: data.message,
                 buttons: ['OK']
             });
         }
@@ -46,7 +46,7 @@ function dataHandler(jsonObject)
             dialog.showMessageBox({
                 type: 'error',
                 title: 'Error',
-                message: "This file name is already taken by another file in this location",
+                message: data.message,
                 buttons: ['OK']
             });
         }
@@ -57,7 +57,7 @@ function dataHandler(jsonObject)
             dialog.showMessageBox({
                 type: 'error',
                 title: 'Error',
-                message: "This folder name is already taken by another folder in this location",
+                message: data.message,
                 buttons: ['OK']
             });
         }
@@ -87,7 +87,7 @@ function dataHandler(jsonObject)
             dialog.showMessageBox({
                 type: 'error',
                 title: 'Error',
-                message: "There was an error while trying to create a share code for this object.\nPlease try again later.",
+                message: data.message,
                 buttons: ['OK']
             });
         }
@@ -104,7 +104,7 @@ function dataHandler(jsonObject)
             dialog.showMessageBox({
                 type: 'error',
                 title: 'Error',
-                message: "There was an error while trying to create a share code for this object.\nPlease try again later.",
+                message: data.message,
                 buttons: ['OK']
             });
         }
