@@ -1,6 +1,7 @@
 const { BrowserWindow , ipcMain } = require('electron');
 const path = require('path');
 const communicator = require('../communicator.js');
+const getFileViewing = () => require('../fileViewing/fileViewingWindow.js');
 
 let inputDialog;
 var usernames = [];
@@ -13,6 +14,15 @@ function dataHandler(jsonObject)
 {
     data = jsonObject.data;
     if (jsonObject.code === REMOVE_SHARES) {
+        if (data.status === 'error')
+        {
+            dialog.showMessageBox({
+                type: 'error',
+                title: 'Error',
+                message: "There was an error while trying to create a share code for this object.\nPlease try again later.",
+                buttons: ['OK']
+            });
+        }
         inputDialog.close();
     }
 }
@@ -21,7 +31,7 @@ function openShareManagementDialog(users, fileName, location, isFolder) {
     usernames = users;
     file_name = fileName;
     file_location = location;
-    is_folder - isFolder;
+    is_folder = isFolder;
     inputDialog = new BrowserWindow({
         width: 550,
         height: 425,
@@ -45,6 +55,7 @@ function openShareManagementDialog(users, fileName, location, isFolder) {
 
     inputDialog.on('closed', () => {
         // Handle the closed event if needed
+        getFileViewing().reloadCurrentFolder();
     });
     
 }
@@ -54,16 +65,17 @@ function handleGetFileSharesNames()
     inputDialog.webContents.send('get-file-shares', usernames);
 }
 
-function handleRemoveShares(users)
+function handleRemoveShares(event, users)
 {
     const messageData = { 
         data : { 
             usernames: users,
             name: file_name,
             location: file_location,
-            isFolder: is_folder
+            is_folder: is_folder
         }
     };
+    console.log(messageData);
     const messageDataJson = JSON.stringify(messageData);
     communicator.sendMessage(messageDataJson, REMOVE_SHARES);
 }

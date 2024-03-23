@@ -4,9 +4,9 @@ const fs = require('fs');
 const path = require('path');
 
 const getMain = () => require('../main.js');
+const getFileViewing = () => require('../fileViewing/fileViewingWindow.js'); 
 const communicator = require("../communicator.js");
 const codes = require('../windowCodes.js');
-const windowCodes = require('../windowCodes.js');
 const fileViewing = require('../fileViewing/fileViewingWindow.js');
 
 let mainWindow;
@@ -98,12 +98,12 @@ function dataHandler(jsonObject)
     else if (jsonObject.code === UPDATE_REQUEST)
     {
         mainWindow.webContents.send('file-updates', jsonObject.data);
-        updateLocalFile(jsonObject.data.updates);
+        updateLocalFile(data.updates);
     }
     else if (jsonObject.code === LOGOUT_REQUEST)
     {
         fileViewing.resetLocation();
-        getMain().switchWindow(windowCodes.LOGIN);
+        getMain().switchWindow(codes.LOGIN);
     }
 }
 
@@ -121,20 +121,27 @@ function createWindow(locationPath, name) {
         autoHideMenuBar: false,
     })
     mainWindow.loadFile('editFile/editFile.html');
+
     mainWindow.on('closed', () => {
+        getFileViewing().reloadCurrentFolder();
         deleteLocalFile();
       });
 
-    communicator.setDataHandler(dataHandler);
 
     try {
+        ipcMain.handle('dialog:connectDataHandler', handleConnectDataHandler);
         ipcMain.handle('dialog:getFile', connectToFileRequest);
         ipcMain.handle('dialog:sendChanges', handleChangesInMain);
     } catch {} //used in case the handlers already exists
 
     return mainWindow;
 }  
-    
+
+function handleConnectDataHandler() 
+{
+    communicator.setDataHandler(dataHandler);
+}
+
     ipcMain.on('set-menu-editFile', (event) => {
         const template = [
             {
@@ -158,18 +165,6 @@ function createWindow(locationPath, name) {
                         disconnectFromFile();
                         getMain().switchWindow(codes.FILE_VIEW);
                         },
-                    },
-                    {
-                    label: 'Exit App',
-                    click: () => {
-                        mainWindow.close();
-                        },
-                    },
-                    {
-                    label: 'Log out',
-                    click: () => {
-                        logOut();
-                        },
                     }
                 ],
             },
@@ -178,12 +173,6 @@ function createWindow(locationPath, name) {
         const menuTemplate = Menu.buildFromTemplate(template);
         mainWindow.setMenu(menuTemplate);
     });
-
-    function logOut() {
-        disconnectFromFile();
-        const messageDataJson = JSON.stringify({});
-        communicator.sendMessage(messageDataJson, LOGOUT_REQUEST);
-    }
 
 function deleteWindow()
 {

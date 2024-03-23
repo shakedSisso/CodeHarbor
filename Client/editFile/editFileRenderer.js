@@ -43,6 +43,7 @@ var currentIndex = 0;
   }, 1000);
 
   window.addEventListener('DOMContentLoaded', () => {
+    window.electronAPI.connectHandler();
     window.api.setMenu();
     window.electronAPI.getFile();
   });

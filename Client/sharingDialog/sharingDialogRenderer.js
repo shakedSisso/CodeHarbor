@@ -8,15 +8,16 @@ const folderRadioButton = document.getElementById('folder');
 
 okButton.addEventListener('click', () => {
   var objectName, isFolder, shareCode;
-  const shareCodeRegex = /^[a-zA-Z0-9]{11}$/;
+  const shareCodeRegex = /^[a-zA-Z0-9]{8}$/;
   const fileNameRegex = /\.(c|h)$/;
   if (validateRadioButtons()) {
     objectName = objectField.value;
     shareCode = shareCodeField.value;
     if(!shareCodeRegex.test(shareCode))
     {
-        alert("Enter a valid share code!");
-        return;
+      window.close();
+      alert("Share code isn't valid!");
+      return;
     }
     const checked = getCheckedRadioButton();
     if (checked == folderRadioButton){
@@ -24,13 +25,14 @@ okButton.addEventListener('click', () => {
     } else {
       if(!fileNameRegex.test(objectName))
       {
-        alert("A file name must end in .c or .h");
+        window.close(); 
+        alert("File name isn't in the right format");
         return;
       }
       isFolder = false;
     }
-    window.electronAPI.share(objectName, shareCode, isFolder);
-    window.close();
+      window.electronAPI.share(objectName, shareCode, isFolder);
+      window.close();
   }
 });
 

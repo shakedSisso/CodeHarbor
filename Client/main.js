@@ -63,7 +63,7 @@ function openRequestedWindow(code){
             signupWindow.createWindow();
             break;
         case codes.EDIT:
-            editFileWindow.createWindow(fileViewingWindow.getLocationPath(), fileViewingWindow.getFileName());
+            currentWindow = editFileWindow.createWindow(fileViewingWindow.getFileLocation(), fileViewingWindow.getFileName());
             break;
         case codes.FILE_VIEW:
             fileViewingWindow.createWindow();

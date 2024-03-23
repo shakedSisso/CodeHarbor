@@ -7,11 +7,8 @@ const codes = require('../windowCodes.js');
 const compilingDialog = require('../compilingDialog/compilingDialogWindow.js');
 const shareManagementDialog = require('../shareManagementDialog/shareManagementDialogWindow.js')
 
-let mainWindow;
-let locationPath = "";
-let fileLocation;
-let fileName;
-let folderOrNot;
+let locationPath = "", fileLocation = "";
+let mainWindow, fileName, folderOrNot;
 let files = [];
 const NEW_FILE_REQUEST = 3;
 const NEW_FOLDER_REQUEST = 6;
@@ -99,7 +96,8 @@ function dataHandler(jsonObject)
     {
         if(data.status === "success")
         {
-            shareManagementDialog.openShareManagementDialog(data.users, fileName, fileLocation, folderOrNot);
+            const users = data.users.map(user => user.username);
+            shareManagementDialog.openShareManagementDialog(users, fileName, fileLocation, folderOrNot);
         }
         else
         {
@@ -161,7 +159,17 @@ function dataHandler(jsonObject)
     }
     else if (jsonObject.code === DOWNLOAD_FILES)
     {
-        selectFolderAndCreateStructure(jsonObject.data);
+        if (data.status === 'error') {
+            dialog.showMessageBox({
+                type: 'error',
+                title: 'Error',
+                message: "There was an error while trying to create a share code for this object.\nPlease try again later.",
+                buttons: ['OK']
+            });
+            return;
+        }
+        delete data.status; //remove the status from the structure so the function doesn't create it as a folder/file
+        selectFolderAndCreateStructure(data);
     }
     else if (jsonObject.code === LOGOUT_REQUEST)
     {
@@ -228,15 +236,16 @@ function handleGetFilesAndFolders(event, location)
 function handleSwitchToEditFile(event, name)
 {
     fileName = name;
+    fileLocation = locationPath;
     getMain().switchWindow(codes.EDIT);
 }
 
 function handleSwitchToSharedEditFile(event, name, location)
 {
     fileName = name;
-    locationPath = location;
-    locationPath = locationPath.substring(locationPath.indexOf("/") + 1);
-    locationPath = locationPath.substring(locationPath.indexOf("/") + 1);
+    fileLocation = location;
+    let parts = fileLocation.split('./files/'); //only save the location that is after './files/'
+    fileLocation = parts[1];
     getMain().switchWindow(codes.EDIT);
 }
 
@@ -272,6 +281,7 @@ function handleGetFileShares(event, objectName, location, isFolder)
     fileName = objectName;
     fileLocation = location;
     folderOrNot = isFolder;
+    location = './files/' + location.substring(0,location.lastIndexOf('/'));
     const messageData = {
         data: {
             name: objectName,
@@ -285,6 +295,7 @@ function handleGetFileShares(event, objectName, location, isFolder)
 
 function handleSendRequestToDelete(event, objectName, location, isFolder)
 {
+    location = './files/' + location.substring(0,location.lastIndexOf('/'));
     const messageData = {
         data: {
             name: objectName,
@@ -298,6 +309,9 @@ function handleSendRequestToDelete(event, objectName, location, isFolder)
 
 function handleGetChosenFiles(event, objectName, location, isFolder)
 {
+    location = './files/' + location.substring(0,location.lastIndexOf('/'));
+    if (isFolder)
+        objectName = objectName.substring(0, objectName.lastIndexOf('/')); //removes the `/` in the end of the name of a folder
     const messageData = {
         data: {
             name: objectName,
@@ -324,7 +338,7 @@ async function openFolderSelectionDialog() {
               fs.writeFileSync(newPath, content.join(''));
           } else {
               fs.mkdirSync(newPath);
-              await createFoldersAndFiles(newPath, content);
+              createFoldersAndFiles(newPath, content);
           }
       }
   }
@@ -333,7 +347,7 @@ async function openFolderSelectionDialog() {
   async function selectFolderAndCreateStructure(structure) {
     try {
       const selectedFolder = await openFolderSelectionDialog();
-      await createFoldersAndFiles(selectedFolder, structure);
+      createFoldersAndFiles(selectedFolder, structure);
       dialog.showMessageBox({
         type: 'info',
         title: 'Download successfully',
@@ -346,16 +360,23 @@ async function openFolderSelectionDialog() {
 
 function handleGetSharedFilesAndFolders(event, location)
 {
-    if (location != locationPath) {
-        locationPath = location.substring(0, location.lastIndexOf("/"));
+    if (location === "Shared/"){
+        const messageData = {
+            data: {
+                location: "Shared"
+            },
+        };    
+        const messageDataJson = JSON.stringify(messageData);
+        communicator.sendMessage(messageDataJson, GET_SHARED_FILES_AND_FOLDERS_REQUEST);
     }
-    const messageData = {
-        data: {
-            location: locationPath
-        },
-    };
-    const messageDataJson = JSON.stringify(messageData);
-    communicator.sendMessage(messageDataJson, GET_SHARED_FILES_AND_FOLDERS_REQUEST);
+    else 
+    {
+        let parts = location.split('./files/'); //only save the location that is after './files/'
+        location = parts[1];
+        handleGetFilesAndFolders(event, location);
+    }
+
+    
 }
 
 function createWindow() {
@@ -532,14 +553,39 @@ function resetLocation()
     locationPath = "";
 }
 
+function getFileLocation() {
+    return fileLocation;
+}
+
 function getFileName(){
     return fileName;
+}
+
+function setFileName(name){
+    fileName = name;
+}
+
+function reloadCurrentFolder() {
+    console.log(locationPath);
+    if (locationPath.startsWith('Shared'))
+    {
+        console.log('in shared');
+        handleGetSharedFilesAndFolders(null, locationPath);
+    }
+    else 
+    {
+        handleGetFilesAndFolders(null, locationPath);
+    }
+    communicator.setDataHandler(dataHandler);
 }
 
 module.exports = {
     createWindow,
     deleteWindow,
     getLocationPath,
+    getFileLocation,
     resetLocation,
-    getFileName
+    getFileName,
+    setFileName,
+    reloadCurrentFolder
 }

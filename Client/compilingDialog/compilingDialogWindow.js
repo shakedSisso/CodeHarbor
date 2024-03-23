@@ -77,6 +77,7 @@ function openCompilingDialog(files) {
 
     inputDialog.on('closed', () => {
         // Handle the closed event if needed
+        getFileViewing().reloadCurrentFolder();
     });
     
 }

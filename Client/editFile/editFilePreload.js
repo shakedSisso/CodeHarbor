@@ -5,6 +5,7 @@ contextBridge.exposeInMainWorld('api', {
 });
 
 contextBridge.exposeInMainWorld('electronAPI', {
+  connectHandler: () => ipcRenderer.invoke('dialog:connectDataHandler',),
   getFile: () => ipcRenderer.invoke('dialog:getFile',),
   sendChanges: (changes, lineCount) => ipcRenderer.invoke('dialog:sendChanges', changes, lineCount),
   getContentFile: (callback) => ipcRenderer.on('file-content', callback),
