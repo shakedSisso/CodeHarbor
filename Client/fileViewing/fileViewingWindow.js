@@ -566,10 +566,8 @@ function setFileName(name){
 }
 
 function reloadCurrentFolder() {
-    console.log(locationPath);
     if (locationPath.startsWith('Shared'))
     {
-        console.log('in shared');
         handleGetSharedFilesAndFolders(null, locationPath);
     }
     else 
