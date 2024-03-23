@@ -163,7 +163,7 @@ function dataHandler(jsonObject)
             dialog.showMessageBox({
                 type: 'error',
                 title: 'Error',
-                message: "There was an error while trying to create a share code for this object.\nPlease try again later.",
+                message: data.message,
                 buttons: ['OK']
             });
             return;
