@@ -1,4 +1,4 @@
-const { BrowserWindow , ipcMain } = require('electron');
+const { BrowserWindow , ipcMain, dialog } = require('electron');
 const path = require('path');
 const communicator = require('../communicator.js');
 const getFileViewing = () => require('../fileViewing/fileViewingWindow.js');
@@ -19,7 +19,7 @@ function dataHandler(jsonObject)
             dialog.showMessageBox({
                 type: 'error',
                 title: 'Error',
-                message: "There was an error while trying to create a share code for this object.\nPlease try again later.",
+                message: data.message,
                 buttons: ['OK']
             });
         }
