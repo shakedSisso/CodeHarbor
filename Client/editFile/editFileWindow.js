@@ -100,11 +100,6 @@ function dataHandler(jsonObject)
         mainWindow.webContents.send('file-updates', jsonObject.data);
         updateLocalFile(data.updates);
     }
-    else if (jsonObject.code === LOGOUT_REQUEST)
-    {
-        fileViewing.resetLocation();
-        getMain().switchWindow(codes.LOGIN);
-    }
 }
 
 function createWindow(locationPath, name) {
