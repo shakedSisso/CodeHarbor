@@ -274,7 +274,7 @@ class server():
         user_document =  MongoDBWrapper.find_document({"username": user.get_user_name()}, user_collection)
         user_id = user_document.get("_id")
         shares_collection = MongoDBWrapper.connect_to_mongo("Shares")
-        user_share = MongoDBWrapper.find_document({"userId": user_id}, shares_collection)
+        user_share = MongoDBWrapper.find_document({"userId": user_id, "share_code": data["data"]["share_code"]}, shares_collection)
         if user_share is not None:
             return {"data": {"status": "error", "message": "This share already exists"}}
         if data["data"]["is_folder"]:
@@ -378,11 +378,11 @@ class server():
         share_codes_collection = MongoDBWrapper.connect_to_mongo("Share Codes")
         users_collection = MongoDBWrapper.connect_to_mongo("Users")
         if data["data"]["is_folder"]:
-            folder_document = MongoDBWrapper.find_document({"folder_name": data["data"]["name"], "location": data["data"]["location"], "owner": user.get_user_name()}, folders_collection)
-            if folder_document is None:
+            folder_document = MongoDBWrapper.find_document({"folder_name": data["data"]["name"][:-1], "location": data["data"]["location"], "owner": user.get_user_name()}, folders_collection)
+            if folder_document == None:
                 return {"data": {"status": "error", "message": "folder wasn't found"}}
             folder_share_code_document = MongoDBWrapper.find_document({"shareId": folder_document.get("_id")}, share_codes_collection)
-            if folder_share_code_document is None:
+            if folder_share_code_document == None:
                 return {"data": {"status": "error", "message": "A share code wasn't created for the folder"}}
             share_documents = MongoDBWrapper.find_documents({"shareCode": folder_share_code_document.get("code")}, shares_collection)
         else:
