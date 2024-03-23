@@ -401,8 +401,12 @@ class server():
         files_collection = MongoDBWrapper.connect_to_mongo("Files")
         folders_collection = MongoDBWrapper.connect_to_mongo("Folders")
         share_codes_collection = MongoDBWrapper.connect_to_mongo("Share Codes")
+        if data["data"]["location"].startswith("./files/"):
+            location = data["data"]["location"][:-1]
+        else:
+            location = "./files/" + data["data"]["location"][:-1]
         if data["data"]["is_folder"]:
-            folder_document = MongoDBWrapper.find_document({"folder_name": data["data"]["name"], "location": data["data"]["location"], "owner": user.get_user_name()}, folders_collection)
+            folder_document = MongoDBWrapper.find_document({"folder_name": data["data"]["name"], "location": location, "owner": user.get_user_name()}, folders_collection)
             if folder_document is None:
                 return {"data": {"status": "error", "message": "folder wasn't found"}}
             folder_share_code_document = MongoDBWrapper.find_document({"shareId": folder_document.get("_id")}, share_codes_collection)
@@ -410,20 +414,20 @@ class server():
                 return {"data": {"status": "error", "message": "A share code wasn't created for the folder"}}
             share_code = folder_share_code_document.get("code")
         else:
-            file_document = MongoDBWrapper.find_document({"file_name": data["data"]["name"], "location": data["data"]["location"], "owner": user.get_user_name()}, files_collection)
+            file_document = MongoDBWrapper.find_document({"file_name": data["data"]["name"], "location": location, "owner": user.get_user_name()}, files_collection)
             if file_document is None:
                 return {"data": {"status": "error", "message": "file wasn't found"}}
             file_share_code_document = MongoDBWrapper.find_document({"shareId": file_document.get("_id")}, share_codes_collection)
             if file_share_code_document is None:
                 return {"data": {"status": "error", "message": "A share code wasn't created for the file"}}
             share_code = file_share_code_document.get("code")
-        
         for user in users_to_remove:
             user_document = MongoDBWrapper.find_document({"username": user}, users_collection)
             if user_document is None:
                 continue
             user_id = user_document.get("_id")
             MongoDBWrapper.delete_document({"userId": user_id, "shareCode": share_code}, shares_collection)
+
 
     
     def get_file_for_download(self, data, user):
