@@ -15,4 +15,6 @@ class RequestCodes(Enum):
     GET_FILES = 12
     GET_FILES_SHARES = 13
     REMOVE_SHARE = 14
+    DOWNLOAD_FILES = 15
     DELETE_OBJECT = 16
+    LOGOUT = 17
