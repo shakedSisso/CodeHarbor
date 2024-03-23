@@ -485,7 +485,7 @@ class server():
         if not files_in_folder is None:
             for file in files_in_folder:
                 if not self.check_if_file_used(file.get("file_name"), file.get("location")):
-                    file_content = self.get_file_content(file)
+                    file_content = self.get_file_content(file.get("file_name"), file.get("location"))
                     files[file.get("file_name")] = file_content
                 else:
                     raise Exception("File {} @ {} is being used".format(file.get("file_name"), file.get("location")))
