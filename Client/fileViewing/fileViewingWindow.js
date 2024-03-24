@@ -194,6 +194,7 @@ function handleCreateRequest(event, name, isFolder)
     }
     else 
     {
+        fileLocation = locationPath;
         code = NEW_FILE_REQUEST;
         messageData = {
             data: {
