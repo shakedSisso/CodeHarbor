@@ -122,7 +122,10 @@ class server():
     def get_file_content_and_connect_to_room(self, data, user):
         fileName = data["data"]["file_name"]
         fileLocation = "files/"+ data["data"]["location"]
-        file_content = self.get_file_content(fileName, fileLocation)
+        try:
+            file_content = self.get_file_content(fileName, fileLocation)
+        except Exception as e:
+            return {"data":{"status":"error","message":"File not Found"}}
         for room in self.rooms:  # checking is there is an open room for the file
             if room.get_file_name() == fileName:
                 room.add_user(user)
@@ -224,7 +227,10 @@ class server():
         files = {"files":{}}
         for fileData in data["file_names"]:
             fileLocation, fileName = os.path.split(fileData)
-            files["files"][fileName] = self.get_file_content(fileName, fileLocation)
+            try:
+                files["files"][fileName] = self.get_file_content(fileName, fileLocation)
+            except Exception as e:
+                return {"data":{"status":"error","message":"File not Found"}}
         return {"data": files}
         
     def create_share_code_for_file(self, data, user):
@@ -437,8 +443,11 @@ class server():
             else:
                 file = MongoDBWrapper.find_document({"file_name": data["data"]["name"], "location": data["data"]["location"], "owner": user.get_user_name()}, files_collection)
                 if not self.check_if_file_used(file.get("file_name"), file.get("location")):
+                    try:
                         file_content = self.get_file_content(data["data"]["name"], data["data"]["location"])
-                        return {"data": {"status": "success", file.get("file_name"): file_content}}
+                    except Exception as e:
+                        return {"data":{"status":"error","message":"File not Found"}}
+                    return {"data": {"status": "success", file.get("file_name"): file_content}}
                 else:
                     raise Exception("File {} @ {} is being used".format(file.get("file_name"), file.get("location")))
         except Exception as e:
@@ -487,7 +496,10 @@ class server():
         if not files_in_folder is None:
             for file in files_in_folder:
                 if not self.check_if_file_used(file.get("file_name"), file.get("location")):
-                    file_content = self.get_file_content(file.get("file_name"), file.get("location"))
+                    try:
+                        file_content = self.get_file_content(file.get("file_name"), file.get("location"))
+                    except Exception as e:
+                        return {"data":{"status":"error","message":"File not Found"}}
                     files[file.get("file_name")] = file_content
                 else:
                     raise Exception("File {} @ {} is being used".format(file.get("file_name"), file.get("location")))
