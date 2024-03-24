@@ -114,8 +114,6 @@ class server():
         return len_bytes + response_data_json.encode()
 
     def get_file_content(self, fileName, fileLocation):
-        if not FSWrapper.check_if_file_exists(fileLocation, fileName):
-            FSWrapper.create_file(fileLocation, fileName)
         file_object = FSWrapper.open_file(fileLocation, fileName, "r")
         file_content = FSWrapper.read_file_content(file_object)
         file_object.close()
