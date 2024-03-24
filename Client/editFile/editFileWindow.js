@@ -31,6 +31,8 @@ function handleChangesInMain(event, changes, lineCount) {
 
 function connectToFileRequest()
 {
+    fileName = getFileViewing().getFileName();
+    location = getFileViewing().getFileLocation();
     const messageData = {
         data: {
             file_name: fileName,
@@ -102,9 +104,7 @@ function dataHandler(jsonObject)
     }
 }
 
-function createWindow(locationPath, name) {
-    location = locationPath;
-    fileName = name;
+function createWindow() {
     mainWindow = new BrowserWindow({
         width: 800,
         height: 600,
