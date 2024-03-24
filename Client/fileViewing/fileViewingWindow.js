@@ -370,7 +370,7 @@ function handleGetSharedFilesAndFolders(event, location)
         const messageDataJson = JSON.stringify(messageData);
         communicator.sendMessage(messageDataJson, GET_SHARED_FILES_AND_FOLDERS_REQUEST);
     }
-    else 
+    else {
         if (location.includes('files'))
         {
             let parts = location.split('./files/'); //only save the location that is after './files/'
@@ -378,8 +378,6 @@ function handleGetSharedFilesAndFolders(event, location)
         }
         handleGetFilesAndFolders(event, location);
     }
-
-    
 }
 
 function createWindow() {
