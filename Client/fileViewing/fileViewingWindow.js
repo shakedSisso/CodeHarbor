@@ -370,9 +370,11 @@ function handleGetSharedFilesAndFolders(event, location)
         communicator.sendMessage(messageDataJson, GET_SHARED_FILES_AND_FOLDERS_REQUEST);
     }
     else 
-    {
-        let parts = location.split('./files/'); //only save the location that is after './files/'
-        location = parts[1];
+        if (location.includes('files'))
+        {
+            let parts = location.split('./files/'); //only save the location that is after './files/'
+            location = parts[1];
+        }
         handleGetFilesAndFolders(event, location);
     }
 
