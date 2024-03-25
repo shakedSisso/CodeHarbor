@@ -491,7 +491,7 @@ class server():
         files = {}
         if not folders_in_folder is None:
             for folder in folders_in_folder:
-                files[folder.get("folder_name")] = self.get_folder_content(folder.get("folder_name"), location + "/" + name, owner)
+                files[folder.get("folder_name")] = self.get_folder_content_for_download(folder.get("folder_name"), location + "/" + name, owner)
         files_in_folder = MongoDBWrapper.find_documents({"location": location + "/" + name, "owner": owner}, files_collection)
         if not files_in_folder is None:
             for file in files_in_folder:
@@ -525,9 +525,6 @@ class server():
             MongoDBWrapper.delete_document({"_id": document.get("_id")}, folders_collection)
         else:
             MongoDBWrapper.delete_document({"_id": document.get("_id")}, files_collection)
-
-
-    
 
 def main():
     main_server = server()
