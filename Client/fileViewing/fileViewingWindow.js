@@ -328,6 +328,10 @@ async function openFolderSelectionDialog() {
     const result = await dialog.showOpenDialog({
       properties: ['openDirectory']
     });
+    if (result.canceled)
+    {
+        throw new Error('Download canceled');
+    }
     return result.filePaths[0]; // return the selected folder path
   }
   
@@ -350,12 +354,18 @@ async function openFolderSelectionDialog() {
       const selectedFolder = await openFolderSelectionDialog();
       createFoldersAndFiles(selectedFolder, structure);
       dialog.showMessageBox({
-        type: 'info',
-        title: 'Download successfully',
-        message: "The chosen file or folder were downloaded successfully",
-        buttons: ['OK']
-    });
+            type: 'info',
+            title: 'Download successfully',
+            message: "The chosen file or folder were downloaded successfully",
+            buttons: ['OK']
+        });
     } catch (error) {
+        dialog.showMessageBox({
+            type: 'info',
+            title: 'Download canceled', 
+            message: 'Download was canceled successfully',
+            buttons: ['OK']
+        });
     }
   }
 
