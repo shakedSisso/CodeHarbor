@@ -203,11 +203,13 @@ function showContextMenu(x, y) {
   {
     shareOption.style.display = 'none';
     manageOption.style.display = 'none';
+    deleteOption.style.display = 'none';
   }
   else 
   {
     shareOption.style.display = 'flex';
     manageOption.style.display = 'flex';
+    deleteOption.style.display = 'flex';
   }
 
   // Hide the context menu when clicking outside of it
