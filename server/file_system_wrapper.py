@@ -31,6 +31,11 @@ class FSWrapper():
     @staticmethod
     def delete_file(file_path, file_name):
         os.remove(os.path.join(file_path, file_name))
+        
+    @staticmethod
+    def delete_folder(folder_path, folder_name):
+        os.rmdir(os.path.join(folder_path, folder_name))
+
     @staticmethod
     def write_change_to_file(file, line_number, new_line):
         file.seek(0)
