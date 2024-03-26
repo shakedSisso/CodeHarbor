@@ -522,7 +522,7 @@ class server():
             MongoDBWrapper.delete_documents({"shareCode": object_share_document.get("code")}, shares_collection)
             MongoDBWrapper.delete_document({"_id": object_share_document.get("_id")}, share_codes_collection)
         if is_folder:
-            FSWrapper.delete_file(document.get("location").replace("/", "\\")[2:].replace(".", ""), document.get("folder_name"))
+            FSWrapper.delete_folder(document.get("location").replace("/", "\\")[2:].replace(".", ""), document.get("folder_name"))
             MongoDBWrapper.delete_document({"_id": document.get("_id")}, folders_collection)
         else:
             FSWrapper.delete_file(document.get("location").replace("/", "\\")[2:].replace(".", ""), document.get("file_name"))
