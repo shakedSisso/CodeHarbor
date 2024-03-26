@@ -366,10 +366,10 @@ class server():
             except Exception:
                 return {"data": {"status": "error", "message": "Error has occurred while trying to remove file from File system and DB"}}
             return {"data": {"status": "success"}}
-        try:
-            self.delete_folder(data["data"]["name"], data["data"]["location"], user.get_user_name())
-        except Exception as e:
-            return {"data": {"status": "error", "message": str(e)}}
+        #try:
+        self.delete_folder(data["data"]["name"][:-1], data["data"]["location"], user.get_user_name())
+        #except Exception as e:
+        #    return {"data": {"status": "error", "message": str(e)}}
         return {"data": {"status": "success"}}
 
 
@@ -480,6 +480,7 @@ class server():
                     self.clear_object_db_fs(file, False)
                 else:
                     raise Exception("File {} @ {} is being used".format(file.get("file_name"), file.get("location")))
+        print("getting document of name: {} @ {} by {}".format(name, location, owner))
         folder_document = MongoDBWrapper.find_document({"folder_name": name, "location": location, "owner": owner}, folders_collection)
         self.clear_object_db_fs(folder_document, True)
     
@@ -520,10 +521,11 @@ class server():
         if not object_share_document is None:
             MongoDBWrapper.delete_documents({"shareCode": object_share_document.get("code")}, shares_collection)
             MongoDBWrapper.delete_document({"_id": object_share_document.get("_id")}, share_codes_collection)
-        FSWrapper.delete_file(document.get("location"), document.get("file_name"))
         if is_folder:
+            FSWrapper.delete_file(document.get("location").replace("/", "\\")[2:].replace(".", ""), document.get("folder_name"))
             MongoDBWrapper.delete_document({"_id": document.get("_id")}, folders_collection)
         else:
+            FSWrapper.delete_file(document.get("location").replace("/", "\\")[2:].replace(".", ""), document.get("file_name"))
             MongoDBWrapper.delete_document({"_id": document.get("_id")}, files_collection)
 
 def main():
