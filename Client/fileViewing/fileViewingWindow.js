@@ -39,9 +39,9 @@ function dataHandler(jsonObject)
                 buttons: ['OK']
             });
         }
-    } else if (jsonObject.code === NEW_FILE_REQUEST) {
+    } else if (jsonObject.code === requestCodes.NEW_FILE_REQUEST) {
         if (data.status === "success")
-            getMain().switchWindow(codes.EDIT);
+            getMain().switchWindow(windowCodes.EDIT);
         else {
             dialog.showMessageBox({
                 type: 'error',
@@ -50,7 +50,7 @@ function dataHandler(jsonObject)
                 buttons: ['OK']
             });
         }
-    } else if (jsonObject.code === NEW_FOLDER_REQUEST) { 
+    } else if (jsonObject.code === requestCodes.NEW_FOLDER_REQUEST) { 
         if (data.status === "success")
             handleGetFilesAndFolders(null, locationPath); //when a user creates a folder, we don't enter that folder
         else {
@@ -62,7 +62,7 @@ function dataHandler(jsonObject)
             });
         }
     }
-    else if (jsonObject.code === GET_SHARE_CODE)
+    else if (jsonObject.code === requestCodes.GET_SHARE_CODE)
     {
         if(data.status === "success")
         {
@@ -147,51 +147,11 @@ function dataHandler(jsonObject)
         delete data.status; //remove the status from the structure so the function doesn't create it as a folder/file
         selectFolderAndCreateStructure(data);
     }
-    else if (jsonObject.code === LOGOUT_REQUEST)
+    else if (jsonObject.code === requestCodes.LOGOUT_REQUEST)
     {
         locationPath = "";
-        getMain().switchWindow(codes.LOGIN);
+        getMain().switchWindow(windowCodes.LOGIN);
     }
-}
-
-function handleCreateRequest(event, name, isFolder)
-{
-    fileName = name;
-    var code, messageData;
-    if (isFolder) 
-    {
-        code = NEW_FOLDER_REQUEST;
-        messageData = {
-            data: {
-                folder_name: name,
-                location: locationPath,
-            },
-        }; 
-    }
-    else 
-    {
-        fileLocation = locationPath;
-        code = NEW_FILE_REQUEST;
-        messageData = {
-            data: {
-                file_name: name,
-                location: locationPath,
-            },
-        }; 
-    }
-    communicator.sendMessage(messageDataJson, code);
-}
-
-function handleShareRequest(event, objectName, shareCode, isFolder)
-{
-    const messageData = {
-        data: {
-            name: objectName,
-            share_code: shareCode,
-            is_folder: isFolder,
-        },
-    };
-    communicator.sendMessage(messageDataJson, CONNECT_TO_SHARED_OBJECT_REQUEST);
 }
 
 /**
@@ -221,7 +181,7 @@ function handleSwitchToEditFile(event, name)
 {
     fileName = name;
     fileLocation = locationPath;
-    getMain().switchWindow(codes.EDIT);
+    getMain().switchWindow(windowCodes.EDIT);
 }
 
 /**
@@ -234,9 +194,10 @@ function handleSwitchToSharedEditFile(event, name, location)
 {
     fileName = name;
     fileLocation = location;
+    locationPath = "Shared/" + location + "/";
     let parts = fileLocation.split('./files/'); //only save the location that is after './files/'
     fileLocation = parts[1];
-    getMain().switchWindow(codes.EDIT);
+    getMain().switchWindow(windowCodes.EDIT);
 }
 
 /**
@@ -413,9 +374,8 @@ function handleGetSharedFilesAndFolders(event, location)
             data: {
                 location: "Shared"
             },
-        };    
-        const messageDataJson = JSON.stringify(messageData);
-        communicator.sendMessage(messageDataJson, GET_SHARED_FILES_AND_FOLDERS_REQUEST);
+        };
+        communicator.sendMessage(messageData, requestCodes.GET_SHARED_FILES_AND_FOLDERS_REQUEST);
     }
     else {
         let parts;
@@ -430,12 +390,6 @@ function handleGetSharedFilesAndFolders(event, location)
         location = parts[1];
         handleGetFilesAndFolders(event, location);
     }
-    const messageData = {
-        data: {
-            location: locationPath
-        },
-    };
-    communicator.sendMessage(messageData, requestCodes.GET_SHARED_FILES_AND_FOLDERS_REQUEST);
 
 }
 
@@ -556,7 +510,7 @@ function handleSetMenu (event, mainFolderName) {
  */
 function logOut() {
     const messageDataJson = JSON.stringify({});
-    communicator.sendMessage(messageDataJson, LOGOUT_REQUEST);
+    communicator.sendMessage(messageDataJson, requestCodes.LOGOUT_REQUEST);
 }
 
 /**
@@ -641,7 +595,7 @@ module.exports = {
     getLocationPath,
     getFileName,
     setFileName,
-    reloadCurrentFile,
+    reloadCurrentFolder,
     resetLocation,
     getFileLocation
 }
