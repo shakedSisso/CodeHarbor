@@ -1,13 +1,18 @@
 const { BrowserWindow , ipcMain} = require('electron');
 const path = require('path');
+
 const getMain = () => require('../main.js');
 const communicator = require("../communicator.js");
-const codes = require('../windowCodes.js');
+const windowCodes = require('../windowCodes.js');
+const requestCodes = require('../requestCodes.js');
 
 let mainWindow;
 let name;
-const SIGNUP_REQUEST = 4;
 
+/**
+ * Handles data received from the server after signing up.
+ * @param {Object} jsonObject - The JSON object containing the server response data.
+ */
 function dataHandler(jsonObject)
 {
     const data = jsonObject.data;
@@ -15,15 +20,25 @@ function dataHandler(jsonObject)
         mainWindow.webContents.send('show-error', 'Username is already taken by another user');
     } else  {
         getMain().setUsername(name);
-        getMain().switchWindow(codes.FILE_VIEW);
+        getMain().switchWindow(windowCodes.FILE_VIEW);
     }
 }
 
+/**
+ * Handles the event to switch to the login window.
+ */
 function handleSwitchToLogin()
 {
-    getMain().switchWindow(codes.LOGIN);
+    getMain().switchWindow(windowCodes.LOGIN);
 }
 
+/**
+ * Handles the event to send sign-up details to the server.
+ * @param {Object} event - The event object from IPC main.
+ * @param {string} username - The username to sign up with.
+ * @param {string} password - The password for the new account.
+ * @param {string} email - The email address for the new account.
+ */
 function handleSendSignUpDetails(event, username, password, email)
 {
     name = username;
@@ -34,14 +49,20 @@ function handleSendSignUpDetails(event, username, password, email)
             email: email,
         },
     };
-    const messageDataJson = JSON.stringify(messageData);
-    communicator.sendMessage(messageDataJson, SIGNUP_REQUEST);
+    communicator.sendMessage(messageData, requestCodes.SIGNUP_REQUEST);
 }
 
-function createWindow() {
+/**
+ * Creates the sign-up window.
+ * @param {Object} bounds - The bounds object containing window dimensions and position.
+ * @returns {BrowserWindow} The created BrowserWindow object for the sign-up window.
+ */
+function createWindow(bounds) {
     mainWindow = new BrowserWindow({
-        width: 800,
-        height: 600,
+        width: bounds.width,
+        height: bounds.height,
+        x: bounds.x,
+        y: bounds.y,
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: true,
@@ -55,11 +76,14 @@ function createWindow() {
     try {
         ipcMain.handle('dialog:switchToLogin', handleSwitchToLogin);
         ipcMain.handle('dialog:sendSignUpDetails', handleSendSignUpDetails);
-    } catch {} //used in case the handlers already exists
+    } catch {} //used in case the handlers already exist because the window was created before
 
     return mainWindow;
 }
 
+/**
+ * Deletes the sign-up window.
+ */
 function deleteWindow()
 {
     if (mainWindow) {

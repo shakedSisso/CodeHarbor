@@ -7,8 +7,10 @@
     <title>CodeHarbor</title>
 </head>
 <body>
+  <!-- Sign Up Form Container -->
   <div class="form-container" id="signupForm">
     <h2>Sign Up</h2>
+    <!-- Sign Up Form -->
     <form>
         <div class="input-group">
             <label for="username">
@@ -28,11 +30,15 @@
             </label>
             <input type="password" id="password" name="password" required>
         </div>
+        <!-- Error Message Container -->
         <div id="errorMessage" class="error-message"><em></em></div>
-      <button type="button" class="action-btn" id="signupButton">Sign Up</button>
+        <!-- Sign Up Button -->
+        <button type="button" class="action-btn" id="signupButton">Sign Up</button>
     </form>
+    <!-- Switch to Login Link -->
     <p class="switch-form" onclick="switchForm()">Already have an account? Login</p>
   </div>
+  <!-- JavaScript File for Signup Form -->
   <script src="signupRenderer.js"></script>
 </body>
 </html>
