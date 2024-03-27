@@ -7,26 +7,34 @@
     <title>CodeHarbor</title>
 </head>
 <body>
+  <!-- Login form container -->
   <div class="form-container" id="loginForm">
     <h2>Login</h2>
+    <!-- Login form -->
     <form>
       <div class="input-group">
+        <!-- Username input field -->
         <label for="username">
             <img src="../images/username.png" alt="User Icon">Username:
         </label>
         <input type="text" id="username" name="username" required>
       </div>
       <div class="input-group">
+        <!-- Password input field -->
         <label for="password">
             <img src="../images/password.png" alt="User Icon">Password:
         </label>
         <input type="password" id="password" name="password" required>
       </div>
+      <!-- Error message display area -->
       <div id="errorMessage" class="error-message"><em></em></div>
+      <!-- Login button -->
       <button type="button" class="action-btn" id="loginButton">Login</button>
     </form>
+    <!-- Link to switch to Sign Up form -->
     <p class="switch-form" onclick="switchForm()">Don't have an account? Sign Up</p>
   </div>
+  <!-- Script for login form functionality -->
   <script src="loginRenderer.js"></script>
 </body>
 </html>

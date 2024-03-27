@@ -1,15 +1,18 @@
 const { BrowserWindow , ipcMain, dialog } = require('electron');
 const path = require('path');
+
 const communicator = require('../communicator.js');
+const getMain = () => require('../main.js');
+const requestCodes = require('../requestCodes.js');
 const getFileViewing = () => require('../fileViewing/fileViewingWindow.js');
 
-let inputDialog;
 var usernames = [];
-let file_name;
-let file_location;
-let is_folder;
-const REMOVE_SHARES = 14;
+let inputDialog, file_name, file_location, is_folder;
 
+/**
+ * Handles incoming data from the server and closes the input dialog window.
+ * @param {Object} jsonObject - The JSON object received from the server.
+ */
 function dataHandler(jsonObject)
 {
     data = jsonObject.data;
@@ -27,15 +30,24 @@ function dataHandler(jsonObject)
     }
 }
 
-function openShareManagementDialog(users, fileName, location, isFolder) {
+/**
+ * Opens a share management dialog window.
+ * @param {Array} users - An array of usernames for sharing.
+ * @param {string} fileName - The name of the file to be shared.
+ * @param {string} location - The location of the file to be shared.
+ * @param {boolean} isFolder - Indicates whether the shared item is a folder.
+ */
+async function openShareManagementDialog(users, fileName, location, isFolder) {
     usernames = users;
     file_name = fileName;
     file_location = location;
     is_folder = isFolder;
+    const position = await getMain().middleOfWindow();
     inputDialog = new BrowserWindow({
         width: 550,
-        height: 425,
-        show: false,
+        height: 430,
+        x: position.x,
+        y: position.y,
         webPreferences: {
         nodeIntegration: true,
         contextIsolation: true,
@@ -48,7 +60,7 @@ function openShareManagementDialog(users, fileName, location, isFolder) {
     try {
         ipcMain.handle('dialog:getFileSharesNames', handleGetFileSharesNames);
         ipcMain.handle('dialog:removeShares', handleRemoveShares);
-    } catch {} //used in case the handlers already exists
+    } catch {} //used in case the handlers already exist because the window was created before
 
     inputDialog.loadFile('shareManagementDialog/shareManagementDialog.html');
     inputDialog.show();
@@ -60,11 +72,18 @@ function openShareManagementDialog(users, fileName, location, isFolder) {
     
 }
 
+/**
+ * Handles the getFileSharesNames dialog event.
+ */
 function handleGetFileSharesNames()
 {
     inputDialog.webContents.send('get-file-shares', usernames);
 }
 
+/**
+ * Handles the removeShares dialog event.
+ * @param {Array} users - An array of usernames to remove shares for.
+ */
 function handleRemoveShares(event, users)
 {
     const messageData = { 
@@ -75,9 +94,7 @@ function handleRemoveShares(event, users)
             is_folder: is_folder
         }
     };
-    console.log(messageData);
-    const messageDataJson = JSON.stringify(messageData);
-    communicator.sendMessage(messageDataJson, REMOVE_SHARES);
+    communicator.sendMessage(messageData, requestCodes.REMOVE_SHARES);
 }
 
 module.exports = {

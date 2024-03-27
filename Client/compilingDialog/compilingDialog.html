@@ -10,19 +10,24 @@
   <div class="form-container">
     <h2>Compiling Dialog</h2>
     <form>
+      <!-- Input field for executable file name -->
       <div class="input-group">
         <label for="textInput">Executable File Name:</label>
         <input type="text" id="textInput" name="textInput" required>
       </div>
+        <!-- Compilation file selection -->
         <h4>Please choose the files you want to compile together:</h4>        
         <div class="compile-container" id="compilingForm"></div>
+      <!-- Error message display area -->
       <div id="errorMessage" class="error-message"><em></em></div>
+        <!-- Action buttons -->
         <div class="buttons-group">
             <button class="action-btn" id="okButton">OK</button>
             <button class="action-btn" id="cancelButton">Cancel</button>
         </div>
     </form>
   </div>
+  <!-- JavaScript file for rendering compiling dialog -->
   <script src="./compilingDialogRenderer.js"></script>
 </body>
 </html>
