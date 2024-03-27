@@ -155,6 +155,14 @@ function createWindow(bounds, locationPath, name) {
 }  
 
 /**
+ * Connects the current dataHandler function to the communicator
+ */
+function handleConnectDataHandler() 
+{
+    communicator.setDataHandler(dataHandler);
+}
+
+/**
  * Event listener for the 'set-menu-editFile' IPC message.
  * Builds and sets the menu for editing files in the main window.
  * @param {object} event - The IPC event object.

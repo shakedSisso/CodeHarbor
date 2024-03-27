@@ -1,3 +1,6 @@
+dynamicallyCreateItem("../images/folder.png", "Owned");
+dynamicallyCreateItem("../images/folder.png", "Shared");
+
 // Function to dynamically create items with specified image and text
 function dynamicallyCreateItem(imagePath, text) {
     // Implementation is missing
@@ -78,7 +81,6 @@ function handleImageClick(event) {
         deleteAllItems();
         const name = event.target.title;
 
-        // Check conditions based on fileViewingForm alt attribute and clicked image name
         if (name === "../" && (fileViewingForm.alt === usernameFolder || fileViewingForm.alt === "Shared/"))
         {
             // Create items for "Owned" and "Shared" folders
@@ -107,7 +109,7 @@ function handleImageClick(event) {
                     fileViewingForm.alt = goBackAFolder(fileViewingForm.alt);
                     if (fileViewingForm.alt.startsWith("Shared/"))
                     {
-                        if (slashCount === 5) //used to skip the folders 'files', '.' and the folder with the name of the owner
+                        if (slashCount === 5 || slashCount === 2) //used to skip the folders 'files', '.' and the folder with the name of the owner
                         {
                             fileViewingForm.alt = "Shared/";
                         }
@@ -131,6 +133,7 @@ function handleImageClick(event) {
                 {
                     fileViewingForm.alt = "Shared/" + event.target.alt + "/" + name;
                     window.electronAPI.getSharedFilesAndFolders(event.target.alt + "/" + name);
+                    return;
                 }
                 else if (name === "Owned/") 
                 {

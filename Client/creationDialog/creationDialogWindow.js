@@ -33,7 +33,7 @@ function dataHandler(jsonObject)
     } 
     else if (jsonObject.code === requestCodes.NEW_FOLDER_REQUEST) { 
         if (data.status === "success")
-            getFileViewing().reloadCurrentFile();
+            getFileViewing().reloadCurrentFolder();
         else {
             dialog.showMessageBox({
                 type: 'error',

@@ -75,7 +75,7 @@ function openRequestedWindow(code){
             currentWindow = signupWindow.createWindow(windowBounds);
             break;
         case codes.EDIT:
-            currentWindow = editFileWindow.createWindow();
+            currentWindow = editFileWindow.createWindow(windowBounds, fileViewingWindow.getFileLocation(), fileViewingWindow.getFileName());
             break;
         case codes.FILE_VIEW:
             currentWindow = fileViewingWindow.createWindow(windowBounds);
@@ -91,7 +91,7 @@ function openRequestedWindow(code){
  */
 function closeLastWindow() {
     windowBounds = currentWindow.getBounds();
-    
+
     switch(currentWindowCode){
         case codes.LOGIN:
             loginWindow.deleteWindow();

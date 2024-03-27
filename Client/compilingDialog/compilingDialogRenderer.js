@@ -7,6 +7,7 @@ const inputField = document.getElementById('textInput'); // The input text field
  * Event listener for the 'DOMContentLoaded' event that triggers the electronAPI to get files.
  */
 window.addEventListener('DOMContentLoaded', () => {
+    deleteAllItems(); //used to remove the checkboxes from previous times the user opened the dialog
     window.electronAPI.getFiles();
 });
 
@@ -29,10 +30,12 @@ okButton.addEventListener('click', () => {
     if (!isOneChecked)
     {
         alert('You must choose at least one file to compile and run');
+        window.close();
     }
     else if (fileNameRegex.test(input)) 
     {
         alert('The executable`s name cannot include `.`');
+        window.close();
     }
     else 
     {
@@ -74,6 +77,7 @@ function createCheckboxes(checkboxLabels) {
 
         container.appendChild(label);
 
+
         compilingForm.appendChild(container);
     });
 }
@@ -85,3 +89,12 @@ function createCheckboxes(checkboxLabels) {
 window.electronAPI.getCurrentLocationFiles((event, value) => {
     createCheckboxes(value);
   })
+  
+/**
+ * Function to delete all items in the compiling form.
+ * Clears the inner HTML content of the 'compilingForm' element.
+ */
+function deleteAllItems() {
+    var container = document.getElementById('compilingForm');
+    container.innerHTML = '';
+}
