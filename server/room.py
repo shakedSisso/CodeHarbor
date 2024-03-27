@@ -23,6 +23,12 @@ class Room():
     def get_file_path(self):
         return self._file_path
     
+    def is_empty(self):
+        return len(self._users) == 0
+    
+    def clear_room(self):
+        self._file_object.close()
+    
     def update_changes(self, changes, amount_of_lines, updating_user):
         with self._file_lock:
             for line_number, new_line in changes.items():

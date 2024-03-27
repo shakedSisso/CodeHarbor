@@ -219,6 +219,12 @@ class server():
     def disconnect_user_from_file(self, data, user):
         user_room = user.get_room()
         user_room.remove_user(user)
+        if user_room.is_empty():
+            user_room.clear_room()
+            for room in self.rooms:
+                if room is user_room:
+                    self.rooms.remove(room)
+                    break
         user.connect_to_room(None)
         return None
 
