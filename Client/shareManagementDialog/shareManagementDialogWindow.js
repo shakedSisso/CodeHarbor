@@ -1,9 +1,10 @@
-const { BrowserWindow , ipcMain } = require('electron');
+const { BrowserWindow , ipcMain, dialog } = require('electron');
 const path = require('path');
 
 const communicator = require('../communicator.js');
 const getMain = () => require('../main.js');
 const requestCodes = require('../requestCodes.js');
+const getFileViewing = () => require('../fileViewing/fileViewingWindow.js');
 
 var usernames = [];
 let inputDialog, file_name, file_location, is_folder;
@@ -14,7 +15,19 @@ let inputDialog, file_name, file_location, is_folder;
  */
 function dataHandler(jsonObject)
 {
-    inputDialog.close();
+    data = jsonObject.data;
+    if (jsonObject.code === REMOVE_SHARES) {
+        if (data.status === 'error')
+        {
+            dialog.showMessageBox({
+                type: 'error',
+                title: 'Error',
+                message: data.message,
+                buttons: ['OK']
+            });
+        }
+        inputDialog.close();
+    }
 }
 
 /**
@@ -28,7 +41,7 @@ async function openShareManagementDialog(users, fileName, location, isFolder) {
     usernames = users;
     file_name = fileName;
     file_location = location;
-    is_folder - isFolder;
+    is_folder = isFolder;
     const position = await getMain().middleOfWindow();
     inputDialog = new BrowserWindow({
         width: 550,
@@ -54,6 +67,7 @@ async function openShareManagementDialog(users, fileName, location, isFolder) {
 
     inputDialog.on('closed', () => {
         // Handle the closed event if needed
+        getFileViewing().reloadCurrentFolder();
     });
     
 }
@@ -70,14 +84,14 @@ function handleGetFileSharesNames()
  * Handles the removeShares dialog event.
  * @param {Array} users - An array of usernames to remove shares for.
  */
-function handleRemoveShares(users)
+function handleRemoveShares(event, users)
 {
     const messageData = { 
         data : { 
             usernames: users,
             name: file_name,
             location: file_location,
-            isFolder: is_folder
+            is_folder: is_folder
         }
     };
     communicator.sendMessage(messageData, requestCodes.REMOVE_SHARES);

@@ -13,6 +13,10 @@ contextBridge.exposeInMainWorld('api', {
  */
 contextBridge.exposeInMainWorld('electronAPI', {
   /**
+   * Function that connects the DataHandler
+   */
+  connectHandler: () => ipcRenderer.invoke('dialog:connectDataHandler',),
+  /**
    * Retrieves a file using a dialog box.
    */
   getFile: () => ipcRenderer.invoke('dialog:getFile',),

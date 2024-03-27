@@ -13,8 +13,8 @@ const getMain = () => require('../main.js');
 const windowCodes = require('../windowCodes.js');
 const requestCodes = require('../requestCodes.js');
 
-let locationPath = "";
-let mainWindow, fileLocation, fileName, folderOrNot;
+let locationPath = "", fileLocation = "";
+let mainWindow, fileName, folderOrNot;
 let files = [];
 
 /**
@@ -35,12 +35,34 @@ function dataHandler(jsonObject)
             dialog.showMessageBox({
                 type: 'error',
                 title: 'Error',
-                message: "Couldn't find the requested folder",
+                message: data.message,
                 buttons: ['OK']
             });
         }
-    } 
-    else if (jsonObject.code === requestCodes.GET_SHARE_CODE)
+    } else if (jsonObject.code === NEW_FILE_REQUEST) {
+        if (data.status === "success")
+            getMain().switchWindow(codes.EDIT);
+        else {
+            dialog.showMessageBox({
+                type: 'error',
+                title: 'Error',
+                message: data.message,
+                buttons: ['OK']
+            });
+        }
+    } else if (jsonObject.code === NEW_FOLDER_REQUEST) { 
+        if (data.status === "success")
+            handleGetFilesAndFolders(null, locationPath); //when a user creates a folder, we don't enter that folder
+        else {
+            dialog.showMessageBox({
+                type: 'error',
+                title: 'Error',
+                message: data.message,
+                buttons: ['OK']
+            });
+        }
+    }
+    else if (jsonObject.code === GET_SHARE_CODE)
     {
         if(data.status === "success")
         {
@@ -65,7 +87,7 @@ function dataHandler(jsonObject)
             dialog.showMessageBox({
                 type: 'error',
                 title: 'Error',
-                message: "There was an error while trying to create a share code for this object.\nPlease try again later.",
+                message: data.message,
                 buttons: ['OK']
             });
         }
@@ -74,14 +96,15 @@ function dataHandler(jsonObject)
     {
         if(data.status === "success")
         {
-            shareManagementDialog.openShareManagementDialog(data.users, fileName, fileLocation, folderOrNot);
+            const users = data.users.map(user => user.username);
+            shareManagementDialog.openShareManagementDialog(users, fileName, fileLocation, folderOrNot);
         }
         else
         {
             dialog.showMessageBox({
                 type: 'error',
                 title: 'Error',
-                message: "There was an error while trying to create a share code for this object.\nPlease try again later.",
+                message: data.message,
                 buttons: ['OK']
             });
         }
@@ -112,13 +135,63 @@ function dataHandler(jsonObject)
     }
     else if (jsonObject.code === requestCodes.DOWNLOAD_FILES)
     {
-        selectFolderAndCreateStructure(jsonObject.data);
+        if (data.status === 'error') {
+            dialog.showMessageBox({
+                type: 'error',
+                title: 'Error',
+                message: data.message,
+                buttons: ['OK']
+            });
+            return;
+        }
+        delete data.status; //remove the status from the structure so the function doesn't create it as a folder/file
+        selectFolderAndCreateStructure(data);
     }
     else if (jsonObject.code === LOGOUT_REQUEST)
     {
         locationPath = "";
         getMain().switchWindow(codes.LOGIN);
     }
+}
+
+function handleCreateRequest(event, name, isFolder)
+{
+    fileName = name;
+    var code, messageData;
+    if (isFolder) 
+    {
+        code = NEW_FOLDER_REQUEST;
+        messageData = {
+            data: {
+                folder_name: name,
+                location: locationPath,
+            },
+        }; 
+    }
+    else 
+    {
+        fileLocation = locationPath;
+        code = NEW_FILE_REQUEST;
+        messageData = {
+            data: {
+                file_name: name,
+                location: locationPath,
+            },
+        }; 
+    }
+    communicator.sendMessage(messageDataJson, code);
+}
+
+function handleShareRequest(event, objectName, shareCode, isFolder)
+{
+    const messageData = {
+        data: {
+            name: objectName,
+            share_code: shareCode,
+            is_folder: isFolder,
+        },
+    };
+    communicator.sendMessage(messageDataJson, CONNECT_TO_SHARED_OBJECT_REQUEST);
 }
 
 /**
@@ -147,7 +220,8 @@ function handleGetFilesAndFolders(event, location)
 function handleSwitchToEditFile(event, name)
 {
     fileName = name;
-    getMain().switchWindow(windowCodes.EDIT);
+    fileLocation = locationPath;
+    getMain().switchWindow(codes.EDIT);
 }
 
 /**
@@ -159,10 +233,10 @@ function handleSwitchToEditFile(event, name)
 function handleSwitchToSharedEditFile(event, name, location)
 {
     fileName = name;
-    locationPath = location;
-    locationPath = locationPath.substring(locationPath.indexOf("/") + 1);
-    locationPath = locationPath.substring(locationPath.indexOf("/") + 1);
-    getMain().switchWindow(windowCodes.EDIT);
+    fileLocation = location;
+    let parts = fileLocation.split('./files/'); //only save the location that is after './files/'
+    fileLocation = parts[1];
+    getMain().switchWindow(codes.EDIT);
 }
 
 /**
@@ -218,6 +292,7 @@ function handleGetFileShares(event, objectName, location, isFolder)
     fileName = objectName;
     fileLocation = location;
     folderOrNot = isFolder;
+    location = './files/' + location.substring(0,location.lastIndexOf('/'));
     const messageData = {
         data: {
             name: objectName,
@@ -237,6 +312,7 @@ function handleGetFileShares(event, objectName, location, isFolder)
  */
 function handleSendRequestToDelete(event, objectName, location, isFolder)
 {
+    location = './files/' + location.substring(0,location.lastIndexOf('/'));
     const messageData = {
         data: {
             name: objectName,
@@ -256,6 +332,9 @@ function handleSendRequestToDelete(event, objectName, location, isFolder)
  */
 function handleGetChosenFiles(event, objectName, location, isFolder)
 {
+    location = './files/' + location.substring(0,location.lastIndexOf('/'));
+    if (isFolder)
+        objectName = objectName.substring(0, objectName.lastIndexOf('/')); //removes the `/` in the end of the name of a folder
     const messageData = {
         data: {
             name: objectName,
@@ -274,6 +353,10 @@ async function openFolderSelectionDialog() {
     const result = await dialog.showOpenDialog({
       properties: ['openDirectory']
     });
+    if (result.canceled)
+    {
+        throw new Error('Download canceled');
+    }
     return result.filePaths[0]; // return the selected folder path
   }
   
@@ -298,18 +381,25 @@ async function createFoldersAndFiles(directory, structure) {
  * Opens the folder selection dialog and creates the folder structure based on the provided structure.
  * @param {Object} structure - The structure defining the folders and files to create.
  */
-async function selectFolderAndCreateStructure(structure) {
+  async function selectFolderAndCreateStructure(structure) {
     try {
-        const selectedFolder = await openFolderSelectionDialog();
-        await createFoldersAndFiles(selectedFolder, structure);
+      const selectedFolder = await openFolderSelectionDialog();
+      createFoldersAndFiles(selectedFolder, structure);
+      dialog.showMessageBox({
+            type: 'info',
+            title: 'Download successfully',
+            message: "The chosen file or folder were downloaded successfully",
+            buttons: ['OK']
+        });
+    } catch (error) {
         dialog.showMessageBox({
-        type: 'info',
-        title: 'Download successfully',
-        message: "The chosen file or folder were downloaded successfully",
-        buttons: ['OK']
-    });
-    } catch (error) {}
-}
+            type: 'info',
+            title: 'Download canceled', 
+            message: 'Download was canceled successfully',
+            buttons: ['OK']
+        });
+    }
+  }
 
 /**
  * Handles the "get shared files and folders" request from the client.
@@ -318,8 +408,27 @@ async function selectFolderAndCreateStructure(structure) {
  */
 function handleGetSharedFilesAndFolders(event, location)
 {
-    if (location != locationPath) {
-        locationPath = location.substring(0, location.lastIndexOf("/"));
+    if (location === "Shared/"){
+        const messageData = {
+            data: {
+                location: "Shared"
+            },
+        };    
+        const messageDataJson = JSON.stringify(messageData);
+        communicator.sendMessage(messageDataJson, GET_SHARED_FILES_AND_FOLDERS_REQUEST);
+    }
+    else {
+        let parts;
+        if (location.includes('files'))
+        {
+            parts = location.split('./files/'); //only save the location that is after './files/'
+        }
+        else if (location.includes('Shared'))
+        {
+            parts = location.split('Shared/');
+        }
+        location = parts[1];
+        handleGetFilesAndFolders(event, location);
     }
     const messageData = {
         data: {
@@ -327,6 +436,7 @@ function handleGetSharedFilesAndFolders(event, location)
         },
     };
     communicator.sendMessage(messageData, requestCodes.GET_SHARED_FILES_AND_FOLDERS_REQUEST);
+
 }
 
 /**
@@ -486,6 +596,14 @@ function resetLocation()
 }
 
 /**
+ * Retrieves the current file location
+ * @returns {string} The current file location
+ */
+function getFileLocation() {
+    return fileLocation;
+}
+
+/**
  * Retrieves the current file name.
  * @returns {string} The current file name.
  */
@@ -494,8 +612,8 @@ function getFileName(){
 }
 
 /**
- * Sets the current file name.
- * @param {string} name - The file name to set.
+ * Sets the current file name
+ * @param {string} the name file name
  */
 function setFileName(name){
     fileName = name;
@@ -504,8 +622,16 @@ function setFileName(name){
 /**
  * Reloads the current file in the main window.
  */
-function reloadCurrentFile() {
-    handleGetFilesAndFolders(null, locationPath);
+function reloadCurrentFolder() {
+    if (locationPath.startsWith('Shared'))
+    {
+        handleGetSharedFilesAndFolders(null, locationPath);
+    }
+    else 
+    {
+        handleGetFilesAndFolders(null, locationPath);
+    }
+    communicator.setDataHandler(dataHandler);
 }
 
 module.exports = {
@@ -516,5 +642,6 @@ module.exports = {
     getFileName,
     setFileName,
     reloadCurrentFile,
-    resetLocation
+    resetLocation,
+    getFileLocation
 }

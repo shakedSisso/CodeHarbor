@@ -58,6 +58,7 @@ var currentIndex = 0;
 
   // Event listener when DOM content is loaded
   window.addEventListener('DOMContentLoaded', () => {
+    window.electronAPI.connectHandler();
     window.api.setMenu();
     window.electronAPI.getFile();
   });

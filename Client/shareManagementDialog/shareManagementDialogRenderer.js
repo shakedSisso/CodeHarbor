@@ -9,19 +9,19 @@ window.addEventListener('DOMContentLoaded', () => {
 // Event listener for the close button click
 closeButton.addEventListener('click', () => {
     var isOneUnchecked = false;
-    let users = [];
+    let usernames = [];
     let checkboxes = document.querySelectorAll('input[type="checkbox"]');
     checkboxes.forEach(function(checkbox) {
         if (!checkbox.checked) {
             isOneUnchecked = true;
-            users.push(checkbox.value);
+            const name = checkbox.alt;
+            usernames.push(name);
         }
     });
     
     if (isOneUnchecked)
     {
-        // Remove shares for unchecked users
-        window.electronAPI.removeShares(users);
+        window.electronAPI.removeShares(usernames);
     }
     else
     {
@@ -51,6 +51,7 @@ function createCheckboxes(checkboxLabels) {
         checkbox.name = 'checkbox';
         checkbox.checked = true;
         checkbox.value = labelText;
+        checkbox.alt = labelText;
         checkbox.classList.add('checkbox');
 
         label.appendChild(checkbox);

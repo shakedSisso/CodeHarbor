@@ -9,7 +9,7 @@ const folderRadioButton = document.getElementById('folder');
 // Event listeners
 okButton.addEventListener('click', () => {
   var objectName, isFolder, shareCode;
-  const shareCodeRegex = /^[a-zA-Z0-9]{11}$/;
+  const shareCodeRegex = /^[a-zA-Z0-9]{8}$/;
   const fileNameRegex = /\.(c|h)$/;
 
   // Validate radio buttons and input fields
@@ -20,8 +20,9 @@ okButton.addEventListener('click', () => {
     // Validate share code format
     if(!shareCodeRegex.test(shareCode))
     {
-        alert("Enter a valid share code!");
-        return;
+      window.close();
+      alert("Share code isn't valid!");
+      return;
     }
 
     // Determine if sharing a file or folder based on radio button selection
@@ -32,7 +33,8 @@ okButton.addEventListener('click', () => {
       // Validate file name format
       if(!fileNameRegex.test(objectName))
       {
-        alert("A file name must end in .c or .h");
+        window.close(); 
+        alert("File name isn't in the right format");
         return;
       }
       isFolder = false;

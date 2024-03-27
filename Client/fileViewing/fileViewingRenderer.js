@@ -79,7 +79,7 @@ function handleImageClick(event) {
         const name = event.target.title;
 
         // Check conditions based on fileViewingForm alt attribute and clicked image name
-        if ((fileViewingForm.alt === usernameFolder && name != "Owned/") || fileViewingForm.alt === "Shared/")
+        if (name === "../" && (fileViewingForm.alt === usernameFolder || fileViewingForm.alt === "Shared/"))
         {
             // Create items for "Owned" and "Shared" folders
             dynamicallyCreateItem("../images/folder.png", "Owned");
@@ -96,34 +96,41 @@ function handleImageClick(event) {
         {
             if (name === "../")
             {
-                // Handle navigating back to the parent folder
-                if (fileViewingForm.alt == usernameFolder || fileViewingForm.alt == "Shared/")
-                {
+                const location = fileViewingForm.alt;
+                const slashCount = location.split('/').length - 1; //count the amount of folders are in the path
+                if (slashCount === 1) { //if the user only entered one of the main folders
                     fileViewingForm.alt = "";
                     window.electronAPI.resetLocation();
                 }
-                else {
+                else 
+                {
                     fileViewingForm.alt = goBackAFolder(fileViewingForm.alt);
+                    if (fileViewingForm.alt.startsWith("Shared/"))
+                    {
+                        if (slashCount === 5) //used to skip the folders 'files', '.' and the folder with the name of the owner
+                        {
+                            fileViewingForm.alt = "Shared/";
+                        }
+                        window.electronAPI.getSharedFilesAndFolders(fileViewingForm.alt);
+                        return;
+                    }
                 }
             }
             else 
             {
-                if (name.startsWith("Shared/"))
+                if (name === "Shared/")
                 {
-                    // Handle navigating into a shared folder
-                    if(name === "Shared/")
-                    {
-                        window.electronAPI.setMenu(name);
-                        menuIsSet = true;
-                        window.electronAPI.showMenu();
-                        fileViewingForm.alt = name;
-                    }
-                    else
-                    {
-                        fileViewingForm.alt = fileViewingForm.alt + name;
-                    }
+                    window.electronAPI.setMenu(name);
+                    menuIsSet = true;
+                    window.electronAPI.showMenu();
+                    fileViewingForm.alt = name;
                     window.electronAPI.getSharedFilesAndFolders(fileViewingForm.alt);
                     return;
+                }
+                else if (fileViewingForm.alt.startsWith("Shared/"))
+                {
+                    fileViewingForm.alt = "Shared/" + event.target.alt + "/" + name;
+                    window.electronAPI.getSharedFilesAndFolders(event.target.alt + "/" + name);
                 }
                 else if (name === "Owned/") 
                 {
@@ -135,7 +142,7 @@ function handleImageClick(event) {
                 }
                 else 
                 {
-                    fileViewingForm.alt = fileViewingForm.alt + name;
+                    fileViewingForm.alt += name;
                 }
             }
             window.electronAPI.getFilesAndFolders(fileViewingForm.alt);
@@ -243,12 +250,14 @@ function showContextMenu(x, y) {
     //hide the share and manage options
     shareOption.style.display = 'none';
     manageOption.style.display = 'none';
+    deleteOption.style.display = 'none';
   }
   else 
   {
     // display the share and manage options
     shareOption.style.display = 'flex';
     manageOption.style.display = 'flex';
+    deleteOption.style.display = 'flex';
   }
 
   // Add an event listener to hide the context menu when clicking outside of it

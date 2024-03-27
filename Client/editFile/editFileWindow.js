@@ -4,6 +4,7 @@ const path = require('path');
 const fs = require('fs');
 
 const getMain = () => require('../main.js');
+const getFileViewing = () => require('../fileViewing/fileViewingWindow.js'); 
 const communicator = require("../communicator.js");
 
 const windowCodes = require('../windowCodes.js');
@@ -35,6 +36,8 @@ function handleChangesInMain(event, changes, lineCount) {
  */
 function connectToFileRequest()
 {
+    fileName = getFileViewing().getFileName();
+    location = getFileViewing().getFileLocation();
     const messageData = {
         data: {
             file_name: fileName,
@@ -108,12 +111,7 @@ function dataHandler(jsonObject)
     else if (jsonObject.code === requestCodes.UPDATE_REQUEST)
     {
         mainWindow.webContents.send('file-updates', jsonObject.data);
-        updateLocalFile(jsonObject.data.updates);
-    }
-    else if (jsonObject.code === LOGOUT_REQUEST)
-    {
-        fileViewing.resetLocation();
-        getMain().switchWindow(windowCodes.LOGIN);
+        updateLocalFile(data.updates);
     }
 }
 
@@ -140,13 +138,15 @@ function createWindow(bounds, locationPath, name) {
         autoHideMenuBar: false,
     })
     mainWindow.loadFile('editFile/editFile.html');
+
     mainWindow.on('closed', () => {
+        getFileViewing().reloadCurrentFolder();
         deleteLocalFile();
       });
 
-    communicator.setDataHandler(dataHandler);
 
     try {
+        ipcMain.handle('dialog:connectDataHandler', handleConnectDataHandler);
         ipcMain.handle('dialog:getFile', connectToFileRequest);
         ipcMain.handle('dialog:sendChanges', handleChangesInMain);
     } catch {} //used in case the handlers already exist because the window was created before

@@ -9,6 +9,7 @@ from room import Room
 from codes import RequestCodes
 from auth import Auth
 import secrets
+import string
 
 MAX_DEFAULT_CONNECTION_AMOUNT = 20
 HEADER_LENGTH = 5
@@ -40,10 +41,10 @@ class server():
             RequestCodes.CONNECT_TO_SHARED_FILE.value: self.connect_to_shared_file,
             RequestCodes.GET_SHARED_FILES_AND_FOLDERS.value: self.get_shared_files_and_folders,
             RequestCodes.GET_FILES.value: self.get_files,
-            RequestCodes.DELETE_OBJECT.value: self.delete_object_request,
             RequestCodes.GET_FILES_SHARES.value: self.get_file_shares,
+            RequestCodes.REMOVE_SHARE.value: self.remove_share_from_file,
             RequestCodes.DOWNLOAD_FILES.value: self.get_file_for_download,
-            RequestCodes.REMOVE_SHARE.value: self.remove_share_from_file
+            RequestCodes.DELETE_OBJECT.value: self.delete_object_request
             }
         
     
@@ -113,8 +114,6 @@ class server():
         return len_bytes + response_data_json.encode()
 
     def get_file_content(self, fileName, fileLocation):
-        if not FSWrapper.check_if_file_exists(fileLocation, fileName):
-            FSWrapper.create_file(fileLocation, fileName)
         file_object = FSWrapper.open_file(fileLocation, fileName, "r")
         file_content = FSWrapper.read_file_content(file_object)
         file_object.close()
@@ -123,7 +122,10 @@ class server():
     def get_file_content_and_connect_to_room(self, data, user):
         fileName = data["data"]["file_name"]
         fileLocation = "files/"+ data["data"]["location"]
-        file_content = self.get_file_content(fileName, fileLocation)
+        try:
+            file_content = self.get_file_content(fileName, fileLocation)
+        except Exception as e:
+            return {"data":{"status":"error","message":"File not Found"}}
         for room in self.rooms:  # checking is there is an open room for the file
             if room.get_file_name() == fileName:
                 room.add_user(user)
@@ -225,7 +227,10 @@ class server():
         files = {"files":{}}
         for fileData in data["file_names"]:
             fileLocation, fileName = os.path.split(fileData)
-            files["files"][fileName] = self.get_file_content(fileName, fileLocation)
+            try:
+                files["files"][fileName] = self.get_file_content(fileName, fileLocation)
+            except Exception as e:
+                return {"data":{"status":"error","message":"File not Found"}}
         return {"data": files}
         
     def create_share_code_for_file(self, data, user):
@@ -261,14 +266,17 @@ class server():
 
 
     def generate_share_code(self):
-        return secrets.token_urlsafe(8)
+        while True:
+            password = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(8))
+            if all(c.isalnum() for c in password):  # Check if password contains only alphanumeric characters
+                return password
     
     def connect_to_shared_file(self, data, user):
         user_collection = MongoDBWrapper.connect_to_mongo("Users")
         user_document =  MongoDBWrapper.find_document({"username": user.get_user_name()}, user_collection)
         user_id = user_document.get("_id")
         shares_collection = MongoDBWrapper.connect_to_mongo("Shares")
-        user_share = MongoDBWrapper.find_document({"userId": user_id}, shares_collection)
+        user_share = MongoDBWrapper.find_document({"userId": user_id, "share_code": data["data"]["share_code"]}, shares_collection)
         if user_share is not None:
             return {"data": {"status": "error", "message": "This share already exists"}}
         if data["data"]["is_folder"]:
@@ -331,11 +339,11 @@ class server():
                 share_document = MongoDBWrapper.find_document({"code": share.get("shareCode")}, share_codes_collection)
                 if share_document.get("is_folder"):
                     folder_document = MongoDBWrapper.find_document({"_id": share_document.get("shareId")}, folders_collection)
-                    if folder_document.get("location") == data["data"]["location"]:
+                    if folder_document.get("location") == 'files/'+data["data"]["location"]:
                         folders_documents.append(folder_document)
                 else:
                     file_document = MongoDBWrapper.find_document({"_id": share_document.get("shareId")}, files_collection)
-                    if file_document.get("location") == data["data"]["location"]:
+                    if file_document.get("location") == 'files/'+data["data"]["location"]:
                         files_documents.append(file_document)
             return {
                 "data": {
@@ -358,10 +366,10 @@ class server():
             except Exception:
                 return {"data": {"status": "error", "message": "Error has occurred while trying to remove file from File system and DB"}}
             return {"data": {"status": "success"}}
-        try:
-            self.delete_folder(data["data"]["name"], data["data"]["location"], user.get_user_name())
-        except Exception as e:
-            return {"data": {"status": "error", "message": e}}
+        #try:
+        self.delete_folder(data["data"]["name"][:-1], data["data"]["location"], user.get_user_name())
+        #except Exception as e:
+        #    return {"data": {"status": "error", "message": str(e)}}
         return {"data": {"status": "success"}}
 
 
@@ -372,11 +380,11 @@ class server():
         share_codes_collection = MongoDBWrapper.connect_to_mongo("Share Codes")
         users_collection = MongoDBWrapper.connect_to_mongo("Users")
         if data["data"]["is_folder"]:
-            folder_document = MongoDBWrapper.find_document({"folder_name": data["data"]["name"], "location": data["data"]["location"], "owner": user.get_user_name()}, folders_collection)
-            if folder_document is None:
+            folder_document = MongoDBWrapper.find_document({"folder_name": data["data"]["name"][:-1], "location": data["data"]["location"], "owner": user.get_user_name()}, folders_collection)
+            if folder_document == None:
                 return {"data": {"status": "error", "message": "folder wasn't found"}}
             folder_share_code_document = MongoDBWrapper.find_document({"shareId": folder_document.get("_id")}, share_codes_collection)
-            if folder_share_code_document is None:
+            if folder_share_code_document == None:
                 return {"data": {"status": "error", "message": "A share code wasn't created for the folder"}}
             share_documents = MongoDBWrapper.find_documents({"shareCode": folder_share_code_document.get("code")}, shares_collection)
         else:
@@ -388,7 +396,7 @@ class server():
                 return {"data": {"status": "error", "message": "A share code wasn't created for the file"}}
             share_documents = MongoDBWrapper.find_documents({"shareCode": file_share_code_document.get("code")}, shares_collection)
         shares = [{"username": MongoDBWrapper.find_document({"_id": document.get("userId")}, users_collection).get("username")} for document in share_documents]
-        return {"data": {"users": shares}}
+        return {"data": {"status": "success","users": shares}}
     
     def remove_share_from_file(self, data, user):
         users_to_remove = data["data"]["usernames"]
@@ -397,8 +405,12 @@ class server():
         files_collection = MongoDBWrapper.connect_to_mongo("Files")
         folders_collection = MongoDBWrapper.connect_to_mongo("Folders")
         share_codes_collection = MongoDBWrapper.connect_to_mongo("Share Codes")
+        if data["data"]["location"].startswith("./files/"):
+            location = data["data"]["location"][:-1]
+        else:
+            location = "./files/" + data["data"]["location"][:-1]
         if data["data"]["is_folder"]:
-            folder_document = MongoDBWrapper.find_document({"folder_name": data["data"]["name"], "location": data["data"]["location"], "owner": user.get_user_name()}, folders_collection)
+            folder_document = MongoDBWrapper.find_document({"folder_name": data["data"]["name"], "location": location, "owner": user.get_user_name()}, folders_collection)
             if folder_document is None:
                 return {"data": {"status": "error", "message": "folder wasn't found"}}
             folder_share_code_document = MongoDBWrapper.find_document({"shareId": folder_document.get("_id")}, share_codes_collection)
@@ -406,20 +418,20 @@ class server():
                 return {"data": {"status": "error", "message": "A share code wasn't created for the folder"}}
             share_code = folder_share_code_document.get("code")
         else:
-            file_document = MongoDBWrapper.find_document({"file_name": data["data"]["name"], "location": data["data"]["location"], "owner": user.get_user_name()}, files_collection)
+            file_document = MongoDBWrapper.find_document({"file_name": data["data"]["name"], "location": location, "owner": user.get_user_name()}, files_collection)
             if file_document is None:
                 return {"data": {"status": "error", "message": "file wasn't found"}}
             file_share_code_document = MongoDBWrapper.find_document({"shareId": file_document.get("_id")}, share_codes_collection)
             if file_share_code_document is None:
                 return {"data": {"status": "error", "message": "A share code wasn't created for the file"}}
             share_code = file_share_code_document.get("code")
-        
         for user in users_to_remove:
             user_document = MongoDBWrapper.find_document({"username": user}, users_collection)
             if user_document is None:
                 continue
             user_id = user_document.get("_id")
             MongoDBWrapper.delete_document({"userId": user_id, "shareCode": share_code}, shares_collection)
+
 
     
     def get_file_for_download(self, data, user):
@@ -429,14 +441,17 @@ class server():
                 folder_content = self.get_folder_content_for_download(data["data"]["name"], data["data"]["location"], user.get_user_name())
                 return {"data": {"status": "success", data["data"]["name"]: folder_content}}
             else:
-                file = MongoDBWrapper.find_document({"file_name": data["data"]["name"], "location":  data["data"]["location"], "owner": user.get_user_name()}, files_collection)
+                file = MongoDBWrapper.find_document({"file_name": data["data"]["name"], "location": data["data"]["location"], "owner": user.get_user_name()}, files_collection)
                 if not self.check_if_file_used(file.get("file_name"), file.get("location")):
-                        file_content = self.get_file_content_for_download(file)
-                        return {"data": {"status": "success", file.get("file_name"): file_content}}
+                    try:
+                        file_content = self.get_file_content(data["data"]["name"], data["data"]["location"])
+                    except Exception as e:
+                        return {"data":{"status":"error","message":"File not Found"}}
+                    return {"data": {"status": "success", file.get("file_name"): file_content}}
                 else:
                     raise Exception("File {} @ {} is being used".format(file.get("file_name"), file.get("location")))
         except Exception as e:
-            return {"data": {"status": "error", "message": e}}
+            return {"data": {"status": "error", "message": str(e)}}
 
     def is_object_in_folder(self, object, folders):
         owner = object.get("owner")
@@ -465,6 +480,7 @@ class server():
                     self.clear_object_db_fs(file, False)
                 else:
                     raise Exception("File {} @ {} is being used".format(file.get("file_name"), file.get("location")))
+        print("getting document of name: {} @ {} by {}".format(name, location, owner))
         folder_document = MongoDBWrapper.find_document({"folder_name": name, "location": location, "owner": owner}, folders_collection)
         self.clear_object_db_fs(folder_document, True)
     
@@ -476,31 +492,25 @@ class server():
         files = {}
         if not folders_in_folder is None:
             for folder in folders_in_folder:
-                files[folder.get("folder_name")] = self.get_folder_content(folder.get("folder_name"), location + "/" + name, owner)
+                files[folder.get("folder_name")] = self.get_folder_content_for_download(folder.get("folder_name"), location + "/" + name, owner)
         files_in_folder = MongoDBWrapper.find_documents({"location": location + "/" + name, "owner": owner}, files_collection)
         if not files_in_folder is None:
             for file in files_in_folder:
                 if not self.check_if_file_used(file.get("file_name"), file.get("location")):
-                    file_content = self.get_file_content_for_download(file)
+                    try:
+                        file_content = self.get_file_content(file.get("file_name"), file.get("location"))
+                    except Exception as e:
+                        return {"data":{"status":"error","message":"File not Found"}}
                     files[file.get("file_name")] = file_content
                 else:
                     raise Exception("File {} @ {} is being used".format(file.get("file_name"), file.get("location")))
         return files
-    
-
-    def get_file_content_for_download(self, fileDocument):
-        file_object = FSWrapper.open_file(fileDocument.get("location"), fileDocument.get("file_name"), "r")
-        file_content = FSWrapper.read_file_content(file_object)
-        file_object.close()
-        return file_content
-        
-        
 
     def check_if_file_used(self, name, location):
         file_room = [room for room in self.rooms if room.get_file_name() == name and room.get_file_path() == location]
-        if not file_room is None:
-           return True
-        return False  
+        if not file_room:
+           return False
+        return True  
     
     def clear_object_db_fs(self, document, is_folder):
         files_collection = MongoDBWrapper.connect_to_mongo("Files")
@@ -511,14 +521,12 @@ class server():
         if not object_share_document is None:
             MongoDBWrapper.delete_documents({"shareCode": object_share_document.get("code")}, shares_collection)
             MongoDBWrapper.delete_document({"_id": object_share_document.get("_id")}, share_codes_collection)
-        FSWrapper.delete_file(document.get("location"), document.get("file_name"))
         if is_folder:
+            FSWrapper.delete_folder(document.get("location").replace("/", "\\")[2:].replace(".", ""), document.get("folder_name"))
             MongoDBWrapper.delete_document({"_id": document.get("_id")}, folders_collection)
         else:
+            FSWrapper.delete_file(document.get("location").replace("/", "\\")[2:].replace(".", ""), document.get("file_name"))
             MongoDBWrapper.delete_document({"_id": document.get("_id")}, files_collection)
-
-
-    
 
 def main():
     main_server = server()
