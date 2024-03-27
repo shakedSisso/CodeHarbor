@@ -114,6 +114,11 @@ function dataHandler(jsonObject)
     {
         selectFolderAndCreateStructure(jsonObject.data);
     }
+    else if (jsonObject.code === LOGOUT_REQUEST)
+    {
+        locationPath = "";
+        getMain().switchWindow(codes.LOGIN);
+    }
 }
 
 /**
@@ -404,6 +409,23 @@ function handleSetMenu (event, mainFolderName) {
                     enabled: getMain().getDoesCompilerExists(),
                 },
             ],
+        },
+        {
+            label: 'Exit',
+            submenu: [
+                {
+                    label: 'Exit App',
+                    click: () => {
+                        mainWindow.close();
+                    },
+                },
+                {
+                    label: 'Log out',
+                    click: () => {
+                        logOut();
+                    },
+                }
+            ],
         }
     ];
     
@@ -417,6 +439,14 @@ function handleSetMenu (event, mainFolderName) {
         });
     }
     setMenu(template);
+}
+
+/**
+ * Sends a message to the server requesting to disconnect from the user
+ */
+function logOut() {
+    const messageDataJson = JSON.stringify({});
+    communicator.sendMessage(messageDataJson, LOGOUT_REQUEST);
 }
 
 /**
@@ -445,6 +475,14 @@ function deleteWindow()
  */
 function getLocationPath(){
     return locationPath;
+}
+
+/**
+ * Resets the variable 'locationPath' to an empty string
+ */
+function resetLocation()
+{
+    locationPath = "";
 }
 
 /**
@@ -477,5 +515,6 @@ module.exports = {
     getLocationPath,
     getFileName,
     setFileName,
-    reloadCurrentFile
+    reloadCurrentFile,
+    resetLocation
 }

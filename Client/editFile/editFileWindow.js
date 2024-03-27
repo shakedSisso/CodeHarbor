@@ -5,6 +5,7 @@ const fs = require('fs');
 
 const getMain = () => require('../main.js');
 const communicator = require("../communicator.js");
+
 const windowCodes = require('../windowCodes.js');
 const requestCodes = require('../requestCodes.js');
 
@@ -108,6 +109,11 @@ function dataHandler(jsonObject)
     {
         mainWindow.webContents.send('file-updates', jsonObject.data);
         updateLocalFile(jsonObject.data.updates);
+    }
+    else if (jsonObject.code === LOGOUT_REQUEST)
+    {
+        fileViewing.resetLocation();
+        getMain().switchWindow(windowCodes.LOGIN);
     }
 }
 
