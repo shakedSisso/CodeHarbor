@@ -27,7 +27,7 @@
    <br/>
    ```bash
    git clone https://github.com/shakedSisso/CodeHarbor.git
-2. Install dependencies:**
+2. **Install dependencies:**
    <br/>
    ```bash
    cd CodeHarbor
@@ -36,6 +36,3 @@
    <br/>
    ```bash
    npm start
-   
-
-   
